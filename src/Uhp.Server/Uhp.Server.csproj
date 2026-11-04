@@ -8,7 +8,7 @@
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <ProjectReference Include="../Uhp.Core/Uhp.Core.csproj" />
-    <PackageReference Include="StaticNorth.Valiant.Endpoints.AspNetCore" Version="1.2.1-preview.1" />
-    <PackageReference Include="StaticNorth.Valiant.Validation" Version="1.2.0" />
+    <PackageReference Include="StaticNorth.Valiant.Endpoints.AspNetCore" Version="1.2.1" />
+    <PackageReference Include="StaticNorth.Valiant.Validation" Version="1.2.1" />
   </ItemGroup>
 </Project>

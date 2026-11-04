@@ -10,7 +10,7 @@ The [official Unified Harness Protocol documentation](https://unifiedharnessprot
 |---|---|---|
 | `Uhp.Core` | Protocol models, typed events, owned extension JSON, source-generated serialization | .NET runtime |
 | `Uhp.Client` | Discovery, negotiation, HTTP requests, streaming, recovery and cancellation | Core |
-| `Uhp.Server` | ASP.NET Core endpoints and a host-owned backend contract | Core, Valiant Endpoints 1.2.1-preview.1 and Validation 1.2.0 |
+| `Uhp.Server` | ASP.NET Core endpoints and a host-owned backend contract | Core, Valiant Endpoints and Validation 1.2.1 |
 
 The client and Core have no ASP.NET Core or Valiant dependency. Protocol models live in `Uhp.Core`; client entry points and transport exceptions live in `Uhp.Client`. This is the namespace adjustment accompanying the agreed three-package split.
 
@@ -96,17 +96,7 @@ For a deliberate manual replay, assign an `IdempotencyKey` before the first subm
 
 ## Build and verify
 
-The SDK is pinned in `global.json`. Run .NET commands directly so diagnostics remain visible:
-
-The server currently depends on the locally built Valiant Endpoints `1.2.1-preview.1` AOT fix. Until that version is published, build it from the sibling Valiant checkout with its pinned SDK and copy the package into this repository's local feed:
-
-```sh
-(cd ../valiant && dotnet build StaticNorth.Valiant.sln --configuration Release && dotnet msbuild StaticNorth.Valiant.Pack.proj -t:Pack -m:1 -p:Configuration=Release -p:NoBuild=true -p:PackageVersion=1.2.1-preview.1)
-mkdir -p artifacts/packages
-cp ../valiant/artifacts/packages/StaticNorth.Valiant.Endpoints.AspNetCore.1.2.1-preview.1.nupkg artifacts/packages/
-```
-
-Then use UHP's pinned SDK:
+The SDK is pinned in `global.json`. Valiant Endpoints and Validation `1.2.1` restore from NuGet.org; no sibling checkout or local Valiant package is required. Run .NET commands directly so diagnostics remain visible:
 
 ```sh
 dotnet restore Uhp.slnx --locked-mode

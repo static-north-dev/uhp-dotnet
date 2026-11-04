@@ -10,15 +10,15 @@
       },
       "StaticNorth.Valiant.Endpoints.AspNetCore": {
         "type": "Direct",
-        "requested": "[1.2.1-preview.1, )",
-        "resolved": "1.2.1-preview.1",
-        "contentHash": "763TGPdfMvgCfiLZzRJgo4aHxQcLBZT1Jzv7MbEADvXa9JzwXuMkeDm1smcdRKQr+sxEL5wyMsTKZOZZC4XUVw=="
+        "requested": "[1.2.1, )",
+        "resolved": "1.2.1",
+        "contentHash": "4cKRdKDjfsgocM7Lz5bAfGRDnN3u2tlizc0I8qqfPfa34pcUdKUgbj3r8OYJkneJOEQ5GOElupHmdx3R4tJvjw=="
       },
       "StaticNorth.Valiant.Validation": {
         "type": "Direct",
-        "requested": "[1.2.0, )",
-        "resolved": "1.2.0",
-        "contentHash": "aWQJPUY+aC0bbCdMgHMOYIdKSooQ/L9q1kwVNRN8PaaCQG3DfoGXgFSjJPWM2SUWrXwyMllhhbvrMkJkhINoPw=="
+        "requested": "[1.2.1, )",
+        "resolved": "1.2.1",
+        "contentHash": "pLF4MunZqJpT4Qxt6yor9wbxxVvpI5aDf9WjtGYXEM7mBM+4b4y0HQx8z363zP3+VP/AhNg1e/FaNGUmtsorVA=="
       },
       "uhp.core": {
         "type": "Project"
