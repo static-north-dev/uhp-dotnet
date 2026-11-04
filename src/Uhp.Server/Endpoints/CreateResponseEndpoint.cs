@@ -10,7 +10,7 @@ using Uhp.Server.Transport;
 
 namespace Uhp.Server.Endpoints;
 
-[ValiantEndpoint]
+[ValiantEndpoint<UhpEndpointGroup>]
 internal sealed class CreateResponseEndpoint : IEndpoint
 {
     public static IEndpointConventionBuilder Map(IEndpointRouteBuilder builder)

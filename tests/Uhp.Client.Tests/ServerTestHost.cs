@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using StaticNorth.Valiant.Endpoints.AspNetCore;
 using Uhp.Client;
 using Uhp.Core;
 using Uhp.FixtureServer;
@@ -15,7 +16,7 @@ internal sealed class ServerTestHost(WebApplication app) : IAsyncDisposable
 {
     public FixtureBackend Backend => (FixtureBackend)app.Services.GetRequiredService<IUhpServerBackend>();
 
-    public static async Task<ServerTestHost> StartAsync(string version = UhpProtocolVersions.Current)
+    public static async Task<ServerTestHost> StartAsync(string version = UhpProtocolVersions.Current, Action<ValiantEndpointOptions>? configureEndpoints = null)
     {
         var builder = WebApplication.CreateSlimBuilder();
         builder.Logging.ClearProviders();
@@ -34,6 +35,12 @@ internal sealed class ServerTestHost(WebApplication app) : IAsyncDisposable
                 ["idempotency"] = true
             });
         });
+
+        if (configureEndpoints is not null)
+        {
+            builder.Services.Configure(configureEndpoints);
+        }
+
         var app = builder.Build();
         app.MapUhp("/api/harness");
         app.MapGet("/health", HandleHealth);

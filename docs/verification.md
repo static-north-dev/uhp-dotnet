@@ -7,9 +7,10 @@ Environment: UHP .NET SDK 10.0.401, macOS arm64. Native consumers use runtime/co
 | Release build | All six solution projects build without warnings or errors |
 | Schema provenance | Six versioned inputs and upstream license/notice match manifest SHA-256 hashes |
 | Deterministic generation | 20 checked-in wire/context files match the pinned-schema generator |
-| MSTest | 68 tests pass with Test SDK 18.11.0 and MSTest 4.5.2, covering client wire/transport/SSE and real loopback client/server scenarios on all three dates |
+| MSTest | 70 tests pass with Test SDK 18.11.0 and MSTest 4.5.2, covering client wire/transport/SSE and real loopback client/server scenarios on all three dates |
 | Endpoint style | Named method groups and standard TypedResults; shared protocol checks in an endpoint filter |
-| Automatic registration | UHP invokes its Valiant-generated registrar; no manual endpoint list or registration adapter |
+| Automatic registration | Every UHP endpoint belongs to `UhpEndpointGroup`; Valiant's generated registrar applies group policies/conventions and maps the endpoints without a manual list or adapter |
+| Group integration | Regression cases verify group exclusion and group-level host restrictions while unrelated routes remain independent |
 | Valiant regression suite | 556 tests pass, including generated mapping selection, query-enabled behavior, mapping policies and generator incrementality |
 | Valiant Native AOT | Packed smoke passes with explicit-assembly DI registration and automatic mapping of standalone and grouped endpoints |
 | Structure | One top-level type per source file |

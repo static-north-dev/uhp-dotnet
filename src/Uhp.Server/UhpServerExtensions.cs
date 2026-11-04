@@ -1,14 +1,12 @@
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using StaticNorth.Valiant.Endpoints.AspNetCore;
 using StaticNorth.Valiant.Validation;
 using Uhp.Server.Validation;
-using Uhp.Server.Transport;
 using Uhp.Core;
 
 namespace Uhp.Server;
@@ -35,11 +33,12 @@ public static class UhpServerExtensions
         ArgumentNullException.ThrowIfNull(builder);
         _ = builder.ServiceProvider.GetRequiredService<UhpServerOptions>();
         _ = builder.ServiceProvider.GetRequiredService<IAuthenticationService>();
-        var group = builder.MapGroup(prefix).AllowAnonymous();
-        group.AddEndpointFilter(new UhpProtocolFilter());
+
+        var group = builder.MapGroup(prefix);
 
         // Map this assembly's generated routes without remapping the host's unrelated endpoints under this prefix.
         new StaticNorth.Valiant.Endpoints.AspNetCore.Generated.ValiantEndpointRouteRegistrar().MapEndpoints(group);
+
         return group;
     }
 }
