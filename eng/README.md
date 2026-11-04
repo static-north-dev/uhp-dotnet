@@ -6,13 +6,13 @@ Use the .NET SDK pinned by `global.json`. The generator has no external dependen
 
 ```sh
 # Verify input hashes and deterministic generated output.
-dotnet run --project eng/Uhp.SchemaGen -- --check
+dotnet run --project eng/StaticNorth.Uhp.SchemaGen -- --check
 
 # Regenerate after an intentional generator change.
-dotnet run --project eng/Uhp.SchemaGen
+dotnet run --project eng/StaticNorth.Uhp.SchemaGen
 
 # Re-download the exact manifest pin, verify hashes, then regenerate.
-dotnet run --project eng/Uhp.SchemaGen -- --refresh
+dotnet run --project eng/StaticNorth.Uhp.SchemaGen -- --refresh
 ```
 
 The preview generator derives property names, types, requiredness and nullability from the target JSON Schema and emits one internal class per file plus a JSON source-generation context. String enums remain open strings so unknown statuses survive. The string-or-array input is preserved as JSON at the public request boundary. A small handwritten output-item converter preserves new item kinds even when their properties have unfamiliar shapes. MCP-server/skill/plugin bodies remain opaque because their features are outside this preview. Unsupported generator shapes fail rather than guessing. Schema constraints beyond generated structural types are checked at the relevant protocol boundary.

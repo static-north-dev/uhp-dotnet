@@ -7,7 +7,10 @@ Environment: UHP .NET SDK 10.0.401, macOS arm64. Native consumers use runtime/co
 | Release build | All six solution projects build without warnings or errors |
 | Schema provenance | Six versioned inputs and upstream license/notice match manifest SHA-256 hashes |
 | Deterministic generation | 20 checked-in wire/context files match the pinned-schema generator |
-| MSTest | 70 tests pass with Test SDK 18.11.0 and MSTest 4.5.2, covering client wire/transport/SSE and real loopback client/server scenarios on all three dates |
+| TUnit | 98 tests pass with TUnit 1.79.0 and its generated executable runner; all 70 original local cases and two external case definitions are retained |
+| Native TUnit | The same 98 tests publish and pass as an osx-arm64 Native AOT executable without trimming/AOT warning suppressions |
+| Allocations | Eight protocol/event writer types measure 0 B/write after warmup; required request/response/HTTP/SSE allocations have explicit tested budgets in `docs/performance.md` |
+| Names and async | Eight projects/packages/namespaces use `StaticNorth.Uhp.*`; runtime and generator I/O use async APIs and generated JSON metadata |
 | Endpoint style | Named method groups and standard TypedResults; shared protocol checks in an endpoint filter |
 | Automatic registration | Every UHP endpoint belongs to `UhpEndpointGroup`; Valiant's generated registrar applies group policies/conventions and maps the endpoints without a manual list or adapter |
 | Group integration | Regression cases verify group exclusion and group-level host restrictions while unrelated routes remain independent |
@@ -18,6 +21,7 @@ Environment: UHP .NET SDK 10.0.401, macOS arm64. Native consumers use runtime/co
 | Packed consumers | UHP client and fixture server restore from the local feed without project references using a fresh package cache; both Valiant 1.2.1 dependencies resolve from NuGet.org |
 | Native AOT | Client and server publish for osx-arm64 with reflection-based JSON disabled; no trimming/AOT warnings suppressed |
 | Native HTTP/SSE scenario | Discovery, catalogs, run, streaming, stored readback, continuation, response cancellation and session cancellation pass |
+| Terminal publication | Concurrent and late fixture subscribers receive the complete contiguous history through the terminal event for completion and cancellation |
 | HarnessRouter CE | Skipped/unverified: no pinned server configuration or credential supplied |
 | SuperQode | Skipped/unverified: no pinned server configuration or credential supplied |
 

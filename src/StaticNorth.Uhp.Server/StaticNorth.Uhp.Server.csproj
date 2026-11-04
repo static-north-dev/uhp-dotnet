@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <IsAotCompatible>true</IsAotCompatible>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>StaticNorth.Uhp.Server</RootNamespace>
+    <EnableRequestDelegateGenerator>true</EnableRequestDelegateGenerator>
+    <Description>ASP.NET Core endpoints and backend integration for the Unified Harness Protocol.</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <ProjectReference Include="../StaticNorth.Uhp.Core/StaticNorth.Uhp.Core.csproj" />
+    <PackageReference Include="StaticNorth.Valiant.Endpoints.AspNetCore" Version="1.2.1" />
+    <PackageReference Include="StaticNorth.Valiant.Validation" Version="1.2.1" />
+  </ItemGroup>
+</Project>

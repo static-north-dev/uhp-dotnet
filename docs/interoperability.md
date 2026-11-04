@@ -18,7 +18,7 @@ The shared public-consumer scenario runs against either server by changing confi
 - `PROTOCOL_VERSION`: optional exact protocol date; use the date advertised by that pinned server.
 
 ```sh
-UHP_INTEROP_RESULTS="$PWD/artifacts/interop" dotnet test tests/Uhp.Client.InteropTests --configuration Release
+UHP_INTEROP_RESULTS="$PWD/artifacts/interop" dotnet run --project tests/StaticNorth.Uhp.Client.InteropTests --configuration Release -- --minimum-expected-tests 2 --report-trx --results-directory artifacts/interop-test-results
 python3 eng/check-interop.py artifacts/interop
 ```
 

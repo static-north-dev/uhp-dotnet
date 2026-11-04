@@ -23,14 +23,14 @@ def run(*args):
 
 def check_packages():
     for name in ("Core", "Client", "Server"):
-        package = ROOT / f"artifacts/packages/Uhp.{name}.0.1.0-preview.1.nupkg"
+        package = ROOT / f"artifacts/packages/StaticNorth.Uhp.{name}.0.1.0-preview.1.nupkg"
         symbols = package.with_suffix(".snupkg")
         assert symbols.is_file(), f"Missing symbols: {symbols}"
         with zipfile.ZipFile(package) as archive:
             assert "README.md" in archive.namelist()
             assert any(path.startswith("licenses/") and path.endswith("LICENSE") for path in archive.namelist())
             assert any(path.startswith("licenses/") and path.endswith("NOTICE") for path in archive.namelist())
-            metadata = ET.fromstring(archive.read(f"Uhp.{name}.nuspec"))
+            metadata = ET.fromstring(archive.read(f"StaticNorth.Uhp.{name}.nuspec"))
             ns = {"n": metadata.tag.split("}")[0].strip("{")}
             assert metadata.find(".//n:license", ns).text == "Apache-2.0"
             assert metadata.find(".//n:repository", ns).get("url") == "https://github.com/static-north-dev/uhp-dotnet"
@@ -38,7 +38,7 @@ def check_packages():
             if name == "Core":
                 assert dependencies == [], dependencies
             if name == "Client":
-                assert dependencies == ["Uhp.Core"], dependencies
+                assert dependencies == ["StaticNorth.Uhp.Core"], dependencies
                 assert metadata.find(".//n:description", ns).text == "community .NET SDK for connecting to UHP servers"
             if name == "Server":
                 assert "StaticNorth.Valiant.Endpoints.AspNetCore" in dependencies
@@ -59,7 +59,7 @@ def main():
         sources += ["--source", "https://api.nuget.org/v3/index.json"]
 
     with tempfile.TemporaryDirectory(prefix="uhp-package-consumer-") as packages:
-        for name in ("Uhp.Console", "Uhp.FixtureServer"):
+        for name in ("StaticNorth.Uhp.Console", "StaticNorth.Uhp.FixtureServer"):
             project = ROOT / "samples" / name
             lock = Path(packages) / (name + ".native.lock.json")
             run("dotnet", "restore", project, "--runtime", args.rid, "--packages", packages,
@@ -76,7 +76,7 @@ def main():
         url = f"http://127.0.0.1:{port}"
         log_path = ROOT / "artifacts/aot/fixture.log"
         with log_path.open("w") as log:
-            server = subprocess.Popen([str(ROOT / "artifacts/aot/Uhp.FixtureServer/Uhp.FixtureServer"), "--urls", url], cwd=ROOT, stdout=log, stderr=subprocess.STDOUT)
+            server = subprocess.Popen([str(ROOT / "artifacts/aot/StaticNorth.Uhp.FixtureServer/StaticNorth.Uhp.FixtureServer"), "--urls", url], cwd=ROOT, stdout=log, stderr=subprocess.STDOUT)
             try:
                 ready = False
                 for _ in range(200):
@@ -92,7 +92,7 @@ def main():
                 assert ready, "The Native AOT server did not become ready."
                 env = os.environ.copy()
                 env.update(UHP_BASE_URL=url + "/api/harness", UHP_TOKEN="fixture-alice", UHP_HARNESS_ID="chrn_fixture")
-                subprocess.run([str(ROOT / "artifacts/aot/Uhp.Console/Uhp.Console")], cwd=ROOT, env=env, check=True, timeout=60)
+                subprocess.run([str(ROOT / "artifacts/aot/StaticNorth.Uhp.Console/StaticNorth.Uhp.Console")], cwd=ROOT, env=env, check=True, timeout=60)
             finally:
                 server.terminate()
                 try:

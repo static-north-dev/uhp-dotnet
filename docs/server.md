@@ -1,6 +1,6 @@
 # Server integration
 
-Install `Uhp.Server`. Configure an ASP.NET Core authentication scheme and implement the singleton `IUhpServerBackend`:
+Install `StaticNorth.Uhp.Server`. Configure an ASP.NET Core authentication scheme and implement the singleton `IUhpServerBackend`:
 
 ```csharp
 builder.Services.AddAuthentication("Bearer")
@@ -25,7 +25,7 @@ JWT bearer authentication in that example is supplied by the host's authenticati
 
 Valiant Endpoints `1.2.1` fixes the unused reflection-based query binder being retained by generated registration. Without query-binding opt-in, its generator now selects a mapping path with no reference to that binder while retaining policies and conventions. UHP has no query-bound request models and no manual endpoint list or registration adapter. No trimming warnings are suppressed; the packed server consumer verifies automatic registration under Native AOT. Both Valiant dependencies restore from NuGet.org.
 
-The server exposes discovery, harness/model catalogs, `POST /v1/responses`, response lookup, response cancellation, and session cancellation. Task submission returns the standard union of an `Ok<UhpResponse>` or a `ServerSentEventsResult<JsonElement>`. SSE payloads retain their complete protocol JSON, including unknown fields. Task body parsing remains explicit to keep malformed-body errors inside the UHP envelope. Generated Valiant validation checks task budgets and translates failures to UHP field names. There is no separate domain DTO layer requiring a mapper.
+The server exposes discovery, harness/model catalogs, `POST /v1/responses`, response lookup, response cancellation, and session cancellation. Task submission returns the standard union of an `Ok<UhpResponse>` or a `ServerSentEventsResult<byte[]>`. Each SSE frame is serialized once to UTF-8 with `UhpJsonContext.Default.UhpEvent`; ASP.NET Core's byte-array SSE path writes those JSON bytes directly. This avoids an intermediate JSON document, a second serialization, and runtime polymorphic metadata lookup. Clients still receive ordinary JSON objects, including unknown fields and edits to parsed records. Task body parsing remains explicit to keep malformed-body errors inside the UHP envelope. Generated Valiant validation checks a value-type task-budget input and translates failures to UHP field names. There is no separate domain DTO layer requiring a mapper.
 
 ## Backend contract
 
@@ -45,4 +45,4 @@ The transport validates event sequences/response IDs, writes and flushes SSE pro
 
 Dates and required Core capabilities are validated during registration. Optional features are not advertised by default; the preview rejects advertising endpoints it does not implement. `MaximumRequestBodyBytes` defaults to 1 MiB and JSON depth is bounded to 64. The host must also apply appropriate connection and request limits.
 
-The sample `Uhp.FixtureServer` is a deterministic in-memory protocol fixture. Its fixed event histories, retention and testing credentials are not production implementations. Passing its tests does not establish a UHP server conformance class; upstream conformance applies to a running server and its actual backend.
+The sample `StaticNorth.Uhp.FixtureServer` is a deterministic in-memory protocol fixture. Its fixed event histories, retention and testing credentials are not production implementations. Passing its tests does not establish a UHP server conformance class; upstream conformance applies to a running server and its actual backend.

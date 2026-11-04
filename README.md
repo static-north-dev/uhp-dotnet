@@ -8,21 +8,21 @@ The [official Unified Harness Protocol documentation](https://unifiedharnessprot
 
 | Package | Purpose | Dependencies |
 |---|---|---|
-| `Uhp.Core` | Protocol models, typed events, owned extension JSON, source-generated serialization | .NET runtime |
-| `Uhp.Client` | Discovery, negotiation, HTTP requests, streaming, recovery and cancellation | Core |
-| `Uhp.Server` | ASP.NET Core endpoints and a host-owned backend contract | Core, Valiant Endpoints and Validation 1.2.1 |
+| `StaticNorth.Uhp.Core` | Protocol models, typed events, owned extension JSON, source-generated serialization | .NET runtime |
+| `StaticNorth.Uhp.Client` | Discovery, negotiation, HTTP requests, streaming, recovery and cancellation | Core |
+| `StaticNorth.Uhp.Server` | ASP.NET Core endpoints and a host-owned backend contract | Core, Valiant Endpoints and Validation 1.2.1 |
 
-The client and Core have no ASP.NET Core or Valiant dependency. Protocol models live in `Uhp.Core`; client entry points and transport exceptions live in `Uhp.Client`. This is the namespace adjustment accompanying the agreed three-package split.
+The client and Core have no ASP.NET Core or Valiant dependency. Protocol models live in `StaticNorth.Uhp.Core`; client entry points and transport exceptions live in `StaticNorth.Uhp.Client`. All project, assembly, package, and namespace identities use the `StaticNorth.Uhp` prefix. See [migration notes](docs/migration.md) and [allocation evidence](docs/performance.md).
 
 The server package provides transport and backend integration. The host supplies an agent runtime, persistence, and principal isolation. The deterministic fixture is test infrastructure. These packages do not contain a production agent runtime.
 
 ## Client usage
 
-After installing `Uhp.Client` from a published release or the local package feed:
+After installing `StaticNorth.Uhp.Client` from a published release or the local package feed:
 
 ```csharp
-using Uhp.Client;
-using Uhp.Core;
+using StaticNorth.Uhp.Client;
+using StaticNorth.Uhp.Core;
 
 using var http = new HttpClient(new SocketsHttpHandler { AllowAutoRedirect = false })
 {
@@ -99,14 +99,14 @@ For a deliberate manual replay, assign an `IdempotencyKey` before the first subm
 The SDK is pinned in `global.json`. Valiant Endpoints and Validation `1.2.1` restore from NuGet.org; no sibling checkout or local Valiant package is required. Run .NET commands directly so diagnostics remain visible:
 
 ```sh
-dotnet restore Uhp.slnx --locked-mode
-dotnet run --project eng/Uhp.SchemaGen --configuration Release -- --check
-dotnet build Uhp.slnx --configuration Release --no-restore
-dotnet test tests/Uhp.Client.Tests --configuration Release --no-build --no-restore
-dotnet format Uhp.slnx --no-restore --verify-no-changes
-dotnet pack src/Uhp.Core --configuration Release --no-build
-dotnet pack src/Uhp.Client --configuration Release --no-build
-dotnet pack src/Uhp.Server --configuration Release --no-build
+dotnet restore StaticNorth.Uhp.slnx --locked-mode
+dotnet run --project eng/StaticNorth.Uhp.SchemaGen --configuration Release -- --check
+dotnet build StaticNorth.Uhp.slnx --configuration Release --no-restore
+dotnet run --project tests/StaticNorth.Uhp.Client.Tests --configuration Release --no-build --no-restore -- --minimum-expected-tests 98
+dotnet format StaticNorth.Uhp.slnx --no-restore --verify-no-changes
+dotnet pack src/StaticNorth.Uhp.Core --configuration Release --no-build
+dotnet pack src/StaticNorth.Uhp.Client --configuration Release --no-build
+dotnet pack src/StaticNorth.Uhp.Server --configuration Release --no-build
 python3 eng/package-smoke.py
 ```
 
@@ -115,7 +115,7 @@ The smoke gate checks package metadata/notices/symbols, installs both sample con
 After packing, run the console sample against a configured server with `UHP_BASE_URL`, `UHP_TOKEN`, and `UHP_HARNESS_ID` in the environment:
 
 ```sh
-dotnet run --project samples/Uhp.Console --configuration Release
+dotnet run --project samples/StaticNorth.Uhp.Console --configuration Release
 ```
 
 The samples' NuGet configuration includes `artifacts/packages`; they use published package contracts and have no project references.
