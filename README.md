@@ -1,2 +1,135 @@
 # uhp-dotnet
-Universal Harness Protocol .NET implementation
+
+Community .NET SDK for connecting to UHP servers, with shared contracts and an ASP.NET Core server integration. Targets .NET 10 and supports Native AOT. The preview package version is `0.1.0-preview.1`; package versions are independent of negotiated protocol dates.
+
+The [official Unified Harness Protocol documentation](https://unifiedharnessprotocol.org/) is the source of truth for protocol behavior, schemas, and conformance requirements. Target date: **2026-10-19**. Tested fixture compatibility dates: **2026-09-28** and **2026-09-12**. Inputs are pinned to upstream commit `80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6` in [spec/upstream](spec/upstream).
+
+## Packages
+
+| Package | Purpose | Dependencies |
+|---|---|---|
+| `Uhp.Core` | Protocol models, typed events, owned extension JSON, source-generated serialization | .NET runtime |
+| `Uhp.Client` | Discovery, negotiation, HTTP requests, streaming, recovery and cancellation | Core |
+| `Uhp.Server` | ASP.NET Core endpoints and a host-owned backend contract | Core, Valiant Endpoints 1.2.1-preview.1 and Validation 1.2.0 |
+
+The client and Core have no ASP.NET Core or Valiant dependency. Protocol models live in `Uhp.Core`; client entry points and transport exceptions live in `Uhp.Client`. This is the namespace adjustment accompanying the agreed three-package split.
+
+The server package provides transport and backend integration. The host supplies an agent runtime, persistence, and principal isolation. The deterministic fixture is test infrastructure. These packages do not contain a production agent runtime.
+
+## Client usage
+
+After installing `Uhp.Client` from a published release or the local package feed:
+
+```csharp
+using Uhp.Client;
+using Uhp.Core;
+
+using var http = new HttpClient(new SocketsHttpHandler { AllowAutoRedirect = false })
+{
+    BaseAddress = baseUri,
+    Timeout = Timeout.InfiniteTimeSpan
+};
+
+var client = await UhpClient.ConnectAsync(http, new UhpClientOptions
+{
+    GetBearerTokenAsync = _ => ValueTask.FromResult(token)
+}, ct);
+
+var request = new UhpTaskRequest("Summarize the README in three bullets.")
+{
+    HarnessId = harnessId,
+    Store = true
+};
+
+string? responseId = null;
+
+await foreach (var update in client.StreamAsync(request, ct))
+{
+    switch (update)
+    {
+        case UhpResponseCreated created:
+            responseId = created.Response.Id;
+            break;
+        case UhpTextDelta delta:
+            Console.Write(delta.Text);
+            break;
+    }
+}
+
+var result = await client.GetResponseAsync(
+    responseId ?? throw new InvalidOperationException("Missing response ID."), ct);
+
+if (result.Status == UhpResponseStatus.Completed)
+{
+    var answer = await client.RunAsync(new UhpTaskRequest("Expand on the second bullet.")
+    {
+        PreviousResponseId = result.Id
+    }, ct);
+
+    Console.WriteLine(answer.Status);
+}
+```
+
+`ConnectAsync` discovers anonymously and selects the newest mutually supported date. Set `ProtocolVersion` to require an exact supported date. If that date differs from the server default, discovery runs again for its capabilities. Missing capability flags are false.
+
+The base URL is the deployment root, such as `http://localhost:3000/api/harness`; both trailing-slash forms preserve the prefix. HTTPS is required except on loopback. The caller owns `HttpClient`. Credentials and negotiated version headers are set per authenticated request. Configure the transport without default credentials, credential-injecting discovery handlers, credential-forwarding redirects, automatic POST retries, or hedging.
+
+The preview includes harness and model catalogs, non-streaming and streaming text tasks, stored response lookup, explicit continuation, and response/session cancellation. Typed user-message arrays use `UhpUserTextMessage`. File transfers, session browsing/sharing, harness administration, plugins, environments, memories, background execution, and interactive input responses are outside the preview. Their unfamiliar response/output data remains inspectable through owned `Raw` JSON. Unknown statuses preserve their original `Value`.
+
+## Recovery, errors and cancellation
+
+A task stream is single-use. Enumerating it twice fails before a second POST. Breaking enumeration or cancelling a local token closes the HTTP read; it does not send a remote cancellation command. Use `CancelResponseAsync` or `CancelSessionAsync` explicitly, then poll `GetResponseAsync` if terminal confirmation is required.
+
+```csharp
+catch (UhpStreamException exception) when (exception.ResponseId is { } id)
+{
+    var snapshot = await client.GetResponseAsync(id, ct);
+    RenderSnapshot(snapshot);
+}
+```
+
+Replace any partial display with that authoritative snapshot; poll while it is in progress. A `store: false` lookup error is propagated. The SDK never reconstructs missed events or resubmits automatically. `UhpStreamException` retains the response ID, last accepted sequence, idempotency key, and cause. Caller cancellation remains `OperationCanceledException`. Set `StreamInactivityTimeout` for a byte-based timeout that includes keepalives; there is no SDK overall streaming deadline.
+
+An uncertain non-streaming POST throws `UhpSubmissionException`, retaining the cause and supplied key. HTTP errors throw `UhpApiException` with status, error fields, owned detail, raw `Retry-After`, and expected/received protocol dates. Version-drift errors retain `unsupported_protocol_version` and its advertised alternatives. Non-JSON proxy errors retain status without copying their body into exceptions. Failed tasks returned with HTTP 200 remain ordinary `UhpResponse` values with partial output.
+
+For a deliberate manual replay, assign an `IdempotencyKey` before the first submission and reuse the identical request, stream mode and key. Keyed submissions are rejected locally unless discovery advertises idempotency. Use independent keys for independent user actions. Prefer a GET whenever the response ID is known. Handle `session_busy`, `rate_limited`, and `quota_exhausted` by code; the SDK supplies no retry policy. The libraries log no task text, tool payloads, bodies, or credentials.
+
+## Build and verify
+
+The SDK is pinned in `global.json`. Run .NET commands directly so diagnostics remain visible:
+
+The server currently depends on the locally built Valiant Endpoints `1.2.1-preview.1` AOT fix. Until that version is published, build it from the sibling Valiant checkout with its pinned SDK and copy the package into this repository's local feed:
+
+```sh
+(cd ../valiant && dotnet build StaticNorth.Valiant.sln --configuration Release && dotnet msbuild StaticNorth.Valiant.Pack.proj -t:Pack -m:1 -p:Configuration=Release -p:NoBuild=true -p:PackageVersion=1.2.1-preview.1)
+mkdir -p artifacts/packages
+cp ../valiant/artifacts/packages/StaticNorth.Valiant.Endpoints.AspNetCore.1.2.1-preview.1.nupkg artifacts/packages/
+```
+
+Then use UHP's pinned SDK:
+
+```sh
+dotnet restore Uhp.slnx --locked-mode
+dotnet run --project eng/Uhp.SchemaGen --configuration Release -- --check
+dotnet build Uhp.slnx --configuration Release --no-restore
+dotnet test tests/Uhp.Client.Tests --configuration Release --no-build --no-restore
+dotnet format Uhp.slnx --no-restore --verify-no-changes
+dotnet pack src/Uhp.Core --configuration Release --no-build
+dotnet pack src/Uhp.Client --configuration Release --no-build
+dotnet pack src/Uhp.Server --configuration Release --no-build
+python3 eng/package-smoke.py
+```
+
+The smoke gate checks package metadata/notices/symbols, installs both sample consumers from the local feed with no project references and a fresh package cache, publishes both with Native AOT and reflection-based JSON disabled, and runs the shared lifecycle scenario. It selects the patched .NET runtime/compiler `10.0.14`; override with `--runtime-version` when updating that pin. On an offline workstation with the dependencies cached, pass `--offline-cache /path/to/nuget/packages`. Native AOT requires the platform's native compiler toolchain.
+
+After packing, run the console sample against a configured server with `UHP_BASE_URL`, `UHP_TOKEN`, and `UHP_HARNESS_ID` in the environment:
+
+```sh
+dotnet run --project samples/Uhp.Console --configuration Release
+```
+
+The samples' NuGet configuration includes `artifacts/packages`; they use published package contracts and have no project references.
+
+Read [server integration](docs/server.md), [schema maintenance](eng/README.md), and [interoperability evidence](docs/interoperability.md). This preview has **not been published**. Fixture/AOT success does not replace the two pinned real-server checks required before publishing.
+
+Apache-2.0. Vendored upstream license, attribution, and hashes are under `spec/upstream` and included in each package.

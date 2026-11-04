@@ -1,0 +1,139 @@
+uhp-dotnet implementation specification
+Decision	First preview
+Deliverable	One GitHub repository, uhp-dotnet, publishing one community NuGet package, Uhp.Client
+Consumer	A .NET developer driving a UHP server from a service, CLI, desktop app, or test
+Runtime	Native C# library targeting net10.0, usable with Native AOT
+Protocol	Target the 2026-10-19 draft. Support the operations below on 2026-09-28 and 2026-09-12 as tested compatibility versions
+License	Apache-2.0
+Status	Proposed for implementation, 4 November 2026. Operations and release gates below describe work to complete
+
+
+1. Release outcome
+A developer can install the package, supply a server base URL and credential, choose a configured harness, stream a task, read the stored result after a disconnect, continue the session, and cancel remote work. The same application must exercise this flow against two independent UHP server implementations by changing configuration alone.
+
+The first preview covers text tasks, structured progress, and the response lifecycle. File transfers, session browsing and sharing, harness administration, plugins, environments, memories, and interactive input responses are candidates for later releases. The preview must preserve unfamiliar output from those features so consumers can inspect it. Agent execution, a server SDK, and a standalone CLI are separate deliverables. The console sample is an ordinary consumer of the public package.
+2. Protocol inputs and repository layout
+Use upstream OpenAPI 3.1 and JSON Schema 2020-12 to define wire shapes. Use the versioned protocol chapters for behavior. The task route is POST /v1/responses. An introductory guide's /v1/tasks example conflicts with both the Tasks chapter and the OpenAPI operation.
+
+Pin upstream commit 80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6. For each supported date, vendor the two protocol/schema/uhp-<date>.* files from that commit. Record their SHA-256 hashes and upstream license and attribution. Keep package SemVer independent of the date a server negotiates. Pinned upstream source · Schema rules
+Repository path	Responsibility
+src/Uhp.Client/	Public API, HTTP transport, JSON serialization, SSE decoding, internal generated wire types
+spec/upstream/	Versioned schema inputs, provenance manifest, upstream notices
+eng/	Reproducible schema refresh and generation commands with pinned tooling
+tests/Uhp.Client.Tests/	MSTest wire fixtures, negotiation, errors, streaming, cancellation, and package behavior
+tests/Uhp.Client.InteropTests/	Configurable real-server scenarios shared across implementations
+samples/Uhp.Console/	Install-and-run example and Native AOT smoke consumer
+
+
+Generate the internal DTOs used by the preview from the target schema. A clean checkout must build using checked-in generated output without fetching upstream files. CI regenerates and checks for a diff. Use a small handwritten converter where the selected generator loses a wire distinction, such as the string-or-array input or an unknown output item. Keep generator types internal. Older-date fixtures must pass through the same public client. Enable the library’s AOT and trimming analyzers with IsAotCompatible. Register wire types and converters in a JsonSerializerContext so parsing does not require reflection at runtime.
+3. Public API and endpoint coverage
+Use namespace Uhp.Client and entry point UhpClient. The following signatures define the intended consumer contract. ct is an optional CancellationToken throughout.
+Public operation	HTTP request	Return value
+UhpClient.ConnectAsync(httpClient, options, ct)	GET /v1/uhp	Task<UhpClient> exposing immutable Discovery and ProtocolVersion
+ListHarnessesAsync(ct)	GET /v1/harnesses	Task<IReadOnlyList<UhpHarness>>
+GetHarnessAsync(harnessId, ct)	GET /v1/harnesses/{harness_id}	Task<UhpHarness>
+GetModelsAsync(ct)	GET /v1/models	Task<UhpModelCatalog> grouped by backend
+GetHarnessModelsAsync(harnessId, ct)	GET /v1/harnesses/{harness_id}/models	Task<UhpHarnessModels> with model availability and default
+RunAsync(request, ct)	POST /v1/responses with stream: false	Task<UhpResponse>
+StreamAsync(request, ct)	Same POST with stream: true	IAsyncEnumerable<UhpEvent>
+GetResponseAsync(responseId, ct)	GET /v1/responses/{response_id}	Task<UhpResponse>
+CancelResponseAsync(responseId, ct)	POST /v1/responses/{response_id}/cancel	Task<UhpResponse>
+CancelSessionAsync(sessionId, ct)	POST /v1/sessions/{session_id}/cancel	Task<UhpSessionCancelResult> preserving the returned ID and status
+
+
+Continue by setting PreviousResponseId on the next request. Keep the client safe to share across concurrent callers. It must never infer a “current session,” reuse the last response on behalf of a caller, or dispose the caller's HttpClient. Tasks · Sessions
+Intended usage
+This is the example the implementation and its public API compilation test must support. The host supplies baseUri, token, a configured harnessId, and ct.
+using Uhp.Client;
+
+using var http = new HttpClient
+{
+    BaseAddress = baseUri,
+    Timeout = Timeout.InfiniteTimeSpan
+};
+var client = await UhpClient.ConnectAsync(http, new UhpClientOptions
+{
+    GetBearerTokenAsync = _ => ValueTask.FromResult(token)
+}, ct);
+
+var request = new UhpTaskRequest("Summarize the README in three bullets.")
+{
+    HarnessId = harnessId,
+    Store = true
+};
+
+string? responseId = null;
+await foreach (var update in client.StreamAsync(request, ct))
+{
+    switch (update)
+    {
+        case UhpResponseCreated created:
+            responseId = created.Response.Id;
+            break;
+        case UhpTextDelta delta:
+            Console.Write(delta.Text);
+            break;
+    }
+}
+
+var result = await client.GetResponseAsync(
+    responseId ?? throw new InvalidOperationException("Missing response ID."), ct);
+if (result.Status == UhpResponseStatus.Completed)
+{
+    var followUp = new UhpTaskRequest("Expand on the second bullet.")
+    {
+        PreviousResponseId = result.Id
+    };
+    var answer = await client.RunAsync(followUp, ct);
+    Console.WriteLine(answer.Status);
+}
+4. Wire behavior
+Discovery, authentication, and version selection
+1. Require an absolute HTTPS base address, allowing HTTP on loopback for development. The base is the server's deployment root, for example http://localhost:3000/api/harness. Append relative v1/... paths and preserve any deployment prefix whether the supplied base ends with a slash or not. Escape user-supplied identifiers as individual path segments.
+2. Discover without a version header and without calling the SDK's bearer-token provider. The supplied transport must be configured without default credentials or a handler that injects them into discovery. Validate object, protocol, a non-empty versions, and membership of default_version in that list.
+3. Prefer the newest mutually supported date from the explicit table in this document. If UhpClientOptions.ProtocolVersion is set, require that exact supported date. No overlap fails locally before a task can start. If the chosen date differs from the default, repeat discovery with UHP-Version to obtain capabilities for the chosen version. Treat missing capability flags as false.
+4. Send the negotiated UHP-Version and resolve a bearer token per authenticated request. Apply headers to each message. Check the version on UHP responses, including errors. Preserve the server's unsupported_protocol_version code and advertised alternatives if a previously selected version disappears. A version mismatch on a successful response is a protocol error. A proxy's non-UHP error must still expose its HTTP status.
+5. Authenticate only against the configured server. Do not follow server-supplied absolute links with a bearer credential. Document the caller's responsibility to avoid credential-forwarding redirect handlers, automatic POST retries, and hedging. Logs omit credentials, task text, tool payloads, and raw bodies by default.
+Lifecycle and version negotiation · Transport and authentication
+Requests and responses
+- UhpTaskRequest accepts a plain text string or a list of typed user text messages. Expose optional HarnessId, Model, PreviousResponseId, Instructions, Store, MaxStep, MaxOutputTokens, TimeoutSeconds, extension metadata, and IdempotencyKey. Serialize the key as an HTTP header. The method selects the stream mode. Background execution is outside preview scope.
+- Serialize HarnessId as metadata.harness_id. If omitted, let the server choose its default. Preserve user metadata. Reject a conflicting typed and raw harness selection before sending. Omit unset fields and preserve explicit false and zero where valid. Do not expose the reserved request-level tools and include as executable features.
+- Return the response ID, status, actual model, output items in wire order, metadata including session_id, error, incomplete details, and nullable usage. Preserve reported model substitution and ignored-field data. Represent unknown item types and statuses with their original names and owned JSON so the data remains readable after the HTTP response is disposed.
+- Preserve the terminal states completed, incomplete, failed, and cancelled, including partial output. An HTTP 200 carrying a failed task returns a normal UhpResponse. An HTTP error throws UhpApiException with HTTP status, UHP error type, code, message, param, detail, and Retry-After when available. Malformed successful bodies throw UhpProtocolException. A non-JSON HTTP error preserves status without logging the response body. A transport failure before any response headers preserves its underlying exception. For a task POST whose delivery is uncertain, expose the idempotency key and mark the execution outcome unknown.
+- Harness configuration fields include camelCase, while response fields include snake_case. Use explicit wire names. Preserve timestamp units per type, including seconds on responses and milliseconds on harness creation.
+Streaming, recovery, and cancellation
+Use HttpCompletionOption.ResponseHeadersRead and System.Net.ServerSentEvents with source-generated JSON serialization. Parse complete SSE messages, including multiline data:, CRLF/LF boundaries, and comments. Reset an optional configurable inactivity timeout on received bytes, including keepalives. The SDK adds no overall streaming deadline. The host owns its transport timeout and its cancellation token.
+
+Each stream starts at response.created with sequence zero. Require contiguous sequence numbers, include unknown event types in sequence tracking, and surface their type and raw JSON. Emit typed lifecycle, output item, text, tool argument, reasoning summary, annotation, and error events. Tool call/result items correlate by call_id; tool execution stays on the server. A consumer can display all progress using await foreach without buffering the complete run.
+
+A terminal event contains the complete response. Use its embedded status, including cancelled inside response.failed. An error event alone is nonterminal. EOF before termination, a sequence gap or duplicate, invalid event JSON, or transport failure after submission must surface a UhpStreamException with nullable ResponseId, LastSequenceNumber, the caller’s IdempotencyKey, and the underlying cause. Keep caller cancellation distinguishable as OperationCanceledException.
+
+Capture the response ID on response.created. After a disconnect, callers recover with GetResponseAsync and can poll while status is in_progress. The recovered response is authoritative. Never fabricate missed events or require optional Last-Event-ID support. If the server did not retain the response (store: false), propagate its lookup error. If the ID was never received, surface the ambiguous outcome and preserve the caller's idempotency key.
+
+A task stream is single-use. Re-enumerating the same returned stream must fail locally before issuing another POST. Breaking enumeration, disposing a stream, reaching an inactivity timeout, or cancelling a local token closes the local read. An explicit CancelResponseAsync or CancelSessionAsync sends the remote command. Its acknowledgement can precede termination. A caller needing confirmation must read the response until terminal. Streaming
+
+For example, a consumer that already displayed deltas can handle a lost connection as follows. The returned snapshot replaces its partial display. If the snapshot is still in progress, it can poll the same ID with a bounded delay and caller cancellation.
+catch (UhpStreamException ex) when (ex.ResponseId is { } id)
+{
+    var snapshot = await client.GetResponseAsync(id, ct);
+    RenderSnapshot(snapshot); // Consumer UI or logging code.
+}
+Retry policy
+Ship with zero automatic resubmissions. A caller intending to retry assigns a unique key before the first POST and uses the identical request, stream mode, and key for a retry. Only offer this as safe when discovery advertises idempotency. Expose the flag, and have the SDK reject an explicitly keyed submission locally if support is absent, rather than give the caller false assurance. Independent user actions receive independent keys.
+
+If a response ID is known, prefer a GET. On session_busy, return the typed 409 so the caller can wait for the active turn. On quota_exhausted, preserve the error even if the status is 429. Distinguish it from rate_limited, for which the caller can honor Retry-After. Error and retry rules
+5. Verification and delivery
+Gate	Required evidence
+Discovery and auth	Fixtures for all three dates, older default with newer overlap, pinned version unavailable, no common date, missing capability, and server version drift. Assert the full URL under a prefixed base and that the token provider is first invoked after discovery.
+Serialization	Golden requests for omitted defaults, explicit false, custom metadata, continuation, and text arrays. Read an empty harness list, both model catalog shapes, missing usage, mixed-case wire fields, model fallback, unknown items, and retained extension JSON.
+Stream correctness	Fragment the same bytes across arbitrary reads. Cover comments and multiline SSE, gaps, duplicates, unknown events, EOF before terminal, cancellation reported through a failed event, and an error followed by terminal output. All return the expected data or a diagnosable failure.
+Remote execution count	Count POSTs under interrupted connections, local cancellation, early disposal, and double enumeration. A disconnect issues zero cancel calls and no second submission. Recover a retained response via GET. Test explicit cancellation and same-key manual replay on an idempotency-capable fixture.
+Interoperability	Run the same sample against pinned HarnessRouter CE and SuperQode versions on their advertised dates. Exercise discovery, run, stream, follow-up, readback, and cancel. Record server version, negotiated date, capabilities, and pass/fail/skip per operation. Unit fixtures run on every PR. Credentialed real-agent jobs run in a trusted environment before publishing.
+Package	Build and test in Release. Pack Uhp.Client with README, repository metadata, license expression Apache-2.0, applicable notices, and symbols. Install from a local NuGet feed into the sample with no project reference. Compile, publish, and run the sample with Native AOT against an HTTP/SSE fixture. Resolve trimming/AOT warnings from the SDK.
+
+
+The upstream conformance suite assigns classes to running servers. Publish the client interoperability results and identify any unverified combination. Use “community .NET SDK for connecting to UHP servers” in the package description. A released SDK can be proposed for the upstream implementation directory with its role, targeted protocol dates, public release URL, and maintainer contact. Conformance · Listing criteria · Naming policy
+Implementation order
+1. Vertical slice. Create the solution, pin the schemas, implement discovery and an authenticated non-streaming text task. Exit when the sample prints a real server's response ID and status using the negotiated date.
+2. Task lifecycle. Add the catalog methods, SSE event model, continuation, recovery, both cancellation scopes, and error mapping. Exit when failure fixtures prove a disconnected client never accidentally runs work twice.
+3. Publishable preview. Complete the real-server matrix, install the packed artifact in the sample, and run the Native AOT gate. Release 0.1.0-preview.1 when the required workflows pass. Record optional capabilities separately from those exercised by the preview.

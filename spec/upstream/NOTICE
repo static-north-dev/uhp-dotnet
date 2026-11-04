@@ -1,0 +1,90 @@
+HarnessRouter
+Copyright (c) 2026 HarnessRouter
+
+This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+
+Apache-2.0 requires that this NOTICE file be included in redistributions; the third-party
+entries below are here for the same reason, and state the licenses of OTHER projects — they
+are unaffected by ours.
+
+THIRD-PARTY DEPENDENCIES
+------------------------
+The published container image bundles the following third-party software. All are
+permissive licenses, and their notices are preserved here as those licenses require.
+
+  Python
+    FastAPI              MIT
+    Uvicorn              BSD-3-Clause
+    httpx                BSD-3-Clause
+    Pydantic             MIT
+    python-multipart     Apache-2.0
+    aiohttp              Apache-2.0
+    redis-py             MIT
+    PyJWT                MIT
+    PyYAML               MIT
+
+  JavaScript
+    Next.js              MIT
+    React / ReactDOM     MIT
+    ReifyUI              MIT
+    highlight.js         BSD-3-Clause
+    Mermaid              MIT
+    Apache ECharts       Apache-2.0
+
+AGENT RUNTIMES — NOT REDISTRIBUTED
+----------------------------------
+The agent CLIs are deliberately NOT included in this image. They are installed on first
+run, by you, under their own licenses:
+
+  @anthropic-ai/claude-code   Anthropic's own terms ("SEE LICENSE IN README.md")
+  @openai/codex               Apache-2.0
+  hermes-agent                MIT (License-Expression declared by the publisher since 0.19.0)
+  cheetahclaws                Apache-2.0 — "CheetahClaws, Copyright 2026 SAIL Lab at UC Berkeley"
+                              (SAIL-Research-Lab/cheetahclaws; its NOTICE ships in the wheel). The
+                              console's CheetahClaws mark, ui/public/logos/cheetahclaws.png, is the
+                              head of that project's logo (docs/media/logos/logo-5.png in its
+                              repository), cropped to a square, under the same license.
+  Kilo CLI (kilo)             MIT, "Copyright (c) 2026 Kilo Code, Copyright (c) 2025 opencode"
+                              (Kilo-Org/kilocode; the release archive from its GitHub releases)
+  MiniMax Code (minimax)      MIT, "Copyright (c) 2026 MiniMax Code" (MiniMax-AI/minimax-code; the
+                              release tarball from its GitHub releases)
+  Grok Build (grok)           Apache-2.0 source, "Copyright 2023-2026 SpaceXAI" (xai-org/grok-build).
+                              The binary is the one SpaceXAI's own installer (x.ai/cli) downloads from
+                              its release bucket; SpaceXAI publishes no separate terms or checksums
+                              for it.
+  Agent Zero (agentzero)      MIT, "Copyright (c) 2025 Agent Zero, s.r.o" (agent0ai/agent-zero; the
+                              tagged source archive, with its Python dependencies from PyPI under
+                              their own licenses)
+  Docker Agent (docker-agent) Apache-2.0 (docker/docker-agent; the static binary from its GitHub
+                              releases, v1.152.0, pinned by version and by a digest computed here —
+                              upstream publishes no checksums beside the assets). No mark of its own is
+                              redistributed: the console falls back to its generic glyph.
+  Mistral Vibe (vibe)         Apache-2.0 (mistralai/mistral-vibe; 3.0.2 from PyPI, with its whole
+                              dependency tree pinned by version and hash in docker/locks). The
+                              console's Vibe mark,
+                              ui/public/logos/vibe.svg, is that project's own editor glyph
+                              (distribution/zed/icons/mistral_vibe.svg), unchanged, under the same
+                              license.
+  fast-agent (fast-agent)     Apache-2.0 (evalstate/fast-agent, PyPI fast-agent-mcp; 0.10.47 from
+                              PyPI, with its whole dependency tree pinned by version and hash in
+                              docker/locks, and its own NOTICE file as that license requires). No mark of its own is redistributed: its
+                              repository ships none, so the console falls back to its generic
+                              glyph.
+  Deep Agents Code (dcode)    MIT (langchain-ai/deepagents, PyPI deepagents-code; 0.2.1 from PyPI,
+                              together with deepagents-acp (MIT) and agent-client-protocol, which
+                              its ACP server mode needs, and the deepagents SDK underneath them,
+                              the whole tree pinned by version and hash in docker/locks). No mark
+                              of its own is redistributed: the console falls back to its generic
+                              glyph.
+  CPython 3.14 (for dcode)    PSF-2.0 (python.org; its LICENSE.txt ships in the installed tree),
+                              as python-build-standalone builds it (MPL-2.0 build scripts,
+                              astral-sh/python-build-standalone), release 20261021, CPython
+                              3.14.9, pinned by the sha256 that release publishes. Installed
+                              beside dcode's venv only, because deepagents-code 0.2 requires
+                              Python 3.14; the rest of the image keeps its own interpreter.
+
+Claude Code is distributed under Anthropic's terms and may not be redistributed inside a
+public image; hermes-agent's publisher declared no license before 0.19.0. Installing the
+agent CLIs at first start keeps that decision — and each tool's terms — with the operator.
+Review each tool's license before enabling its backend. Set HR_BACKENDS to control which
+are installed.

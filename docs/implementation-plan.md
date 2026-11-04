@@ -1,0 +1,12 @@
+# Preview implementation plan
+
+The supplied specification is implemented with the subsequently agreed package split: Uhp.Core, Uhp.Client, and Uhp.Server. Shared public types use Uhp.Core; client consumers add that using alongside Uhp.Client. Server endpoints use Valiant Endpoints and validation. Mapping is used only where a distinct source and destination justify it.
+
+1. Vendor the six schema inputs, license, notice, and SHA-256 provenance at upstream commit 80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6. Generate internal preview wire models deterministically with the pinned .NET SDK; a checkout builds without upstream access.
+2. Build Core models/owned extension JSON/source-generated serialization and Client discovery, prefix-safe transport, per-message auth/versioning, explicit continuation, response/error mapping, single-use SSE, inactivity timeout, recovery, and cancellation. Distinguish local failures, uncertain POST outcomes, caller cancellation, and remote task failure.
+3. Build Server ASP.NET Core integration with internal Valiant endpoints and generated validation, UHP errors/headers, anonymous discovery, principal-aware backend contracts, and JSON/SSE transport. The host supplies execution, retention, idempotency and principal isolation; HTTP disconnect must never cancel remote work.
+4. Build implementation before adding MSTest coverage. Verify all three protocol dates, URL/auth/version behavior, wire preservation, fragmented SSE, gaps/duplicates/unknown events, request counts, explicit cancellation, and client/server integration with a deterministic backend.
+5. Pack all three packages, install the client sample from a local feed without project references, and compile/publish/run Native AOT client and server consumers against an HTTP/SSE fixture. Add CI regeneration, tests, packaging and AOT checks; credentialed interoperability remains a separate release gate.
+6. Document public usage, backend responsibilities, security/retry/recovery semantics, unsupported preview features, package validation, and truthful interoperability evidence. Historical upstream reports for CE 0.25.6 and SuperQode 2.3.1 are candidate pins, not SDK results. Do not publish to NuGet until live gates pass.
+
+Plan review incorporated immutable connection configuration, validation before submission, unknown status preservation, selected-version rediscovery validation, error-version drift preservation, atomic stream enumeration, cancellation token composition, and byte-based inactivity handling.

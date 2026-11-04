@@ -1,0 +1,47 @@
+{
+  "repository": "https://github.com/HarnessRouter/harnessrouter",
+  "commit": "80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6",
+  "license": "Apache-2.0",
+  "files": [
+    {
+      "path": "uhp-2026-10-19.openapi.yaml",
+      "upstreamPath": "protocol/schema/uhp-2026-10-19.openapi.yaml",
+      "sha256": "2ab33754fb5319f16b26cb6366b340dac9a5ca8d9bb5252aeea0f1181f0109f6"
+    },
+    {
+      "path": "uhp-2026-10-19.schema.json",
+      "upstreamPath": "protocol/schema/uhp-2026-10-19.schema.json",
+      "sha256": "2a5f6192c50909c8e8689f666fbeb324829d5df9c9b3d67255614a5fa760dcd7"
+    },
+    {
+      "path": "uhp-2026-09-28.openapi.yaml",
+      "upstreamPath": "protocol/schema/uhp-2026-09-28.openapi.yaml",
+      "sha256": "61056ec0016ed1ac95e690300690ec0172d99be68a519aac6679a1356558d987"
+    },
+    {
+      "path": "uhp-2026-09-28.schema.json",
+      "upstreamPath": "protocol/schema/uhp-2026-09-28.schema.json",
+      "sha256": "49dbf1ed151d23e5c48c92ef44dc7616e65c3751f0a8242e74b0aeee597645fd"
+    },
+    {
+      "path": "uhp-2026-09-12.openapi.yaml",
+      "upstreamPath": "protocol/schema/uhp-2026-09-12.openapi.yaml",
+      "sha256": "f7482ced897f85fd08bd33aad0bd783c3a2fef964133b17cd5390f72787dbbcc"
+    },
+    {
+      "path": "uhp-2026-09-12.schema.json",
+      "upstreamPath": "protocol/schema/uhp-2026-09-12.schema.json",
+      "sha256": "fdde5f721190c5cfe3f045bffaa7a02f4cd1e964cea5558cb449306ff82a80c5"
+    },
+    {
+      "path": "LICENSE",
+      "upstreamPath": "LICENSE",
+      "sha256": "0718ec35489c1c3735eadeea39ddf54daa7f452e749f214bcc08cb27bf56339f"
+    },
+    {
+      "path": "NOTICE",
+      "upstreamPath": "NOTICE",
+      "sha256": "3081a2f3cdc2ae858d96a04c16d121bb722e0053ef056de0d6214033c15054bf"
+    }
+  ]
+}

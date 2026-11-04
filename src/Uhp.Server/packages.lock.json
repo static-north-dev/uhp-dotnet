@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "dependencies": {
+    "net10.0": {
+      "Microsoft.NET.ILLink.Tasks": {
+        "type": "Direct",
+        "requested": "[10.0.12, )",
+        "resolved": "10.0.12",
+        "contentHash": "rdn7VmM4sDDZz7tXO7/tPtvR+QByJrhPKT5F2CUcK7ECvXZEf4j0GxdvVpsiX6thBYnYmXOaZBDC2zPzq0S7nw=="
+      },
+      "StaticNorth.Valiant.Endpoints.AspNetCore": {
+        "type": "Direct",
+        "requested": "[1.2.1-preview.1, )",
+        "resolved": "1.2.1-preview.1",
+        "contentHash": "763TGPdfMvgCfiLZzRJgo4aHxQcLBZT1Jzv7MbEADvXa9JzwXuMkeDm1smcdRKQr+sxEL5wyMsTKZOZZC4XUVw=="
+      },
+      "StaticNorth.Valiant.Validation": {
+        "type": "Direct",
+        "requested": "[1.2.0, )",
+        "resolved": "1.2.0",
+        "contentHash": "aWQJPUY+aC0bbCdMgHMOYIdKSooQ/L9q1kwVNRN8PaaCQG3DfoGXgFSjJPWM2SUWrXwyMllhhbvrMkJkhINoPw=="
+      },
+      "uhp.core": {
+        "type": "Project"
+      }
+    }
+  }
+}

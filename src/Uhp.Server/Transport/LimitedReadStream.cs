@@ -1,0 +1,32 @@
+namespace Uhp.Server.Transport;
+
+internal sealed class LimitedReadStream(Stream inner, long maximumBytes) : Stream
+{
+    private long _received;
+
+    public override bool CanRead => true;
+    public override bool CanSeek => false;
+    public override bool CanWrite => false;
+    public override long Length => throw new NotSupportedException();
+    public override long Position { get => throw new NotSupportedException(); set => throw new NotSupportedException(); }
+
+    public override async ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
+    {
+        var count = await inner.ReadAsync(buffer[..(int)Math.Min(buffer.Length, maximumBytes - _received + 1)], cancellationToken).ConfigureAwait(false);
+        _received += count;
+
+        if (_received > maximumBytes)
+        {
+            throw new UhpServerException(413, new("invalid_request_error", "invalid_input", "The request body exceeds the configured size limit."));
+        }
+
+        return count;
+    }
+
+    public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken) => ReadAsync(buffer.AsMemory(offset, count), cancellationToken).AsTask();
+    public override int Read(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+    public override void Flush() => throw new NotSupportedException();
+    public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
+    public override void SetLength(long value) => throw new NotSupportedException();
+    public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+}

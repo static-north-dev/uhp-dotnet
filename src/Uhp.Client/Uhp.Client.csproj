@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <IsAotCompatible>true</IsAotCompatible>
+    <Description>community .NET SDK for connecting to UHP servers</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Uhp.Core/Uhp.Core.csproj" />
+  </ItemGroup>
+</Project>

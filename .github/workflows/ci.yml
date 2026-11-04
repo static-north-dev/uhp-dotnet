@@ -1,0 +1,36 @@
+name: Verify
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: dotnet restore Uhp.slnx --locked-mode
+      - run: dotnet run --project eng/Uhp.SchemaGen --configuration Release --no-restore -- --check
+      - run: dotnet build Uhp.slnx --configuration Release --no-restore
+      - run: dotnet test tests/Uhp.Client.Tests --configuration Release --no-build --no-restore --logger trx --results-directory artifacts/test-results
+      - run: dotnet format Uhp.slnx --no-restore --verify-no-changes
+      - run: dotnet pack src/Uhp.Core --configuration Release --no-build --no-restore
+      - run: dotnet pack src/Uhp.Client --configuration Release --no-build --no-restore
+      - run: dotnet pack src/Uhp.Server --configuration Release --no-build --no-restore
+      - run: python3 eng/package-smoke.py --rid linux-x64
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: verification
+          path: |
+            artifacts/packages
+            artifacts/test-results
+            artifacts/aot/result.json
+            artifacts/aot/fixture.log

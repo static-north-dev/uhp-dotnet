@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <IsAotCompatible>true</IsAotCompatible>
+    <EnableRequestDelegateGenerator>true</EnableRequestDelegateGenerator>
+    <Description>ASP.NET Core endpoints and backend integration for the Unified Harness Protocol.</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <ProjectReference Include="../Uhp.Core/Uhp.Core.csproj" />
+    <PackageReference Include="StaticNorth.Valiant.Endpoints.AspNetCore" Version="1.2.1-preview.1" />
+    <PackageReference Include="StaticNorth.Valiant.Validation" Version="1.2.0" />
+  </ItemGroup>
+</Project>
