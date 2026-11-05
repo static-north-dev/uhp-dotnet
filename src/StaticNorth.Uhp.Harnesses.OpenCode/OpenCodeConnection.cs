@@ -98,7 +98,7 @@ public sealed class OpenCodeConnection(HttpClient client)
             await using var events = SseParser
                 .Create(stream, static (_, data) => JsonElement.Parse(data))
                 .EnumerateAsync(stop.Token)
-                .GetAsyncEnumerator();
+                .GetAsyncEnumerator(stop.Token);
             var opening = events.MoveNextAsync().AsTask();
 
             try
@@ -201,7 +201,8 @@ public sealed class OpenCodeConnection(HttpClient client)
 
     private async Task<HttpResponseMessage> SendAsync(HttpMethod method, string path, string directory, HttpContent? body, CancellationToken ct)
     {
-        using var request = new HttpRequestMessage(method, path + "?directory=" + Uri.EscapeDataString(directory)) { Content = body };
+        using var request = new HttpRequestMessage(method, path + "?directory=" + Uri.EscapeDataString(directory));
+        request.Content = body;
         return await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct)
             .ConfigureAwait(false);
     }
