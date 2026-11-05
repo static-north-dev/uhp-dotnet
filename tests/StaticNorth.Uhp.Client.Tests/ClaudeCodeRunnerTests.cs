@@ -213,10 +213,9 @@ public sealed class ClaudeCodeRunnerTests
             throw new SkipTestException("The deterministic Claude Code fixture uses a POSIX shell.");
         }
 
-        var path = Path.Combine(directory, "claude");
-        await File.WriteAllTextAsync(path, "#!/bin/sh\n" + script + "\n", ct);
-        File.SetUnixFileMode(path, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
+        var path = Path.Combine(directory, "claude-fixture.sh");
+        await File.WriteAllTextAsync(path, script + "\n", ct);
 
-        return new ClaudeCodeRunner(path, directory);
+        return new ClaudeCodeRunner(Path.Combine(AppContext.BaseDirectory, "Fixtures", "claude-launcher.sh"), directory);
     }
 }
