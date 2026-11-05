@@ -2,6 +2,7 @@
   <PropertyGroup>
     <IsAotCompatible>true</IsAotCompatible>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <RestoreAdditionalProjectSources Condition="'$(UseUhpPackages)' == 'true'">$(RestoreAdditionalProjectSources);$(PackageOutputPath)</RestoreAdditionalProjectSources>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../../src/StaticNorth.Uhp.Server/StaticNorth.Uhp.Server.csproj" Condition="'$(UseUhpPackages)' != 'true'" />

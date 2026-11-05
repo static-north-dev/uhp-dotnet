@@ -6,7 +6,7 @@
         "type": "Direct",
         "requested": "[10.0.12, )",
         "resolved": "10.0.12",
-        "contentHash": "rdn7VmM4sDDZz7tXO7/tPtvR+QByJrhPKT5F2CUcK7ECvXZEf4j0GxdvVpsiX6thBYnYmXOaZBDC2zPzq0S7nw=="
+        "contentHash": "xi+BDjFpW+Sb+MHFHaH6Y/gV9I8BluFwRXc1QyCdoZbIK26eNiBeFuMTe/FMwc33G1wdHCyDg7CVTmb8OdQrMQ=="
       },
       "staticnorth.uhp.core": {
         "type": "Project"

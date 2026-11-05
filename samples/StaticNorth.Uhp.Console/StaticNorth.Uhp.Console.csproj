@@ -3,6 +3,7 @@
     <OutputType>Exe</OutputType>
     <JsonSerializerIsReflectionEnabledByDefault>false</JsonSerializerIsReflectionEnabledByDefault>
     <InvariantGlobalization>true</InvariantGlobalization>
+    <RestoreAdditionalProjectSources>$(RestoreAdditionalProjectSources);$(PackageOutputPath)</RestoreAdditionalProjectSources>
     <RestorePackagesWithLockFile>false</RestorePackagesWithLockFile>
   </PropertyGroup>
   <ItemGroup>
