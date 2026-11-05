@@ -57,7 +57,7 @@ public partial class ReferenceBackend : IUhpHarnessManagementBackend, IUhpPlugin
             var owner = Owner(context);
             var previous = FindHarness(harnessId, owner);
 
-            if (harnessId is DefaultHarnessId or ClaudeHarnessId || request.Base != previous.Base)
+            if (harnessId is DefaultHarnessId or ClaudeHarnessId or OpenCodeHarnessId || request.Base != previous.Base)
             {
                 throw Failure(409, "invalid_input", "The harness base is immutable.");
             }
@@ -186,6 +186,7 @@ public partial class ReferenceBackend : IUhpHarnessManagementBackend, IUhpPlugin
         {
             DefaultHarnessId => Harness,
             ClaudeHarnessId => ClaudeHarness,
+            OpenCodeHarnessId => OpenCodeHarness,
             _ => null
         };
 

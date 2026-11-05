@@ -7,10 +7,12 @@ using StaticNorth.Uhp.Server;
 namespace StaticNorth.Uhp.Reference;
 
 // In-memory reference infrastructure with an injected execution runtime; not a persistent storage package.
-public partial class ReferenceBackend(IReferenceRuntime runtime, Environments.ReferenceEnvironmentBackend? environments = null, ClaudeCodeRuntime? claude = null) : IUhpServerBackend, IUhpSessionBackend, IUhpResponseStorageBackend, IDisposable
+public partial class ReferenceBackend(IReferenceRuntime runtime, Environments.ReferenceEnvironmentBackend? environments = null, ClaudeCodeRuntime? claude = null,
+    OpenCodeRuntime? openCode = null) : IUhpServerBackend, IUhpSessionBackend, IUhpResponseStorageBackend, IDisposable
 {
     private const string DefaultHarnessId = "chrn_fixture";
     private const string ClaudeHarnessId = "chrn_claude_code";
+    private const string OpenCodeHarnessId = "chrn_opencode";
     private readonly IReferenceRuntime _runtime = runtime;
     private Memory.ReferenceMemoryBackend? _memories;
     private readonly long _createdAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
@@ -42,6 +44,11 @@ public partial class ReferenceBackend(IReferenceRuntime runtime, Environments.Re
                 result.Add(additional);
             }
 
+            if (OpenCodeHarness is { } openCodeHarness)
+            {
+                result.Add(openCodeHarness);
+            }
+
             foreach (var entry in _harnesses.Values)
             {
                 if (entry.Owner == Owner(context))
@@ -70,24 +77,52 @@ public partial class ReferenceBackend(IReferenceRuntime runtime, Environments.Re
             .GetModelsAsync(ct)
             .ConfigureAwait(false);
 
-        return claude is null ? primary : new(new Dictionary<string, UhpModelBackend>(primary.Backends) { [claude.Base] = claude.Models });
+        if (claude is null && openCode is null)
+        {
+            return primary;
+        }
+
+        var backends = new Dictionary<string, UhpModelBackend>(primary.Backends);
+
+        if (claude is not null)
+        {
+            backends.Add(claude.Base, await GetRuntimeModelsAsync(claude, ct).ConfigureAwait(false));
+        }
+
+        if (openCode is not null)
+        {
+            backends.Add(openCode.Base, await GetRuntimeModelsAsync(openCode, ct).ConfigureAwait(false));
+        }
+
+        return new(backends);
     }
 
-    public Task<UhpHarnessModels> GetHarnessModelsAsync(string harnessId, UhpRequestContext context, CancellationToken ct)
+    public async Task<UhpHarnessModels> GetHarnessModelsAsync(string harnessId, UhpRequestContext context, CancellationToken ct)
     {
         ct.ThrowIfCancellationRequested();
+        string model;
 
         lock (_gate)
         {
             var harness = FindHarness(harnessId, Owner(context));
-
-            if (harnessId == ClaudeHarnessId && claude is { } additional)
-            {
-                return Task.FromResult(new UhpHarnessModels(additional.Models.Models) { HarnessId = harnessId, Backend = additional.Base, Default = additional.DefaultModel });
-            }
-
-            return Task.FromResult(new UhpHarnessModels([new UhpModel(harness.DefaultModel ?? _runtime.DefaultModel, true)]) { HarnessId = harnessId, Backend = _runtime.Base, Default = harness.DefaultModel ?? _runtime.DefaultModel });
+            model = harness.DefaultModel ?? _runtime.DefaultModel;
         }
+
+        var selected = SelectRuntime(harnessId);
+
+        if (ReferenceEquals(selected, _runtime))
+        {
+            return new([new UhpModel(model, true)]) { HarnessId = harnessId, Backend = _runtime.Base, Default = model };
+        }
+
+        var catalog = await GetRuntimeModelsAsync(selected, ct).ConfigureAwait(false);
+        return new(catalog.Models) { HarnessId = harnessId, Backend = selected.Base, Default = catalog.Default };
+    }
+
+    private static async Task<UhpModelBackend> GetRuntimeModelsAsync(IReferenceRuntime selected, CancellationToken ct)
+    {
+        var catalog = await selected.GetModelsAsync(ct).ConfigureAwait(false);
+        return catalog.Backends[selected.Base];
     }
 
     public void ConnectMemories(Memory.ReferenceMemoryBackend memories) => _memories = memories;
@@ -129,6 +164,7 @@ public partial class ReferenceBackend(IReferenceRuntime runtime, Environments.Re
         {
             string selectedHarness;
             string? selectedMemory;
+            bool supportsMemory;
 
             lock (_gate)
             {
@@ -141,14 +177,15 @@ public partial class ReferenceBackend(IReferenceRuntime runtime, Environments.Re
                 selectedHarness = SelectHarness(request, prior);
                 FindHarness(selectedHarness, owner);
                 selectedMemory = requestedMemory?.GetString() ?? prior?.MemoryId;
+                supportsMemory = SelectRuntime(selectedHarness).SupportsMemory;
 
-                if (selectedHarness != ClaudeHarnessId && prior is not null && requestedMemory is not null && selectedMemory != prior.MemoryId)
+                if (supportsMemory && prior is not null && requestedMemory is not null && selectedMemory != prior.MemoryId)
                 {
                     throw Failure(409, "memory_mismatch", "A continuation keeps the session's default memory.");
                 }
             }
 
-            if (selectedHarness != ClaudeHarnessId)
+            if (supportsMemory)
             {
                 memory = await memories
                     .SelectForSessionAsync(selectedHarness, owner, selectedMemory, request.PreviousResponseId is not null,
@@ -181,14 +218,10 @@ public partial class ReferenceBackend(IReferenceRuntime runtime, Environments.Re
             var harness = SelectHarness(request, previousState);
 
             var configuration = FindHarness(harness, owner);
-            var selectedRuntime = _runtime;
+            var selectedRuntime = SelectRuntime(harness);
+            selectedRuntime.ValidateTask(request);
 
-            if (harness == ClaudeHarnessId && claude is { } additional)
-            {
-                additional.ValidateTask(request);
-                selectedRuntime = additional;
-            }
-            else if (_memories is null && requestedMemory is not null)
+            if (_memories is null && requestedMemory is not null)
             {
                 throw UhpServerException.NotFound("memory_not_found");
             }
@@ -361,4 +394,13 @@ public partial class ReferenceBackend(IReferenceRuntime runtime, Environments.Re
     private UhpHarness Harness => new(DefaultHarnessId, "Reference harness", _runtime.Base) { DefaultModel = _runtime.DefaultModel, CreatedAt = _createdAt };
 
     private UhpHarness? ClaudeHarness => claude is null ? null : new(ClaudeHarnessId, "Claude Code", claude.Base) { DefaultModel = claude.DefaultModel, CreatedAt = _createdAt };
+
+    private UhpHarness? OpenCodeHarness => openCode is null ? null : new(OpenCodeHarnessId, "OpenCode", openCode.Base) { DefaultModel = openCode.DefaultModel, CreatedAt = _createdAt };
+
+    private IReferenceRuntime SelectRuntime(string harnessId) => harnessId switch
+    {
+        ClaudeHarnessId when claude is not null => claude,
+        OpenCodeHarnessId when openCode is not null => openCode,
+        _ => _runtime
+    };
 }

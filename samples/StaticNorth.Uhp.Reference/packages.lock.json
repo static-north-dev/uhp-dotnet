@@ -27,6 +27,9 @@
       "staticnorth.uhp.harnesses.codex": {
         "type": "Project"
       },
+      "staticnorth.uhp.harnesses.opencode": {
+        "type": "Project"
+      },
       "staticnorth.uhp.server": {
         "type": "Project",
         "dependencies": {
