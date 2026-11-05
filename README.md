@@ -120,7 +120,7 @@ After packing, run the console sample against a configured server with `UHP_BASE
 dotnet run --project samples/StaticNorth.Uhp.Console --configuration Release
 ```
 
-The samples' NuGet configuration includes `artifacts/packages`. The packed smoke test uses SDK packages for both consumers; the reference host and fixture share non-packable implementation code.
+The console sample restores SDK packages from `artifacts/packages`. The reference sample uses that feed when `UseUhpPackages=true`. The packed smoke test uses SDK packages for both consumers, and the reference host and fixture share non-packable implementation code.
 
 Read [server integration](docs/server.md), [repository tools](tools/README.md), and [interoperability evidence](docs/interoperability.md). The preview has **not been published**. Independent client interoperability with the two pinned servers remains a separate release gate.
 
