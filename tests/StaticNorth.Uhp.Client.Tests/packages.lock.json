@@ -128,6 +128,9 @@
       "staticnorth.uhp.core": {
         "type": "Project"
       },
+      "staticnorth.uhp.harnesses.claudecode": {
+        "type": "Project"
+      },
       "staticnorth.uhp.harnesses.codex": {
         "type": "Project"
       },
