@@ -25,7 +25,7 @@ Demand and support for unattended deployments determine the order for later cand
 ## Implementation and release gates
 
 1. **Extract Codex.** The [preview package](codex-provider.md) contains the stdio connection and the reference host uses it. Move the reusable turn and event translation behind the adapter as the runtime boundary takes shape. Keep the reference state and authentication setup in the host. Rerun the official UHP Full suite for the named Codex deployment.
-2. **Prove Claude Code.** Exercise task submission, streaming, continuation, and cancellation with the same UHP client. Run both adapters in one host, select each by its harness ID, and verify that continuation stays bound to the original harness and principal.
+2. **Prove Claude Code.** The [preview package](claude-code-provider.md) implements the headless transport. Exercise task submission, streaming, continuation, and cancellation with the same UHP client. Run both adapters in one host, select each by its harness ID, and verify that continuation stays bound to the original harness and principal.
 3. **Validate each package before publishing.** Install it from a local NuGet feed in a fresh host and publish that host with Native AOT. Document tested runtime versions and platforms, authentication requirements, and supported capabilities. Exercise advertised capabilities against the real runtime and report official conformance results per deployment. [UHP conformance suite](https://unifiedharnessprotocol.org/conformance)
 
 The recorded **104/104 Full** result covers the current Codex reference deployment. Use it as the baseline for the extraction and record separate results for each new configuration. [Verification record](verification.md)
