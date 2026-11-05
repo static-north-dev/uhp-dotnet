@@ -8,62 +8,121 @@ using System.Text.Json;
 namespace StaticNorth.Uhp.Harnesses.ClaudeCode;
 
 /// <summary>Runs Claude Code in headless mode for a host-owned configuration directory.</summary>
-public sealed class ClaudeCodeRunner(string executablePath, string configurationDirectory)
+public sealed class ClaudeCodeRunner(string executablePath, string? configurationDirectory)
 {
     private static readonly Encoding Utf8 = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
-    private static readonly string[] InheritedVariables = ["PATH", "HOME", "TMPDIR", "TEMP", "TMP", "SystemRoot", "LANG"];
+    private static readonly string[] InheritedVariables = ["PATH", "HOME", "USER", "USERPROFILE", "TMPDIR", "TEMP", "TMP", "SystemRoot", "LANG"];
     private static readonly string[] Arguments =
     [
-        "--bare", "--print", "--output-format", "stream-json", "--verbose", "--include-partial-messages",
+        "--print", "--output-format", "stream-json", "--verbose", "--include-partial-messages",
         "--tools", "", "--permission-prompts", "none", "--strict-mcp-config", "--mcp-config", "{\"mcpServers\":{}}"
     ];
 
     /// <summary>Streams the native events of one turn and validates completion when the stream ends.</summary>
     /// <remarks>Authorize any resume ID for this workspace and configuration before passing it here.</remarks>
-    public async IAsyncEnumerable<JsonElement> RunAsync(
-        string prompt, string workingDirectory, string apiKey, Guid? resumeSessionId = null, [EnumeratorCancellation] CancellationToken ct = default)
+    public IAsyncEnumerable<JsonElement> RunAsync(
+        string prompt, string workingDirectory, string apiKey, Guid? resumeSessionId = null, CancellationToken ct = default) =>
+        RunAsync(prompt, workingDirectory, apiKey, resumeSessionId, null, null, ct);
+
+    /// <summary>Streams a turn using the given model and an optional host-owned system prompt file.</summary>
+    public IAsyncEnumerable<JsonElement> RunAsync(
+        string prompt, string workingDirectory, string apiKey, Guid? resumeSessionId, string? model, string? systemPromptFile,
+        CancellationToken ct = default)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(executablePath);
-        ArgumentException.ThrowIfNullOrWhiteSpace(configurationDirectory);
-        ArgumentException.ThrowIfNullOrWhiteSpace(prompt);
-        ArgumentException.ThrowIfNullOrWhiteSpace(workingDirectory);
         ArgumentException.ThrowIfNullOrWhiteSpace(apiKey);
+        ArgumentException.ThrowIfNullOrWhiteSpace(configurationDirectory);
+        return RunCoreAsync(prompt, workingDirectory, apiKey, null, resumeSessionId, model, systemPromptFile, ct);
+    }
+
+    /// <summary>Streams a turn using the subscription login already saved by Claude Code.</summary>
+    public IAsyncEnumerable<JsonElement> RunWithSubscriptionAsync(string prompt, string workingDirectory,
+        Guid sessionId, bool resume, string model, string? systemPromptFile, CancellationToken ct = default) =>
+        RunCoreAsync(prompt, workingDirectory, null, resume ? null : sessionId, resume ? sessionId : null, model, systemPromptFile, ct);
+
+    /// <summary>Returns the CLI profile directory if it has a Claude subscription login.</summary>
+    public async Task<string?> GetSubscriptionProfileDirectoryAsync(string workingDirectory, CancellationToken ct)
+    {
+        ct.ThrowIfCancellationRequested();
+        var start = CreateStartInfo(workingDirectory);
+        start.RedirectStandardInput = false;
+        start.StandardInputEncoding = null;
+        start.ArgumentList.Add("auth");
+        start.ArgumentList.Add("status");
+        start.ArgumentList.Add("--json");
+
+        using var process = Process.Start(start) ?? throw new IOException("Claude Code could not start.");
+        var stdout = process.StandardOutput.ReadToEndAsync(ct);
+        var stderr = process.StandardError.BaseStream.CopyToAsync(Stream.Null, ct);
+
+        try
+        {
+            await Task.WhenAll(stdout, stderr, process.WaitForExitAsync(ct))
+                .ConfigureAwait(false);
+
+            if (process.ExitCode != 0)
+            {
+                return null;
+            }
+
+            using var status = JsonDocument.Parse(await stdout.ConfigureAwait(false));
+            var root = status.RootElement;
+            return root.TryGetProperty("loggedIn"u8, out var signedIn) && signedIn.ValueKind == JsonValueKind.True &&
+                root.TryGetProperty("authMethod"u8, out var auth) && auth.ValueEquals("claude.ai"u8) &&
+                root.TryGetProperty("subscriptionType"u8, out var subscription) && subscription.ValueKind == JsonValueKind.String &&
+                !subscription.ValueEquals(""u8) && root.TryGetProperty("configDirectory"u8, out var directory) &&
+                directory.ValueKind == JsonValueKind.String && directory.GetString() is { } path && Path.IsPathFullyQualified(path)
+                ? path : null;
+        }
+        finally
+        {
+            await StopProcessAsync(process)
+                .ConfigureAwait(false);
+        }
+    }
+
+    private async IAsyncEnumerable<JsonElement> RunCoreAsync(
+        string prompt, string workingDirectory, string? apiKey, Guid? newSessionId, Guid? resumeSessionId, string? model, string? systemPromptFile,
+        [EnumeratorCancellation] CancellationToken ct = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(prompt);
         ct.ThrowIfCancellationRequested();
 
-        var start = new ProcessStartInfo(executablePath)
+        var start = CreateStartInfo(workingDirectory);
+
+        if (apiKey is not null)
         {
-            RedirectStandardInput = true,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            StandardInputEncoding = Utf8,
-            UseShellExecute = false,
-            WorkingDirectory = workingDirectory
-        };
+            start.ArgumentList.Add("--bare");
+            start.Environment["ANTHROPIC_API_KEY"] = apiKey;
+        }
+        else
+        {
+            start.ArgumentList.Add("--safe-mode");
+            start.ArgumentList.Add("--disable-slash-commands");
+        }
 
         foreach (var argument in Arguments)
         {
             start.ArgumentList.Add(argument);
         }
 
-        if (resumeSessionId is { } sessionId)
+        if ((resumeSessionId ?? newSessionId) is { } sessionId)
         {
-            ArgumentOutOfRangeException.ThrowIfEqual(sessionId, Guid.Empty, nameof(resumeSessionId));
-            start.ArgumentList.Add("--resume");
+            ArgumentOutOfRangeException.ThrowIfEqual(sessionId, Guid.Empty, nameof(sessionId));
+            start.ArgumentList.Add(resumeSessionId.HasValue ? "--resume" : "--session-id");
             start.ArgumentList.Add(sessionId.ToString("D"));
         }
 
-        start.Environment.Clear();
-
-        foreach (var key in InheritedVariables)
+        if (model is not null)
         {
-            if (Environment.GetEnvironmentVariable(key) is { } value)
-            {
-                start.Environment[key] = value;
-            }
+            start.ArgumentList.Add("--model");
+            start.ArgumentList.Add(model);
         }
 
-        start.Environment["CLAUDE_CONFIG_DIR"] = configurationDirectory;
-        start.Environment["ANTHROPIC_API_KEY"] = apiKey;
+        if (systemPromptFile is not null)
+        {
+            start.ArgumentList.Add("--append-system-prompt-file");
+            start.ArgumentList.Add(systemPromptFile);
+        }
 
         using var process = Process.Start(start) ?? throw new IOException("Claude Code could not start.");
         using var stop = CancellationTokenSource.CreateLinkedTokenSource(ct);
@@ -72,7 +131,7 @@ public sealed class ClaudeCodeRunner(string executablePath, string configuration
         var drain = stderr.CopyToAsync(Stream.Null, stop.Token);
         var input = WritePromptAsync(process.StandardInput, prompt, stop.Token);
         var result = default(JsonElement);
-        var observedSessionId = resumeSessionId;
+        var observedSessionId = resumeSessionId ?? newSessionId;
 
         try
         {
@@ -119,20 +178,7 @@ public sealed class ClaudeCodeRunner(string executablePath, string configuration
         {
             try
             {
-                if (!process.HasExited)
-                {
-                    try
-                    {
-                        process.Kill(entireProcessTree: true);
-                    }
-                    catch (InvalidOperationException) when (process.HasExited)
-                    {
-                        // Claude Code exited between the check and the kill request.
-                    }
-                }
-
-                await process
-                    .WaitForExitAsync()
+                await StopProcessAsync(process)
                     .ConfigureAwait(false);
             }
             finally
@@ -150,6 +196,56 @@ public sealed class ClaudeCodeRunner(string executablePath, string configuration
                 await drain.ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
             }
         }
+    }
+
+    private ProcessStartInfo CreateStartInfo(string workingDirectory)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(executablePath);
+        ArgumentException.ThrowIfNullOrWhiteSpace(workingDirectory);
+        var start = new ProcessStartInfo(executablePath)
+        {
+            RedirectStandardInput = true,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            StandardInputEncoding = Utf8,
+            UseShellExecute = false,
+            WorkingDirectory = workingDirectory
+        };
+        start.Environment.Clear();
+
+        foreach (var key in InheritedVariables)
+        {
+            if (Environment.GetEnvironmentVariable(key) is { } value)
+            {
+                start.Environment[key] = value;
+            }
+        }
+
+        if (configurationDirectory is not null)
+        {
+            start.Environment["CLAUDE_CONFIG_DIR"] = configurationDirectory;
+        }
+
+        return start;
+    }
+
+    private static async Task StopProcessAsync(Process process)
+    {
+        if (!process.HasExited)
+        {
+            try
+            {
+                process.Kill(entireProcessTree: true);
+            }
+            catch (InvalidOperationException) when (process.HasExited)
+            {
+                // Claude Code exited between the check and the kill request.
+            }
+        }
+
+        await process
+            .WaitForExitAsync()
+            .ConfigureAwait(false);
     }
 
     private static async Task WritePromptAsync(StreamWriter input, string prompt, CancellationToken ct)

@@ -15,6 +15,8 @@ The three SDK packages provide contracts, transport, and pluggable backend inter
 
 The host invokes native Codex inference, streaming, continuation, and interruption. It binds installed MCP servers and materializes file inputs and plugins in scoped workspaces. A pending question ends the turn; the next accepted answer starts a continuation. A secret is retained outside the native conversation and exposed to the runtime only through a scoped opaque reference. The memory facade evaluates grants as the harness agent, primes standing records as untrusted data, and checks grants on every tool call.
 
+For a mixed runtime preview, the same host can also serve a built-in Claude Code harness. The recorded Full result applies to the Codex-only deployment. [Enable the Claude Code preview](claude-code-provider.md#use-claude-code-alongside-codex)
+
 ## Reproduce
 
 Use a Unix machine with .NET 10, its native compiler, Codex 0.166.0 authenticated locally, Python, npm if building Node environments, and `uv`. Set `CODEX_HOME` if the login lives outside the default local Codex home. The runner configures the origin from its loopback URL; a manually run host may use `--public-origin` for absolute artifact links. Keep provider credentials local.

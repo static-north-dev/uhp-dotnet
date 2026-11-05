@@ -5,7 +5,7 @@ using StaticNorth.Uhp.Harnesses.Codex;
 
 namespace StaticNorth.Uhp.Reference;
 
-public sealed class CodexRuntime(string stateRoot, string authenticationHome) : IReferenceRuntime, IAsyncDisposable
+public sealed class CodexRuntime(string stateRoot, string authenticationHome, string? executablePath = null) : IReferenceRuntime, IAsyncDisposable
 {
     private readonly ConcurrentDictionary<string, CodexRuntimeSession> _sessions = new(StringComparer.Ordinal);
     private readonly ConcurrentDictionary<string, byte> _lostSessions = new(StringComparer.Ordinal);
@@ -14,6 +14,7 @@ public sealed class CodexRuntime(string stateRoot, string authenticationHome) : 
     public bool ProducesArtifacts => true;
     public string WorkspaceRoot { get; } = Path.Combine(Path.GetTempPath(), $"uhp-codex-{Guid.NewGuid():N}");
     public string DefaultModel { get; private set; } = "";
+    private string ExecutablePath => executablePath ?? ReferenceCodexExecutable.ExecutablePath;
 
     public async Task InitializeAsync(CancellationToken ct)
     {
@@ -22,7 +23,7 @@ public sealed class CodexRuntime(string stateRoot, string authenticationHome) : 
         var home = await PrepareHomeAsync(directory, ct)
             .ConfigureAwait(false);
         await using var connection = await CodexAppServerConnection
-            .StartAsync(ReferenceCodexExecutable.ExecutablePath, home, directory, ct)
+            .StartAsync(ExecutablePath, home, directory, ct)
             .ConfigureAwait(false);
         var result = await connection
             .CallAsync("model/list", Empty(), ct)
@@ -91,10 +92,10 @@ public sealed class CodexRuntime(string stateRoot, string authenticationHome) : 
             var home = await PrepareHomeAsync(Path.Combine(stateRoot, request.SessionId), ct)
                 .ConfigureAwait(false);
             var bindings = await CodexHarnessBinding
-                .PrepareAsync(request, home, ct)
+                .PrepareAsync(request, home, ExecutablePath, ct)
                 .ConfigureAwait(false);
             var connection = await CodexAppServerConnection
-                .StartAsync(ReferenceCodexExecutable.ExecutablePath, home, request.Workspace, ct)
+                .StartAsync(ExecutablePath, home, request.Workspace, ct)
                 .ConfigureAwait(false);
 
             try
@@ -350,7 +351,7 @@ public sealed class CodexRuntime(string stateRoot, string authenticationHome) : 
             .ConfigureAwait(false);
     }
 
-    private static JsonElement StartParameters(ReferenceRuntimeRequest request, string home, List<CodexMcpBinding> bindings) => UhpJson.CreateElement(writer =>
+    private JsonElement StartParameters(ReferenceRuntimeRequest request, string home, List<CodexMcpBinding> bindings) => UhpJson.CreateElement(writer =>
     {
         writer.WriteStartObject(); writer.WriteString("cwd", request.Workspace); writer.WriteString("approvalPolicy", "never");
         writer.WriteString("permissions", "uhp-session"); writer.WriteBoolean("ephemeral", true);
@@ -382,7 +383,7 @@ public sealed class CodexRuntime(string stateRoot, string authenticationHome) : 
 
         CodexHarnessBinding.Write(writer, bindings, request.Harness.DisabledTools);
         writer.WriteStartObject("permissions"); writer.WriteStartObject("uhp-session");
-        writer.WriteStartObject("filesystem"); writer.WriteString(":minimal", "read"); writer.WriteString(ReferenceCodexExecutable.ExecutablePath, "read"); writer.WriteString(request.Workspace, "write"); writer.WriteString(home, "read"); writer.WriteString(Path.Combine(home, "auth.json"), "deny");
+        writer.WriteStartObject("filesystem"); writer.WriteString(":minimal", "read"); writer.WriteString(ExecutablePath, "read"); writer.WriteString(request.Workspace, "write"); writer.WriteString(home, "read"); writer.WriteString(Path.Combine(home, "auth.json"), "deny");
         writer.WriteString(Path.Combine(request.Workspace, ".uhp", "plugins"), "read"); writer.WriteString(Path.Combine(request.Workspace, ".agents"), "read");
 
         if (request.Environment is { } readOnlyEnvironment)

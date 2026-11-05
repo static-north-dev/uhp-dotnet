@@ -5,6 +5,7 @@
     <RestoreAdditionalProjectSources Condition="'$(UseUhpPackages)' == 'true'">$(RestoreAdditionalProjectSources);$(PackageOutputPath)</RestoreAdditionalProjectSources>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="../../src/StaticNorth.Uhp.Harnesses.ClaudeCode/StaticNorth.Uhp.Harnesses.ClaudeCode.csproj" />
     <ProjectReference Include="../../src/StaticNorth.Uhp.Harnesses.Codex/StaticNorth.Uhp.Harnesses.Codex.csproj" />
     <ProjectReference Include="../../src/StaticNorth.Uhp.Server/StaticNorth.Uhp.Server.csproj" Condition="'$(UseUhpPackages)' != 'true'" />
     <PackageReference Include="Microsoft.NET.ILLink.Tasks" Version="10.0.14" PrivateAssets="all" />
