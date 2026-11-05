@@ -4,9 +4,9 @@
     "net10.0": {
       "Microsoft.NET.ILLink.Tasks": {
         "type": "Direct",
-        "requested": "[10.0.12, )",
-        "resolved": "10.0.12",
-        "contentHash": "xi+BDjFpW+Sb+MHFHaH6Y/gV9I8BluFwRXc1QyCdoZbIK26eNiBeFuMTe/FMwc33G1wdHCyDg7CVTmb8OdQrMQ=="
+        "requested": "[10.0.14, )",
+        "resolved": "10.0.14",
+        "contentHash": "fsu9CKHwhd0k0xHKtQcBwEgmR03o+NKyiJqvC3rjeP7Io2+9FQhk3I3pm7dEtY5AebpKYyizsPnSA8ZMAW98uw=="
       },
       "StaticNorth.Valiant.Endpoints.AspNetCore": {
         "type": "Transitive",
@@ -19,6 +19,9 @@
         "contentHash": "pLF4MunZqJpT4Qxt6yor9wbxxVvpI5aDf9WjtGYXEM7mBM+4b4y0HQx8z363zP3+VP/AhNg1e/FaNGUmtsorVA=="
       },
       "staticnorth.uhp.core": {
+        "type": "Project"
+      },
+      "staticnorth.uhp.harnesses.codex": {
         "type": "Project"
       },
       "staticnorth.uhp.server": {

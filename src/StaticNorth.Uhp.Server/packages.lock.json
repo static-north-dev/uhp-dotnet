@@ -4,9 +4,9 @@
     "net10.0": {
       "Microsoft.NET.ILLink.Tasks": {
         "type": "Direct",
-        "requested": "[10.0.12, )",
-        "resolved": "10.0.12",
-        "contentHash": "xi+BDjFpW+Sb+MHFHaH6Y/gV9I8BluFwRXc1QyCdoZbIK26eNiBeFuMTe/FMwc33G1wdHCyDg7CVTmb8OdQrMQ=="
+        "requested": "[10.0.14, )",
+        "resolved": "10.0.14",
+        "contentHash": "fsu9CKHwhd0k0xHKtQcBwEgmR03o+NKyiJqvC3rjeP7Io2+9FQhk3I3pm7dEtY5AebpKYyizsPnSA8ZMAW98uw=="
       },
       "StaticNorth.Valiant.Endpoints.AspNetCore": {
         "type": "Direct",
