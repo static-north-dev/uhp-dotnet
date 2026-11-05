@@ -7,4 +7,7 @@
     <RootNamespace>StaticNorth.Uhp.Core</RootNamespace>
     <Description>Shared protocol contracts and AOT-compatible serialization for community UHP .NET integrations.</Description>
   </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.ILLink.Tasks" Version="10.0.14" PrivateAssets="all" />
+  </ItemGroup>
 </Project>

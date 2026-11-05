@@ -10,4 +10,7 @@
   <ItemGroup>
     <ProjectReference Include="../StaticNorth.Uhp.Core/StaticNorth.Uhp.Core.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.ILLink.Tasks" Version="10.0.14" PrivateAssets="all" />
+  </ItemGroup>
 </Project>

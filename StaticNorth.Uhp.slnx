@@ -17,6 +17,7 @@
   <Folder Name="/src/">
     <Project Path="src/StaticNorth.Uhp.Client/StaticNorth.Uhp.Client.csproj" />
     <Project Path="src/StaticNorth.Uhp.Core/StaticNorth.Uhp.Core.csproj" />
+    <Project Path="src/StaticNorth.Uhp.Harnesses.Codex/StaticNorth.Uhp.Harnesses.Codex.csproj" />
     <Project Path="src/StaticNorth.Uhp.Server/StaticNorth.Uhp.Server.csproj" />
   </Folder>
   <Folder Name="/tests/">

@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Text.Json;
 using StaticNorth.Uhp.Core;
+using StaticNorth.Uhp.Harnesses.Codex;
 
 namespace StaticNorth.Uhp.Reference;
 
@@ -20,8 +21,8 @@ public sealed class CodexRuntime(string stateRoot, string authenticationHome) : 
         Directory.CreateDirectory(directory);
         var home = await PrepareHomeAsync(directory, ct)
             .ConfigureAwait(false);
-        await using var connection = await CodexConnection
-            .StartAsync(home, directory, ct)
+        await using var connection = await CodexAppServerConnection
+            .StartAsync(ReferenceCodexExecutable.ExecutablePath, home, directory, ct)
             .ConfigureAwait(false);
         var result = await connection
             .CallAsync("model/list", Empty(), ct)
@@ -92,8 +93,8 @@ public sealed class CodexRuntime(string stateRoot, string authenticationHome) : 
             var bindings = await CodexHarnessBinding
                 .PrepareAsync(request, home, ct)
                 .ConfigureAwait(false);
-            var connection = await CodexConnection
-                .StartAsync(home, request.Workspace, ct)
+            var connection = await CodexAppServerConnection
+                .StartAsync(ReferenceCodexExecutable.ExecutablePath, home, request.Workspace, ct)
                 .ConfigureAwait(false);
 
             try
@@ -381,7 +382,7 @@ public sealed class CodexRuntime(string stateRoot, string authenticationHome) : 
 
         CodexHarnessBinding.Write(writer, bindings, request.Harness.DisabledTools);
         writer.WriteStartObject("permissions"); writer.WriteStartObject("uhp-session");
-        writer.WriteStartObject("filesystem"); writer.WriteString(":minimal", "read"); writer.WriteString(CodexConnection.Executable, "read"); writer.WriteString(request.Workspace, "write"); writer.WriteString(home, "read"); writer.WriteString(Path.Combine(home, "auth.json"), "deny");
+        writer.WriteStartObject("filesystem"); writer.WriteString(":minimal", "read"); writer.WriteString(ReferenceCodexExecutable.ExecutablePath, "read"); writer.WriteString(request.Workspace, "write"); writer.WriteString(home, "read"); writer.WriteString(Path.Combine(home, "auth.json"), "deny");
         writer.WriteString(Path.Combine(request.Workspace, ".uhp", "plugins"), "read"); writer.WriteString(Path.Combine(request.Workspace, ".agents"), "read");
 
         if (request.Environment is { } readOnlyEnvironment)
