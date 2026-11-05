@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" role="img" aria-label="UHP .NET">
+  <title>UHP .NET</title>
+  <defs>
+    <linearGradient id="tile" x2="100%" y2="100%">
+      <stop stop-color="#2C2051" />
+      <stop offset="1" stop-color="#161226" />
+    </linearGradient>
+  </defs>
+  <rect x="4.5" y="4.5" width="119" height="119" rx="26" fill="url(#tile)" stroke="#7461AD" />
+  <g fill="none" stroke-width="11" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M47 34H39a9 9 0 0 0-9 9v42a9 9 0 0 0 9 9h8M30 64h14" stroke="#C8B7FF" />
+    <path d="M81 34h8a9 9 0 0 1 9 9v42a9 9 0 0 1-9 9h-8M98 64H84" stroke="#9B83FF" />
+  </g>
+  <rect x="56" y="56" width="16" height="16" rx="3.5" transform="rotate(45 64 64)" fill="#F7F3FF" />
+</svg>

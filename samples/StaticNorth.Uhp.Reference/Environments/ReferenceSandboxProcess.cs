@@ -11,7 +11,7 @@ internal static class ReferenceSandboxProcess
     {
         Directory.CreateDirectory(home);
         var config = new StringBuilder("default_permissions = \"uhp-build\"\napproval_policy = \"never\"\n[features]\nnetwork_proxy = true\n[permissions.uhp-build.filesystem]\n\":minimal\" = \"read\"\n");
-        PathRule(config, CodexConnection.Executable, "read");
+        PathRule(config, ReferenceCodexExecutable.ExecutablePath, "read");
         PathRule(config, writableRoot, "write");
 
         if (OperatingSystem.IsMacOS() && Directory.Exists("/opt/homebrew"))
@@ -31,7 +31,7 @@ internal static class ReferenceSandboxProcess
 
     public static async Task<ReferenceProcessResult> RunAsync(string home, string cwd, string executable, IReadOnlyList<string> arguments, CancellationToken ct)
     {
-        var start = new ProcessStartInfo(CodexConnection.Executable)
+        var start = new ProcessStartInfo(ReferenceCodexExecutable.ExecutablePath)
         {
             UseShellExecute = false,
             RedirectStandardOutput = true,

@@ -7,4 +7,7 @@
   <ItemGroup>
     <InternalsVisibleTo Include="StaticNorth.Uhp.Client.Tests" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.ILLink.Tasks" Version="10.0.14" PrivateAssets="all" />
+  </ItemGroup>
 </Project>

@@ -11,8 +11,10 @@
     <PackageReference Include="TUnit" Version="1.80.0" />
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <ProjectReference Include="../../src/StaticNorth.Uhp.Client/StaticNorth.Uhp.Client.csproj" />
+    <ProjectReference Include="../../src/StaticNorth.Uhp.Harnesses.ClaudeCode/StaticNorth.Uhp.Harnesses.ClaudeCode.csproj" />
     <ProjectReference Include="../../src/StaticNorth.Uhp.Server/StaticNorth.Uhp.Server.csproj" />
     <Compile Include="../../samples/StaticNorth.Uhp.FixtureServer/Fixture*.cs" Link="Fixture/%(Filename)%(Extension)" />
     <Compile Include="../../samples/StaticNorth.Uhp.Console/Scenario.cs" Link="Fixture/Scenario.cs" />
+    <None Update="Fixtures/*.sh" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

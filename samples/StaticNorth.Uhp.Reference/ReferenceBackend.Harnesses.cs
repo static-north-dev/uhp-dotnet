@@ -57,7 +57,7 @@ public partial class ReferenceBackend : IUhpHarnessManagementBackend, IUhpPlugin
             var owner = Owner(context);
             var previous = FindHarness(harnessId, owner);
 
-            if (harnessId == Harness.Id || request.Base != previous.Base)
+            if (harnessId is DefaultHarnessId or ClaudeHarnessId or OpenCodeHarnessId || request.Base != previous.Base)
             {
                 throw Failure(409, "invalid_input", "The harness base is immutable.");
             }
@@ -182,9 +182,17 @@ public partial class ReferenceBackend : IUhpHarnessManagementBackend, IUhpPlugin
 
     private Wire.Harness FindHarness(string id, string owner)
     {
-        if (id == Harness.Id)
+        var builtIn = id switch
         {
-            return new Wire.Harness { Id = Harness.Id, Name = Harness.Name, Base = Harness.Base, DefaultModel = _runtime.DefaultModel };
+            DefaultHarnessId => Harness,
+            ClaudeHarnessId => ClaudeHarness,
+            OpenCodeHarnessId => OpenCodeHarness,
+            _ => null
+        };
+
+        if (builtIn is not null)
+        {
+            return new Wire.Harness { Id = id, Name = builtIn.Name, Base = builtIn.Base, DefaultModel = builtIn.DefaultModel, CreatedAt = builtIn.CreatedAt };
         }
 
         return _harnesses.TryGetValue(id, out var entry) && entry.Owner == owner ? entry.Harness : throw UhpServerException.NotFound("harness_not_found");

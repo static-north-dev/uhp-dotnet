@@ -1,8 +1,10 @@
+using StaticNorth.Uhp.Harnesses.Codex;
+
 namespace StaticNorth.Uhp.Reference;
 
-internal sealed class CodexRuntimeSession(CodexConnection connection, string threadId, string model, string home, List<CodexMcpBinding> bindings)
+internal sealed class CodexRuntimeSession(CodexAppServerConnection connection, string threadId, string model, string home, List<CodexMcpBinding> bindings)
 {
-    public CodexConnection Connection { get; } = connection;
+    public CodexAppServerConnection Connection { get; } = connection;
     public string ThreadId { get; set; } = threadId;
     public string Model { get; } = model;
     public string Home { get; } = home;

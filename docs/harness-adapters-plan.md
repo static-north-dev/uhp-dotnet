@@ -8,7 +8,7 @@ Start with an opt-in Codex NuGet package, then implement Claude Code to test the
 | --- | --- | --- |
 | 1 | **Codex** · `StaticNorth.Uhp.Harnesses.Codex` | Extract the existing Codex App Server integration over stdio. The reference deployment already exercises real turns, streaming, continuation, and interruption. [Codex App Server](https://developers.openai.com/codex/app-server) · [Reference deployment](conformance-deployment.md) |
 | 2 | **Claude Code** · `StaticNorth.Uhp.Harnesses.ClaudeCode` | Prototype the documented headless CLI with streaming JSON and session resume. Check cancellation and permission callbacks before choosing whether to use the CLI directly or bridge to the Agent SDK. [Programmatic Claude Code](https://code.claude.com/docs/en/headless) · [Agent SDK](https://code.claude.com/docs/en/agent-sdk/overview) |
-| 3 | **OpenCode** · `StaticNorth.Uhp.Harnesses.OpenCode` | Evaluate its headless HTTP server, SSE events, and session abort. This tests the adapter boundary with a different transport and gives a host access to OpenCode's configurable model providers. [OpenCode server API](https://opencode.ai/docs/server/) · [OpenCode model providers](https://opencode.ai/docs/providers/) |
+| 3 | **OpenCode** · `StaticNorth.Uhp.Harnesses.OpenCode` | The reference host preview supports text streaming, continuation, and cancellation over OpenCode HTTP. It passed 41/41 official UHP Core checks with OpenCode 1.15.10 and a local Ollama model. [OpenCode provider preview](opencode-provider.md) |
 
 Demand and support for unattended deployments determine the order for later candidates.
 
@@ -24,11 +24,11 @@ Demand and support for unattended deployments determine the order for later cand
 
 ## Implementation and release gates
 
-1. **Extract Codex.** Pack the adapter as a preview candidate and wire the existing conformance host through it. Keep the reference state and authentication setup in the host. Rerun the official UHP Full suite for the named Codex deployment.
-2. **Prove Claude Code.** Exercise task submission, streaming, continuation, and cancellation with the same UHP client. Run both adapters in one host, select each by its harness ID, and verify that continuation stays bound to the original harness and principal.
+1. **Extract Codex.** The [preview package](codex-provider.md) contains the stdio connection and the reference host uses it. Move the reusable turn and event translation behind the adapter as the runtime boundary takes shape. Keep the reference state and authentication setup in the host. Rerun the official UHP Full suite for the named Codex deployment.
+2. **Prove Claude Code.** The [reference host preview](claude-code-provider.md#use-claude-code-alongside-codex) serves both runtimes by harness ID. A shared client test with local CLI fixtures verifies submission, streaming, continuation, cancellation, and isolation by harness and principal. A local smoke test verifies live Claude Team subscription streaming and continuation through UHP.
 3. **Validate each package before publishing.** Install it from a local NuGet feed in a fresh host and publish that host with Native AOT. Document tested runtime versions and platforms, authentication requirements, and supported capabilities. Exercise advertised capabilities against the real runtime and report official conformance results per deployment. [UHP conformance suite](https://unifiedharnessprotocol.org/conformance)
 
-The recorded **104/104 Full** result covers the current Codex reference deployment. Use it as the baseline for the extraction and record separate results for each new configuration. [Verification record](verification.md)
+The recorded **104/104 Full** result covers the Codex-only reference deployment before the transport extraction. Record separate results for each new configuration. [Verification record](verification.md)
 
 ## Versioning and release cadence
 

@@ -11,9 +11,11 @@ The reference host runs the .NET UHP server with a real local Codex runtime and 
 | Storage | Process-local task, session, harness, share and memory state; filesystem staging for artifacts and environments |
 | Access | Loopback host; ephemeral bearer credential; separate private Codex home and workspace per session |
 
-The three SDK packages provide contracts, transport, and pluggable backend interfaces. The concrete Codex adapter and the in-memory provider live in non-packable reference and test support projects. This deployment is for local verification; its state is not durable across restarts. Provider-specific derivation and queries, apt provisioning, and PDF conversion are unavailable. The host declares or returns those limits through UHP.
+The three SDK packages provide contracts, transport, and pluggable backend interfaces. The reference host now uses the [Codex provider preview](codex-provider.md) for its App Server connection. UHP task mapping and the in-memory provider live in the reference and test support projects. The recorded Full run predates the transport extraction. This local deployment keeps state in process. Provider-specific derivation and queries, apt provisioning, and PDF conversion are unavailable. The host declares or returns those limits through UHP.
 
 The host invokes native Codex inference, streaming, continuation, and interruption. It binds installed MCP servers and materializes file inputs and plugins in scoped workspaces. A pending question ends the turn; the next accepted answer starts a continuation. A secret is retained outside the native conversation and exposed to the runtime only through a scoped opaque reference. The memory facade evaluates grants as the harness agent, primes standing records as untrusted data, and checks grants on every tool call.
+
+For a mixed runtime preview, the same host can also serve a built-in Claude Code harness. The recorded Full result applies to the Codex-only deployment. [Enable the Claude Code preview](claude-code-provider.md#use-claude-code-alongside-codex)
 
 ## Reproduce
 

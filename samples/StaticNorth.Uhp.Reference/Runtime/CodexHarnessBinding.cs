@@ -6,7 +6,7 @@ namespace StaticNorth.Uhp.Reference;
 
 internal static class CodexHarnessBinding
 {
-    public static async Task<List<CodexMcpBinding>> PrepareAsync(ReferenceRuntimeRequest request, string home, CancellationToken ct)
+    public static async Task<List<CodexMcpBinding>> PrepareAsync(ReferenceRuntimeRequest request, string home, string executablePath, CancellationToken ct)
     {
         var result = new List<CodexMcpBinding>();
 
@@ -95,7 +95,7 @@ internal static class CodexHarnessBinding
 
                 args.Add(command.StartsWith("./", StringComparison.Ordinal) ? Path.Combine(root, command[2..]) : command);
                 args.AddRange(arguments);
-                result.Add(new(server.Name, null, CodexConnection.Executable, args.ToArray(), null, new() { ["CODEX_HOME"] = pluginHome }, root));
+                result.Add(new(server.Name, null, executablePath, args.ToArray(), null, new() { ["CODEX_HOME"] = pluginHome }, root));
             }
         }
 
@@ -179,7 +179,7 @@ internal static class CodexHarnessBinding
     private static async Task WriteSandboxAsync(string home, string root, string data, CancellationToken ct)
     {
         var config = new StringBuilder("default_permissions = \"uhp-plugin\"\napproval_policy = \"never\"\n[permissions.uhp-plugin.filesystem]\n\":minimal\" = \"read\"\n");
-        AddPath(config, CodexConnection.Executable, "read");
+        AddPath(config, ReferenceCodexExecutable.ExecutablePath, "read");
         AddPath(config, root, "read");
         AddPath(config, data, "write");
 

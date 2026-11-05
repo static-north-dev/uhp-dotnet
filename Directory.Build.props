@@ -16,6 +16,7 @@
     <PackageProjectUrl>https://github.com/static-north-dev/uhp-dotnet</PackageProjectUrl>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageIcon>nuget-icon.png</PackageIcon>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <PackageOutputPath>$(MSBuildThisFileDirectory)artifacts/packages</PackageOutputPath>
@@ -25,6 +26,7 @@
   </PropertyGroup>
   <ItemGroup Condition="'$(IsPackable)' == 'true'">
     <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="/" />
+    <None Include="$(MSBuildThisFileDirectory)assets/nuget-icon.png" Pack="true" PackagePath="/" />
     <None Include="$(MSBuildThisFileDirectory)spec/upstream/LICENSE" Pack="true" PackagePath="licenses/upstream-LICENSE" />
     <None Include="$(MSBuildThisFileDirectory)spec/upstream/NOTICE" Pack="true" PackagePath="licenses/upstream-NOTICE" />
   </ItemGroup>

@@ -32,6 +32,8 @@ def check_packages():
             assert any(path.startswith("licenses/") and path.endswith("NOTICE") for path in archive.namelist())
             metadata = ET.fromstring(archive.read(f"StaticNorth.Uhp.{name}.nuspec"))
             ns = {"n": metadata.tag.split("}")[0].strip("{")}
+            assert metadata.findtext(".//n:icon", namespaces=ns) == "nuget-icon.png"
+            assert archive.read("nuget-icon.png") == (ROOT / "assets/nuget-icon.png").read_bytes()
             assert metadata.find(".//n:license", ns).text == "Apache-2.0"
             assert metadata.find(".//n:repository", ns).get("url") == "https://github.com/static-north-dev/uhp-dotnet"
             dependencies = [item.get("id") for item in metadata.findall(".//n:dependency", ns)]
