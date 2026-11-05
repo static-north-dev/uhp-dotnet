@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <IsAotCompatible>true</IsAotCompatible>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>StaticNorth.Uhp.Client</RootNamespace>
+    <Description>community .NET SDK for connecting to UHP servers</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../StaticNorth.Uhp.Core/StaticNorth.Uhp.Core.csproj" />
+  </ItemGroup>
+</Project>

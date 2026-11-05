@@ -1,0 +1,8 @@
+[project]
+name = "staticnorth-uhp-conformance-environment"
+version = "0.1.0"
+requires-python = ">=3.13,<3.14"
+dependencies = ["uhp-conformance[fixture]"]
+
+[tool.uv.sources]
+uhp-conformance = { path = "../../artifacts/conformance/upstream/protocol/conformance", editable = true }

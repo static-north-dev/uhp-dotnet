@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <IsAotCompatible>true</IsAotCompatible>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>StaticNorth.Uhp.Core</RootNamespace>
+    <Description>Shared protocol contracts and AOT-compatible serialization for community UHP .NET integrations.</Description>
+  </PropertyGroup>
+</Project>
