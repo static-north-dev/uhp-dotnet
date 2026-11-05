@@ -132,8 +132,8 @@ The [in-memory reference provider](tests/StaticNorth.Uhp.TestSupport/README.md) 
 
 ## Publish to NuGet.org
 
-The [release workflow](.github/workflows/release.yml) builds and tests the tagged commit, then publishes Core, Client, and Server using the tag version with the leading `v` removed. To publish the first preview, push the tag `v0.1.0-preview.1` from a verified commit that contains the workflow.
+To publish to NuGet.org, publish a GitHub Release for a version tag such as `v1.2.0` or `v1.2.0-preview.1`. Use a tag that points to a verified commit containing the [release workflow](.github/workflows/release.yml). The workflow builds and tests that commit, then publishes Core, Client, and Server using the tag version with the leading `v` removed.
 
-Before the first tag push, set the GitHub Actions variable `NUGET_USER` to the NuGet.org username. On NuGet.org, configure [Trusted Publishing](https://learn.microsoft.com/en-us/nuget/nuget-org/trusted-publishing) for `static-north-dev/uhp-dotnet`, workflow `release.yml`, and environment `production`. Scope the policy to `StaticNorth.Uhp.*` and allow publishing new packages and new versions.
+Before publishing a GitHub Release, set the GitHub Actions variable `NUGET_USER` to the NuGet.org username. On NuGet.org, configure [Trusted Publishing](https://learn.microsoft.com/en-us/nuget/nuget-org/trusted-publishing) for `static-north-dev/uhp-dotnet`, workflow `release.yml`, and environment `production`. Scope the policy to `StaticNorth.Uhp.*` and allow publishing new packages and new versions.
 
 Apache-2.0. Vendored upstream license, attribution, and hashes are under `spec/upstream` and included in each package.
