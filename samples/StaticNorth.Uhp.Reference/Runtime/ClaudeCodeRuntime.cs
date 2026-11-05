@@ -1,5 +1,4 @@
 using System.Collections.Concurrent;
-using System.Text;
 using System.Text.Json;
 using StaticNorth.Uhp.Core;
 using StaticNorth.Uhp.Harnesses.ClaudeCode;
@@ -14,7 +13,8 @@ public sealed class ClaudeCodeRuntime(string executablePath, string stateRoot, s
     public string Base => "claude-code";
     public string DefaultModel => model;
     public string WorkspaceRoot { get; } = Path.Combine(stateRoot, "workspaces");
-    internal UhpModelBackend Models => new(model, [new(model, File.Exists(executablePath)) { IsDefault = true, Backend = Base }]);
+    public bool SupportsMemory => false;
+    private UhpModelBackend Models => new(model, [new(model, File.Exists(executablePath)) { IsDefault = true, Backend = Base }]);
 
     public Task<UhpModelCatalog> GetModelsAsync(CancellationToken ct)
     {
@@ -22,41 +22,14 @@ public sealed class ClaudeCodeRuntime(string executablePath, string stateRoot, s
         return Task.FromResult(new UhpModelCatalog(new Dictionary<string, UhpModelBackend> { [Base] = Models }));
     }
 
-    internal void ValidateTask(UhpTaskRequest task)
+    public void ValidateTask(UhpTaskRequest task)
     {
         if ((task.Model is { } requested && requested != model) || !File.Exists(executablePath))
         {
             throw ReferenceBackend.Failure(422, "model_unavailable", "The Claude Code harness cannot serve the requested model.");
         }
 
-        if (task.InputFeatures != UhpInputFeatures.None || task.Metadata?.ContainsKey("environment") == true ||
-            task.Metadata?.ContainsKey("memory") == true)
-        {
-            throw ReferenceBackend.Failure(422, "invalid_input", "The Claude Code preview accepts text without files, interactive answers, environments, or memories.");
-        }
-
-        if (task.Input.ValueKind == JsonValueKind.Array)
-        {
-            var hasText = false;
-
-            foreach (var item in task.Input.EnumerateArray())
-            {
-                if (!item.GetProperty("role"u8).ValueEquals("user"u8))
-                {
-                    throw ReferenceBackend.Failure(422, "invalid_input", "The Claude Code preview accepts user messages only.");
-                }
-
-                if (!hasText)
-                {
-                    hasText = HasText(item.GetProperty("content"u8));
-                }
-            }
-
-            if (!hasText)
-            {
-                throw ReferenceBackend.Failure(422, "invalid_input", "Claude Code requires a nonempty user prompt.");
-            }
-        }
+        ReferenceTextInput.Validate(task, "Claude Code");
     }
 
     public void ValidateSession(string sessionId)
@@ -90,7 +63,7 @@ public sealed class ClaudeCodeRuntime(string executablePath, string stateRoot, s
                     .ConfigureAwait(false);
             }
 
-            var prompt = Prompt(request.Task.Input);
+            var prompt = ReferenceTextInput.Prompt(request.Task.Input);
             var messages = subscriptionProfileDirectory is null
                 ? runner.RunAsync(prompt, request.Workspace, apiKey!, prior.Ready ? prior.Id : null, model, instructions, ct)
                 : runner.RunWithSubscriptionAsync(prompt, request.Workspace, nativeId, prior.Ready, model, instructions, ct);
@@ -176,52 +149,6 @@ public sealed class ClaudeCodeRuntime(string executablePath, string stateRoot, s
             ct.ThrowIfCancellationRequested();
             File.Delete(Path.Combine(project, fileName));
         }
-    }
-
-    private static string Prompt(JsonElement input)
-    {
-        if (input.ValueKind == JsonValueKind.String)
-        {
-            return input.GetString()!;
-        }
-
-        var prompt = new StringBuilder();
-
-        foreach (var item in input.EnumerateArray())
-        {
-            var content = item.GetProperty("content"u8);
-
-            if (content.ValueKind == JsonValueKind.String)
-            {
-                prompt.AppendLine(content.GetString());
-                continue;
-            }
-
-            foreach (var part in content.EnumerateArray())
-            {
-                prompt.AppendLine(part.GetProperty("text"u8).GetString());
-            }
-        }
-
-        return prompt.ToString();
-    }
-
-    private static bool HasText(JsonElement content)
-    {
-        if (content.ValueKind == JsonValueKind.String)
-        {
-            return !string.IsNullOrWhiteSpace(content.GetString());
-        }
-
-        foreach (var part in content.EnumerateArray())
-        {
-            if (!string.IsNullOrWhiteSpace(part.GetProperty("text"u8).GetString()))
-            {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     private static void CreatePrivateDirectory(string directory)

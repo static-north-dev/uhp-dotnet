@@ -18,7 +18,7 @@ The client and Core have no ASP.NET Core or Valiant dependency. Protocol models 
 
 The server package provides transport and backend integration. The host supplies an agent runtime, persistence, and principal isolation. The deterministic fixture is test infrastructure. These packages do not contain a production agent runtime.
 
-See the [Codex provider preview](docs/codex-provider.md), [Claude Code provider preview](docs/claude-code-provider.md), and [harness adapter roadmap](docs/harness-adapters-plan.md).
+See the [Codex provider preview](docs/codex-provider.md), [Claude Code provider preview](docs/claude-code-provider.md), [OpenCode provider preview](docs/opencode-provider.md), and [harness adapter roadmap](docs/harness-adapters-plan.md).
 
 ## Client usage
 

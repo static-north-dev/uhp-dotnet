@@ -8,7 +8,7 @@ Start with an opt-in Codex NuGet package, then implement Claude Code to test the
 | --- | --- | --- |
 | 1 | **Codex** · `StaticNorth.Uhp.Harnesses.Codex` | Extract the existing Codex App Server integration over stdio. The reference deployment already exercises real turns, streaming, continuation, and interruption. [Codex App Server](https://developers.openai.com/codex/app-server) · [Reference deployment](conformance-deployment.md) |
 | 2 | **Claude Code** · `StaticNorth.Uhp.Harnesses.ClaudeCode` | Prototype the documented headless CLI with streaming JSON and session resume. Check cancellation and permission callbacks before choosing whether to use the CLI directly or bridge to the Agent SDK. [Programmatic Claude Code](https://code.claude.com/docs/en/headless) · [Agent SDK](https://code.claude.com/docs/en/agent-sdk/overview) |
-| 3 | **OpenCode** · `StaticNorth.Uhp.Harnesses.OpenCode` | Evaluate its headless HTTP server, SSE events, and session abort. This tests the adapter boundary with a different transport and gives a host access to OpenCode's configurable model providers. [OpenCode server API](https://opencode.ai/docs/server/) · [OpenCode model providers](https://opencode.ai/docs/providers/) |
+| 3 | **OpenCode** · `StaticNorth.Uhp.Harnesses.OpenCode` | The reference host preview supports text streaming, continuation, and cancellation over OpenCode HTTP. It passed 41/41 official UHP Core checks with OpenCode 1.15.10 and a local Ollama model. [OpenCode provider preview](opencode-provider.md) |
 
 Demand and support for unattended deployments determine the order for later candidates.
 
