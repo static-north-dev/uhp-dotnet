@@ -40,24 +40,26 @@ internal static class UhpHttp
         UhpTaskRequest request;
         IReadOnlyList<string> ignored;
         bool stream;
+        bool background;
 
         try
         {
             using var body = new LimitedReadStream(http.Request.Body, options.MaximumRequestBodyBytes);
             using var document = await JsonDocument.ParseAsync(body, new JsonDocumentOptions { MaxDepth = 64 }, http.RequestAborted).ConfigureAwait(false);
             request = UhpJson.ParseRequest(document.RootElement, context.IdempotencyKey);
-            ignored = (document.RootElement.TryGetProperty("tools", out _), document.RootElement.TryGetProperty("include", out _)) switch
-            {
-                (true, true) => BothIgnored,
-                (true, false) => ToolsIgnored,
-                (false, true) => IncludeIgnored,
-                _ => Array.Empty<string>()
-            };
+            ignored = IgnoredFields(document.RootElement);
             stream = document.RootElement.TryGetProperty("stream", out var streamField) && streamField.GetBoolean();
+            background = document.RootElement.TryGetProperty("background", out var backgroundField) && backgroundField.GetBoolean();
         }
         catch (Exception exception) when (exception is UhpProtocolException or JsonException or ArgumentException or InvalidOperationException)
         {
-            throw new UhpServerException(400, new UhpError(UhpProtocol.InvalidRequestError, UhpProtocol.InvalidInput, "The request does not match the UHP text-task contract."));
+            throw new UhpServerException(400, new UhpError(UhpProtocol.InvalidRequestError, UhpProtocol.InvalidInput, "The request does not match the UHP task contract."));
+        }
+
+        if ((request.InputFeatures & UhpInputFeatures.Files) != 0 && !options.Capabilities["files_input"] ||
+            (request.InputFeatures & UhpInputFeatures.Interactive) != 0 && !options.Capabilities["input_requests"])
+        {
+            throw new UhpServerException(400, new(UhpProtocol.InvalidRequestError, UhpProtocol.InvalidInput, "The requested input capability is not available."));
         }
 
         var validator = http.RequestServices.GetRequiredService<UhpTaskBudgetsValidator>();
@@ -79,11 +81,21 @@ internal static class UhpHttp
 
         http.RequestAborted.ThrowIfCancellationRequested();
         var stopping = http.RequestServices.GetRequiredService<IHostApplicationLifetime>().ApplicationStopping;
-        var execution = await backend.SubmitAsync(new UhpSubmission(request, ignored), context, stopping).ConfigureAwait(false);
+        var execution = await backend.SubmitAsync(new UhpSubmission(request, ignored) { Background = background }, context, stopping).ConfigureAwait(false);
 
         if (execution.InitialResponse.Status != UhpResponseStatus.InProgress || string.IsNullOrWhiteSpace(execution.InitialResponse.Id))
         {
             throw new UhpServerException(500, new UhpError(UhpProtocol.ServerError, UhpProtocol.ServerError, "The backend returned an invalid accepted response."));
+        }
+
+        if (execution.IsReplay)
+        {
+            await execution.Completion.WaitAsync(http.RequestAborted).ConfigureAwait(false);
+        }
+
+        if (background && !stream && !execution.IsReplay)
+        {
+            return TypedResults.Ok(execution.InitialResponse);
         }
 
         if (!stream)
@@ -96,6 +108,51 @@ internal static class UhpHttp
         http.Response.Headers[UhpProtocol.BufferingHeader] = "no";
         return TypedResults.ServerSentEvents(ReadEventsAsync(execution, http.RequestAborted));
     }
+
+    private static IReadOnlyList<string> IgnoredFields(JsonElement body)
+    {
+        List<string>? unknown = null;
+
+        foreach (var field in body.EnumerateObject())
+        {
+            if (!IsKnown(field))
+            {
+                (unknown ??= []).Add(field.Name);
+            }
+        }
+
+        var tools = body.TryGetProperty("tools", out _);
+        var include = body.TryGetProperty("include", out _);
+
+        if (unknown is not null)
+        {
+            if (tools)
+            {
+                unknown.Add("tools");
+            }
+
+            if (include)
+            {
+                unknown.Add("include");
+            }
+
+            return unknown.AsReadOnly();
+        }
+
+        return (tools, include) switch
+        {
+            (true, true) => BothIgnored,
+            (true, false) => ToolsIgnored,
+            (false, true) => IncludeIgnored,
+            _ => Array.Empty<string>()
+        };
+    }
+
+    private static bool IsKnown(JsonProperty field) =>
+        field.NameEquals("input") || field.NameEquals("model") || field.NameEquals("metadata") ||
+        field.NameEquals("stream") || field.NameEquals("background") || field.NameEquals("previous_response_id") ||
+        field.NameEquals("instructions") || field.NameEquals("store") || field.NameEquals("max_output_tokens") ||
+        field.NameEquals("max_step") || field.NameEquals("timeout_seconds") || field.NameEquals("tools") || field.NameEquals("include");
 
     private static async IAsyncEnumerable<byte[]> ReadEventsAsync(UhpExecution execution, [EnumeratorCancellation] CancellationToken ct)
     {

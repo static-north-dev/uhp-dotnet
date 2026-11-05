@@ -119,7 +119,7 @@ public sealed class AllocationTests
     {
         const int iterations = 128;
 
-        for (var index = 0; index < 32; index++)
+        for (var index = 0; index < 512; index++)
         {
             operation();
         }
@@ -140,7 +140,7 @@ public sealed class AllocationTests
         var buffer = new ArrayBufferWriter<byte>(16 * 1024);
         using var writer = new Utf8JsonWriter(buffer);
 
-        for (var index = 0; index < 32; index++)
+        for (var index = 0; index < 512; index++)
         {
             buffer.Clear();
             writer.Reset(buffer);

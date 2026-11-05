@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "dependencies": {
+    "net10.0": {
+      "Microsoft.NET.ILLink.Tasks": {
+        "type": "Direct",
+        "requested": "[10.0.12, )",
+        "resolved": "10.0.12",
+        "contentHash": "rdn7VmM4sDDZz7tXO7/tPtvR+QByJrhPKT5F2CUcK7ECvXZEf4j0GxdvVpsiX6thBYnYmXOaZBDC2zPzq0S7nw=="
+      },
+      "StaticNorth.Valiant.Endpoints.AspNetCore": {
+        "type": "Transitive",
+        "resolved": "1.2.1",
+        "contentHash": "4cKRdKDjfsgocM7Lz5bAfGRDnN3u2tlizc0I8qqfPfa34pcUdKUgbj3r8OYJkneJOEQ5GOElupHmdx3R4tJvjw=="
+      },
+      "StaticNorth.Valiant.Validation": {
+        "type": "Transitive",
+        "resolved": "1.2.1",
+        "contentHash": "pLF4MunZqJpT4Qxt6yor9wbxxVvpI5aDf9WjtGYXEM7mBM+4b4y0HQx8z363zP3+VP/AhNg1e/FaNGUmtsorVA=="
+      },
+      "staticnorth.uhp.core": {
+        "type": "Project"
+      },
+      "staticnorth.uhp.reference": {
+        "type": "Project",
+        "dependencies": {
+          "StaticNorth.Uhp.Server": "[0.1.0-preview.1, )",
+          "StaticNorth.Uhp.TestSupport": "[0.1.0-preview.1, )"
+        }
+      },
+      "staticnorth.uhp.server": {
+        "type": "Project",
+        "dependencies": {
+          "StaticNorth.Uhp.Core": "[0.1.0-preview.1, )",
+          "StaticNorth.Valiant.Endpoints.AspNetCore": "[1.2.1, )",
+          "StaticNorth.Valiant.Validation": "[1.2.1, )"
+        }
+      },
+      "staticnorth.uhp.testsupport": {
+        "type": "Project"
+      }
+    }
+  }
+}

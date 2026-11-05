@@ -7,7 +7,7 @@ internal static class UhpJsonWriter
 {
     private static readonly string[] ResponseFields = [UhpJsonFields.Id, UhpJsonFields.Object, UhpJsonFields.CreatedAt, UhpJsonFields.Status, UhpJsonFields.Model, UhpJsonFields.Output, UhpJsonFields.Metadata, UhpJsonFields.PreviousResponseId, UhpJsonFields.Store, UhpJsonFields.Error, UhpJsonFields.IncompleteDetails, UhpJsonFields.Usage];
     private static readonly string[] HarnessFields = [UhpJsonFields.Id, UhpJsonFields.Object, UhpJsonFields.Name, UhpJsonFields.Base, UhpJsonFields.BaseLabel, UhpJsonFields.DefaultModel, UhpJsonFields.SystemPrompt, UhpJsonFields.MaxStep, UhpJsonFields.TimeoutSeconds, UhpJsonFields.HarnessCreatedAt];
-    private static readonly string[] DiscoveryFields = [UhpJsonFields.Object, UhpJsonFields.Protocol, UhpJsonFields.Versions, UhpJsonFields.DefaultVersion, UhpJsonFields.ConformanceClass, UhpJsonFields.Capabilities, UhpJsonFields.Implementation];
+    private static readonly string[] DiscoveryFields = [UhpJsonFields.Object, UhpJsonFields.Protocol, UhpJsonFields.Versions, UhpJsonFields.DefaultVersion, UhpJsonFields.ConformanceClass, UhpJsonFields.Capabilities, UhpJsonFields.Implementation, "plugin_schemas"];
     private static readonly string[] ImplementationFields = [UhpJsonFields.Name, UhpJsonFields.Version];
     private static readonly string[] ModelFields = [UhpJsonFields.Id, UhpJsonFields.Available, UhpJsonFields.Label, UhpJsonFields.Backend, UhpJsonFields.Default];
     private static readonly string[] CatalogFields = [UhpJsonFields.Backends];
@@ -33,7 +33,7 @@ internal static class UhpJsonWriter
         }
 
         writer.WriteEndArray();
-        WriteOptional(writer, UhpJsonFields.PreviousResponseId, response.PreviousResponseId);
+        writer.WriteString(UhpJsonFields.PreviousResponseId, response.PreviousResponseId);
         WriteOptional(writer, UhpJsonFields.Store, response.Store);
 
         if (response.Metadata is { } metadata)
@@ -48,6 +48,10 @@ internal static class UhpJsonWriter
             writer.WritePropertyName(UhpJsonFields.Error);
             WriteError(writer, error);
         }
+        else
+        {
+            writer.WriteNull(UhpJsonFields.Error);
+        }
 
         if (response.IncompleteDetails is { } details)
         {
@@ -59,11 +63,19 @@ internal static class UhpJsonWriter
             writer.WritePropertyName(UhpJsonFields.IncompleteDetails);
             details.WriteTo(writer);
         }
+        else
+        {
+            writer.WriteNull(UhpJsonFields.IncompleteDetails);
+        }
 
         if (response.Usage is { } usage)
         {
             writer.WritePropertyName(UhpJsonFields.Usage);
             WriteUsage(writer, usage);
+        }
+        else
+        {
+            writer.WriteNull(UhpJsonFields.Usage);
         }
 
         WriteExtensions(writer, response.Raw, ResponseFields);
@@ -76,7 +88,7 @@ internal static class UhpJsonWriter
         WriteRequired(writer, UhpJsonFields.Type, error.Type);
         WriteRequired(writer, UhpJsonFields.Code, error.Code);
         WriteRequired(writer, UhpJsonFields.Message, error.Message);
-        WriteOptional(writer, UhpJsonFields.Param, error.Param);
+        writer.WriteString(UhpJsonFields.Param, error.Param);
 
         if (error.Detail is { } detail)
         {
@@ -87,6 +99,10 @@ internal static class UhpJsonWriter
 
             writer.WritePropertyName(UhpJsonFields.Detail);
             detail.WriteTo(writer);
+        }
+        else
+        {
+            writer.WriteNull(UhpJsonFields.Detail);
         }
 
         WriteExtensions(writer, error.Raw, ErrorFields);
@@ -108,6 +124,19 @@ internal static class UhpJsonWriter
         writer.WriteEndArray();
         WriteRequired(writer, UhpJsonFields.DefaultVersion, discovery.DefaultVersion);
         WriteRequired(writer, UhpJsonFields.ConformanceClass, discovery.ConformanceClass);
+
+        if (discovery.PluginSchemas.Count > 0)
+        {
+            writer.WriteStartArray("plugin_schemas");
+
+            for (var index = 0; index < discovery.PluginSchemas.Count; index++)
+            {
+                writer.WriteStringValue(discovery.PluginSchemas[index]);
+            }
+
+            writer.WriteEndArray();
+        }
+
         writer.WriteStartObject(UhpJsonFields.Capabilities);
         WriteMap(writer, discovery.Capabilities.Values, default, static (target, value, _) => target.WriteBooleanValue(value));
         writer.WriteEndObject();

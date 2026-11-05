@@ -16,7 +16,7 @@ internal sealed class ServerTestHost(WebApplication app) : IAsyncDisposable
 {
     public FixtureBackend Backend => (FixtureBackend)app.Services.GetRequiredService<IUhpServerBackend>();
 
-    public static async Task<ServerTestHost> StartAsync(string version = UhpProtocolVersions.Current, Action<ValiantEndpointOptions>? configureEndpoints = null)
+    public static async Task<ServerTestHost> StartAsync(string version = UhpProtocolVersions.Current, Action<ValiantEndpointOptions>? configureEndpoints = null, bool sessions = false, bool files = false, bool harnesses = false, long maximumUploadBytes = 67_108_864, bool sharing = false, bool memories = false)
     {
         var builder = WebApplication.CreateSlimBuilder();
         builder.Logging.ClearProviders();
@@ -27,14 +27,53 @@ internal sealed class ServerTestHost(WebApplication app) : IAsyncDisposable
             options.AuthenticationScheme = "Fixture";
             options.Versions = [version];
             options.DefaultVersion = version;
+            options.MaximumUploadBytes = maximumUploadBytes;
+            options.PluginSchemas = harnesses ? ["https://agent-plugins.org/schemas/1.0.0/plugin.schema.json"] : [];
             options.Capabilities = new UhpCapabilities(new Dictionary<string, bool>
             {
                 ["streaming"] = true,
                 ["sessions"] = true,
                 ["cancellation"] = true,
-                ["idempotency"] = true
+                ["idempotency"] = true,
+                ["session_listing"] = sessions,
+                ["files_input"] = files,
+                ["files_output"] = files,
+                ["harness_management"] = harnesses,
+                ["harness_idempotency"] = harnesses,
+                ["plugins"] = harnesses,
+                ["session_sharing"] = sharing,
+                ["memories"] = memories
             });
         });
+        builder.Services.AddSingleton<IUhpResponseStorageBackend>(provider => (FixtureBackend)provider.GetRequiredService<IUhpServerBackend>());
+
+        if (sessions)
+        {
+            builder.Services.AddSingleton<IUhpSessionBackend>(provider => (FixtureBackend)provider.GetRequiredService<IUhpServerBackend>());
+        }
+
+        if (files)
+        {
+            builder.Services.AddSingleton<IUhpFileBackend>(provider => (FixtureBackend)provider.GetRequiredService<IUhpServerBackend>());
+        }
+
+        if (sharing)
+        {
+            builder.Services.AddSingleton<IUhpSharingBackend>(provider => (FixtureBackend)provider.GetRequiredService<IUhpServerBackend>());
+            builder.Services.AddSingleton<IUhpSharedViewBackend>(provider => (FixtureBackend)provider.GetRequiredService<IUhpServerBackend>());
+        }
+
+        if (memories)
+        {
+            builder.Services.AddSingleton<StaticNorth.Uhp.TestSupport.Memory.IReferenceMemoryProvider, StaticNorth.Uhp.TestSupport.Memory.InMemoryMemoryProvider>();
+            builder.Services.AddSingleton<IUhpMemoryBackend, StaticNorth.Uhp.Reference.Memory.ReferenceMemoryBackend>();
+        }
+
+        if (harnesses)
+        {
+            builder.Services.AddSingleton<IUhpHarnessManagementBackend>(provider => (FixtureBackend)provider.GetRequiredService<IUhpServerBackend>());
+            builder.Services.AddSingleton<IUhpPluginBackend>(provider => (FixtureBackend)provider.GetRequiredService<IUhpServerBackend>());
+        }
 
         if (configureEndpoints is not null)
         {
@@ -42,6 +81,13 @@ internal sealed class ServerTestHost(WebApplication app) : IAsyncDisposable
         }
 
         var app = builder.Build();
+
+        if (memories)
+        {
+            var backend = (FixtureBackend)app.Services.GetRequiredService<IUhpServerBackend>();
+            backend.ConnectMemories((StaticNorth.Uhp.Reference.Memory.ReferenceMemoryBackend)app.Services.GetRequiredService<IUhpMemoryBackend>());
+        }
+
         app.MapUhp("/api/harness");
         app.MapGet("/health", HandleHealth);
         await app.StartAsync();

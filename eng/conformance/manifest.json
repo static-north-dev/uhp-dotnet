@@ -1,0 +1,24 @@
+{
+  "repository": "https://github.com/HarnessRouter/harnessrouter",
+  "commit": "80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6",
+  "suite_version": "2026.10.19.post5",
+  "inventory_sha256": "511958686d71b6a4896dded050660b5f768c8d6035a5b7840bbb07088c7d312d",
+  "files": {
+    "protocol/conformance/uhp_conformance/__init__.py": "3711c69d8e0dae8284c1de293695bbbbad903b16115924bf6368e4674101b612",
+    "protocol/conformance/uhp_conformance/checks.py": "ec5c4d7198578fc13a6162c75a1d097bfd452447b2930a7423d3e8d4ebc1f29c",
+    "protocol/conformance/uhp_conformance/cli.py": "4c38f5fab11681137c3fb18625be04c7dc7425ffce2d7a7bacea8777bc594664",
+    "protocol/conformance/uhp_conformance/client.py": "8caf3adc2f30ae509f2efedd2378f84323080f36e593930b6cf7cbe503cd318f",
+    "protocol/conformance/uhp_conformance/context.py": "cb3cfc7b3c8d13f3f3fe6aeaebaf3a90c451e8122f99ba60d4f20f0e89add7cc",
+    "protocol/conformance/uhp_conformance/fixture.py": "c464a363d4af736c1bbf1ef88cf06b4d78b33fb12886ffb1fd990a4d13f21b71",
+    "protocol/conformance/uhp_conformance/registry.py": "da1bb7fd67e89108320721c891b66baff8e5cd93c1fb31e9f94940b507d47513",
+    "protocol/conformance/uhp_conformance/report.py": "d9f14b56cfffe14116a40f03a04f121731e96a5b18ec7eb9cd0f3d3caabb484e",
+    "protocol/conformance/uhp_conformance/uhp-2026-09-12.schema.json": "fdde5f721190c5cfe3f045bffaa7a02f4cd1e964cea5558cb449306ff82a80c5",
+    "protocol/conformance/uhp_conformance/uhp-2026-09-28.schema.json": "49dbf1ed151d23e5c48c92ef44dc7616e65c3751f0a8242e74b0aeee597645fd",
+    "protocol/conformance/uhp_conformance/uhp-2026-10-04.schema.json": "a9bb66f8988237f1edfb80cc647fd92f44134e8e09dd3ae032959a71a47b841d",
+    "protocol/conformance/uhp_conformance/uhp-2026-10-19.schema.json": "2a5f6192c50909c8e8689f666fbeb324829d5df9c9b3d67255614a5fa760dcd7",
+    "protocol/conformance/pyproject.toml": "187bf700c3ad949516a87b67544482e2f9d73991f92e94b93b594be816eab378",
+    "protocol/conformance/uv.lock": "afab44ff7ff920426187a0c3c6a8847c3f618d3ac6b995156b33f0c31f7221ba",
+    "LICENSE": "0718ec35489c1c3735eadeea39ddf54daa7f452e749f214bcc08cb27bf56339f",
+    "NOTICE": "3081a2f3cdc2ae858d96a04c16d121bb722e0053ef056de0d6214033c15054bf"
+  }
+}

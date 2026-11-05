@@ -42,7 +42,7 @@ internal sealed class UhpProtocolFilter : IEndpointFilter
             var version = versions.Count == 1 ? versions[0]! : options.DefaultVersion;
             http.Response.Headers[UhpProtocol.VersionHeader] = version;
 
-            if (http.GetEndpoint()?.Metadata.GetMetadata<UhpDiscoveryMetadata>() is null)
+            if (http.GetEndpoint()?.Metadata.GetMetadata<UhpDiscoveryMetadata>() is null && http.GetEndpoint()?.Metadata.GetMetadata<UhpSharedViewMetadata>() is null)
             {
                 var authentication = await http.AuthenticateAsync(options.AuthenticationScheme).ConfigureAwait(false);
 
@@ -88,7 +88,11 @@ internal sealed class UhpProtocolFilter : IEndpointFilter
                 }
             }
 
-            http.Features.Set(new UhpRequestContext(principal, version, keys.Count == 1 ? keys[0] : null));
+            var prefix = http.GetEndpoint()?.Metadata.GetMetadata<UhpBasePathMetadata>()?.Prefix;
+            http.Features.Set(new UhpRequestContext(principal, version, keys.Count == 1 ? keys[0] : null)
+            {
+                BasePath = string.Concat(http.Request.PathBase.Value, prefix)
+            });
             return await next(invocation).ConfigureAwait(false);
         }
         catch (OperationCanceledException) when (http.RequestAborted.IsCancellationRequested)

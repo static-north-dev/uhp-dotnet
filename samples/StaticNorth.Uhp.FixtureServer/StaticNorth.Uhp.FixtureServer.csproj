@@ -5,6 +5,6 @@
     <RestorePackagesWithLockFile>false</RestorePackagesWithLockFile>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="StaticNorth.Uhp.Server" Version="0.1.0-preview.1" />
+    <ProjectReference Include="../StaticNorth.Uhp.Reference/StaticNorth.Uhp.Reference.csproj" />
   </ItemGroup>
 </Project>

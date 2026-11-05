@@ -26,8 +26,10 @@ public sealed class UhpServerOptions
         [UhpProtocol.IdempotencyCapability] = false
     });
     public string ImplementationName { get; set; } = "UHP .NET server";
+    public IReadOnlyList<string> PluginSchemas { get; set; } = [];
     public string ImplementationVersion { get; set; } = "0.1.0-preview.1";
     public long MaximumRequestBodyBytes { get; set; } = 1_048_576;
+    public long MaximumUploadBytes { get; set; } = 67_108_864;
 
     internal UhpServerOptions Snapshot()
     {
@@ -41,14 +43,9 @@ public sealed class UhpServerOptions
             throw new ArgumentException("Server protocol dates must come from the SDK compatibility table and include the default.");
         }
 
-        if (!Capabilities.Streaming || !Capabilities.Sessions || !Capabilities.Cancellation || MaximumRequestBodyBytes <= 0)
+        if (!Capabilities.Streaming || !Capabilities.Sessions || !Capabilities.Cancellation || MaximumRequestBodyBytes <= 0 || MaximumUploadBytes <= 0)
         {
             throw new ArgumentException("The preview requires streaming, sessions, cancellation, and a positive request body limit.");
-        }
-
-        if (Capabilities.Values.Any(pair => pair.Value && pair.Key is not (UhpProtocol.StreamingCapability or UhpProtocol.SessionsCapability or UhpProtocol.CancellationCapability or UhpProtocol.IdempotencyCapability)))
-        {
-            throw new ArgumentException("The preview cannot advertise capabilities whose endpoints it does not implement.");
         }
 
         return new UhpServerOptions
@@ -59,8 +56,10 @@ public sealed class UhpServerOptions
             Versions = Array.AsReadOnly(Versions.ToArray()),
             Capabilities = new UhpCapabilities(Capabilities.Values),
             ImplementationName = ImplementationName,
+            PluginSchemas = Array.AsReadOnly(PluginSchemas.ToArray()),
             ImplementationVersion = ImplementationVersion,
-            MaximumRequestBodyBytes = MaximumRequestBodyBytes
+            MaximumRequestBodyBytes = MaximumRequestBodyBytes,
+            MaximumUploadBytes = MaximumUploadBytes
         };
     }
 }

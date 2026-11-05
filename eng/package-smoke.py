@@ -50,6 +50,7 @@ def main():
     parser.add_argument("--rid", default=("osx" if platform.system() == "Darwin" else "linux") + ("-arm64" if platform.machine() in ("arm64", "aarch64") else "-x64"))
     parser.add_argument("--offline-cache", type=Path)
     parser.add_argument("--runtime-version", default="10.0.14")
+    parser.add_argument("--reference-host", action="store_true")
     args = parser.parse_args()
     check_packages()
     sources = ["--source", str(ROOT / "artifacts/packages")]
@@ -59,14 +60,17 @@ def main():
         sources += ["--source", "https://api.nuget.org/v3/index.json"]
 
     with tempfile.TemporaryDirectory(prefix="uhp-package-consumer-") as packages:
-        for name in ("StaticNorth.Uhp.Console", "StaticNorth.Uhp.FixtureServer"):
-            project = ROOT / "samples" / name
+        projects = [("samples", "StaticNorth.Uhp.Console"), ("samples", "StaticNorth.Uhp.FixtureServer")]
+        if args.reference_host:
+            projects.append(("eng", "StaticNorth.Uhp.ConformanceHost"))
+        for directory, name in projects:
+            project = ROOT / directory / name
             lock = Path(packages) / (name + ".native.lock.json")
             run("dotnet", "restore", project, "--runtime", args.rid, "--packages", packages,
-                "-p:PublishAot=true", "-p:RuntimeFrameworkVersion=" + args.runtime_version,
+                "-p:PublishAot=true", "-p:UseUhpPackages=true", "-p:RuntimeFrameworkVersion=" + args.runtime_version,
                 "-p:RestorePackagesWithLockFile=true", "-p:NuGetLockFilePath=" + str(lock), *sources)
             run("dotnet", "publish", project, "--configuration", "Release", "--runtime", args.rid,
-                "--no-restore", "-p:PublishAot=true", "-p:RuntimeFrameworkVersion=" + args.runtime_version,
+                "--no-restore", "-p:PublishAot=true", "-p:UseUhpPackages=true", "-p:RuntimeFrameworkVersion=" + args.runtime_version,
                 "-p:TrimmerSingleWarn=false", "-m:1", "/nr:false",
                 "--output", ROOT / "artifacts/aot" / name)
 

@@ -1,0 +1,955 @@
+{
+  "protocol_version": "2026-10-19",
+  "upstream_commit": "80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6",
+  "status": "source_review_not_conformance_evidence",
+  "schema_operations": 83,
+  "operations": [
+    {
+      "method": "GET",
+      "path": "/v1/uhp",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "core",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M2",
+      "implementation_review": "partial",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/harnesses",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "core",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M2",
+      "implementation_review": "partial",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/harnesses",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "harness_management",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M5",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/harnesses/{harness_id}",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "core",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M2",
+      "implementation_review": "partial",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "PUT",
+      "path": "/v1/harnesses/{harness_id}",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "harness_management",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M5",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "DELETE",
+      "path": "/v1/harnesses/{harness_id}",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "harness_management",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M5",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/harnesses/{harness_id}/skills/{skill_name}/files",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "files_input/files_output (operation-specific)",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M4",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/harnesses/{harness_id}/plugins/{plugin_name}/files",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "plugins",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M7",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/harnesses/{harness_id}/plugin",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "plugins",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M7",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/environments",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "environments",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M9",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/environments",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "environments",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M9",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/environments/runtimes",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "environments",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M9",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/environments/packages/check",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "environments",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M9",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/environments/{environment_id}",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "environments",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M9",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "PUT",
+      "path": "/v1/environments/{environment_id}",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "environments",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M9",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "DELETE",
+      "path": "/v1/environments/{environment_id}",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "environments",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M9",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/environments/{environment_id}/files",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "environments",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M9",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/environments/{environment_id}/files/{path}",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "environments",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M9",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "PUT",
+      "path": "/v1/environments/{environment_id}/files/{path}",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "environments",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M9",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "DELETE",
+      "path": "/v1/environments/{environment_id}/files/{path}",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "environments",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M9",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/environments/{environment_id}/directories",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "environments",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M9",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/environments/{environment_id}/import",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "environments",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M9",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/environments/{environment_id}/build",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "environments",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M9",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/environments/{environment_id}/builds/{version}",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "environments",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M9",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/environments/{environment_id}/versions",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "environments",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M9",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/environments/{environment_id}/versions/{version}/activate",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "environments",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M9",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/environments/{environment_id}/harnesses",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "environments",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M9",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/memories",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "memories",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M10",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/memories",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "memories",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M10",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/memories/providers",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "memories",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M10",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/memories/types",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "memories",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M10",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/memories/{memory_id}",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "memories",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M10",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "PUT",
+      "path": "/v1/memories/{memory_id}",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "memories",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M10",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "DELETE",
+      "path": "/v1/memories/{memory_id}",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "memories",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M10",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/memories/{memory_id}/grants",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "memories",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M10",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/memories/{memory_id}/grants",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "memories",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M10",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "DELETE",
+      "path": "/v1/memories/{memory_id}/grants/{grant_id}",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "memories",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M10",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/memories/{memory_id}/observe",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "memories",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M10",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/memories/{memory_id}/jobs/{job_id}",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "memories",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M10",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/memories/{memory_id}/prime",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "memories",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M10",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/memories/{memory_id}/records",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "memories",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M10",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/memories/{memory_id}/records",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "memories",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M10",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/memories/{memory_id}/records/{record_id}",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "memories",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M10",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "PATCH",
+      "path": "/v1/memories/{memory_id}/records/{record_id}",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "memories",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M10",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "DELETE",
+      "path": "/v1/memories/{memory_id}/records/{record_id}",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "memories",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M10",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/memories/{memory_id}/records/{record_id}/content/{index}",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "memories",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M10",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/memories/{memory_id}/records/{record_id}/history",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "memories",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M10",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/memories/{memory_id}/records/{record_id}/operations/{name}",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "memories",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M10",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/memories/{memory_id}/recall",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "memories",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M10",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/memories/{memory_id}/graph",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "memories",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M10",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/memories/{memory_id}/erase",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "memories",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M10",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/memories/{memory_id}/queries",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "memories",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M10",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "PUT",
+      "path": "/v1/memories/{memory_id}/queries/{name}",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "memories",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M10",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/memories/{memory_id}/queries/{name}",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "memories",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M10",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/memories/{memory_id}/query",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "memories",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M10",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/memories/{memory_id}/snapshots",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "memories",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M10",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/memories/{memory_id}/snapshots",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "memories",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M10",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/memories/{memory_id}/consolidations",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "memories",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M10",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/memories/{memory_id}/consolidations",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "memories",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M10",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/memories/{memory_id}/consolidations/{run_id}",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "memories",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M10",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/memories/{memory_id}/consolidations/{run_id}/changes",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "memories",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M10",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/memories/{memory_id}/consolidations/{run_id}/revert",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "memories",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M10",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/harnesses/{harness_id}/memories",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "memories",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M10",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "PUT",
+      "path": "/v1/harnesses/{harness_id}/memories",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "memories",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M10",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/models",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "core",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M2",
+      "implementation_review": "partial",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/harnesses/{harness_id}/models",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "core",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M2",
+      "implementation_review": "partial",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/responses",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "core",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M2",
+      "implementation_review": "partial",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/responses/{response_id}",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "core",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M2",
+      "implementation_review": "partial",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "DELETE",
+      "path": "/v1/responses/{response_id}",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "core",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M2",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/responses/{response_id}/input_items",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "core",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M2",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/responses/{response_id}/cancel",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "core",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M2",
+      "implementation_review": "partial",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/sessions",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "session_listing",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M3",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/sessions/{session_id}",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "session_listing",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M3",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/sessions/{session_id}/turns",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "session_listing",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M3",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/sessions/{session_id}/share",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "session_sharing",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M6",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/sessions/{session_id}/share",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "session_sharing",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M6",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "DELETE",
+      "path": "/v1/sessions/{session_id}/share",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "session_sharing",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M6",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/sessions/{session_id}/cancel",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "core",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M2",
+      "implementation_review": "partial",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/files",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "files_input/files_output (operation-specific)",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M4",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/sessions/{session_id}/files",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "files_input/files_output (operation-specific)",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M4",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/sessions/{session_id}/files/archive",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "files_input/files_output (operation-specific)",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M4",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/containers/{container_id}/files/{file_id}/content",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "files_input/files_output (operation-specific)",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M4",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/containers/{container_id}/files/{file_id}/pdf",
+      "source": "spec/upstream/uhp-2026-10-19.openapi.yaml",
+      "condition": "files_input/files_output (operation-specific)",
+      "owner": "Core models; Client API; Server transport; host backend semantics",
+      "milestone": "M4",
+      "implementation_review": "missing",
+      "test": "pending family integration coverage and applicable official checks"
+    },
+    {
+      "method": "DELETE",
+      "path": "/v1/sessions/{session_id}",
+      "source": "https://unifiedharnessprotocol.org/spec/2026-10-19/sessions#6-deleting",
+      "condition": "session deletion; prose-only path",
+      "owner": "Client/Server/session backend",
+      "milestone": "M3",
+      "implementation_review": "missing",
+      "test": "F-08; cancellation/deletion/isolation integration cases"
+    }
+  ],
+  "prose_rules": [
+    {
+      "rule": "TLS outside loopback",
+      "milestone": "M0",
+      "source": "https://unifiedharnessprotocol.org/spec/2026-10-19/security",
+      "owner": "SDK transport and configured host/backend",
+      "status": "pending independent normative tests"
+    },
+    {
+      "rule": "Authentication and credential revocation",
+      "milestone": "M0",
+      "source": "https://unifiedharnessprotocol.org/spec/2026-10-19/security",
+      "owner": "SDK transport and configured host/backend",
+      "status": "pending independent normative tests"
+    },
+    {
+      "rule": "Principal isolation on every operation",
+      "milestone": "M2",
+      "source": "https://unifiedharnessprotocol.org/spec/2026-10-19/security",
+      "owner": "SDK transport and configured host/backend",
+      "status": "pending independent normative tests"
+    },
+    {
+      "rule": "Required nullable response and error fields",
+      "milestone": "M2",
+      "source": "https://unifiedharnessprotocol.org/spec/2026-10-19/tasks",
+      "owner": "SDK transport and configured host/backend",
+      "status": "pending independent normative tests"
+    },
+    {
+      "rule": "Report every supplied ignored field",
+      "milestone": "M2",
+      "source": "https://unifiedharnessprotocol.org/spec/2026-10-19/tasks",
+      "owner": "SDK transport and configured host/backend",
+      "status": "pending independent normative tests"
+    },
+    {
+      "rule": "Disconnect never cancels accepted work",
+      "milestone": "M2",
+      "source": "https://unifiedharnessprotocol.org/spec/2026-10-19/streaming",
+      "owner": "SDK transport and configured host/backend",
+      "status": "pending independent normative tests"
+    },
+    {
+      "rule": "Session continuity and concurrency",
+      "milestone": "M2",
+      "source": "https://unifiedharnessprotocol.org/spec/2026-10-19/lifecycle",
+      "owner": "SDK transport and configured host/backend",
+      "status": "pending independent normative tests"
+    },
+    {
+      "rule": "Response deletion does not cancel work",
+      "milestone": "M2",
+      "source": "https://unifiedharnessprotocol.org/spec/2026-10-19/tasks",
+      "owner": "SDK transport and configured host/backend",
+      "status": "pending independent normative tests"
+    },
+    {
+      "rule": "Session deletion cancels work and revokes access",
+      "milestone": "M3",
+      "source": "https://unifiedharnessprotocol.org/spec/2026-10-19/sessions",
+      "owner": "SDK transport and configured host/backend",
+      "status": "pending independent normative tests"
+    },
+    {
+      "rule": "Artifact bytes, nosniff, path containment",
+      "milestone": "M4",
+      "source": "https://unifiedharnessprotocol.org/spec/2026-10-19/files",
+      "owner": "SDK transport and configured host/backend",
+      "status": "pending independent normative tests"
+    },
+    {
+      "rule": "Read-only shares and all-link revocation",
+      "milestone": "M6",
+      "source": "https://unifiedharnessprotocol.org/spec/2026-10-19/sessions",
+      "owner": "SDK transport and configured host/backend",
+      "status": "pending independent normative tests"
+    },
+    {
+      "rule": "Secret answer never becomes client-readable",
+      "milestone": "M8",
+      "source": "https://unifiedharnessprotocol.org/spec/2026-10-19/tasks",
+      "owner": "SDK transport and configured host/backend",
+      "status": "pending independent normative tests"
+    },
+    {
+      "rule": "Read-only versioned environment isolation",
+      "milestone": "M9",
+      "source": "https://unifiedharnessprotocol.org/spec/2026-10-19/environments",
+      "owner": "SDK transport and configured host/backend",
+      "status": "pending independent normative tests"
+    },
+    {
+      "rule": "Memory privileges, writer stamps and declared degradation",
+      "milestone": "M10",
+      "source": "https://unifiedharnessprotocol.org/spec/2026-10-19/memories",
+      "owner": "SDK transport and configured host/backend",
+      "status": "pending independent normative tests"
+    },
+    {
+      "rule": "Resolve harness live-feed ambiguity",
+      "milestone": "M0",
+      "source": "https://unifiedharnessprotocol.org/spec/2026-10-19/streaming",
+      "owner": "SDK transport and configured host/backend",
+      "status": "pending independent normative tests"
+    }
+  ]
+}

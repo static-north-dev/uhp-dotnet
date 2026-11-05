@@ -10,5 +10,6 @@ public sealed record UhpDiscovery(IReadOnlyList<string> Versions, string Default
 {
     public string? ImplementationName { get; init; }
     public string? ImplementationVersion { get; init; }
+    public IReadOnlyList<string> PluginSchemas { get; init; } = [];
     public JsonElement Raw { get; internal init; }
 }

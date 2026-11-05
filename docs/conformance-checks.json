@@ -1,0 +1,1058 @@
+{
+  "reviewed_at": "2026-11-04",
+  "sdk_commit": "40cf92016fee81d5ecacc982d1f8ee084b7c0d4d",
+  "protocol_version": "2026-10-19",
+  "upstream_commit": "80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6",
+  "suite_version": "2026.10.19.post5",
+  "source": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/conformance/uhp_conformance/checks.py",
+  "target": "full_without_skips",
+  "counts": {
+    "core": 41,
+    "extended": 9,
+    "full_additional": 54,
+    "total": 104
+  },
+  "status": "source_review_only_not_an_official_report",
+  "checks": [
+    {
+      "id": "D-01",
+      "class": "core",
+      "title": "Discovery document is served",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/lifecycle.md#2-capability-discovery",
+      "milestone": "M2",
+      "implementation_review": "partial",
+      "official_outcome": "not_run",
+      "baseline_note": "Preview has related code/local coverage; official outcome is unverified."
+    },
+    {
+      "id": "D-02",
+      "class": "core",
+      "title": "Discovery is served without authentication",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/lifecycle.md#2-capability-discovery",
+      "milestone": "M2",
+      "implementation_review": "partial",
+      "official_outcome": "not_run",
+      "baseline_note": "Preview has related code/local coverage; official outcome is unverified."
+    },
+    {
+      "id": "D-03",
+      "class": "core",
+      "title": "Discovery document matches the schema",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/schema.md",
+      "milestone": "M2",
+      "implementation_review": "partial",
+      "official_outcome": "not_run",
+      "baseline_note": "Preview has related code/local coverage; official outcome is unverified."
+    },
+    {
+      "id": "D-04",
+      "class": "core",
+      "title": "default_version is one of versions",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/lifecycle.md#2-capability-discovery",
+      "milestone": "M2",
+      "implementation_review": "partial",
+      "official_outcome": "not_run",
+      "baseline_note": "Preview has related code/local coverage; official outcome is unverified."
+    },
+    {
+      "id": "D-05",
+      "class": "core",
+      "title": "conformance_class agrees with capabilities",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/lifecycle.md#2-capability-discovery",
+      "milestone": "M2",
+      "implementation_review": "partial",
+      "official_outcome": "not_run",
+      "baseline_note": "Preview has related code/local coverage; official outcome is unverified."
+    },
+    {
+      "id": "V-01",
+      "class": "core",
+      "title": "UHP-Version header on every response",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/lifecycle.md#1-version-negotiation",
+      "milestone": "M2",
+      "implementation_review": "partial",
+      "official_outcome": "not_run",
+      "baseline_note": "Preview has related code/local coverage; official outcome is unverified."
+    },
+    {
+      "id": "V-02",
+      "class": "core",
+      "title": "A supported version is honoured",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/lifecycle.md#1-version-negotiation",
+      "milestone": "M2",
+      "implementation_review": "partial",
+      "official_outcome": "not_run",
+      "baseline_note": "Preview has related code/local coverage; official outcome is unverified."
+    },
+    {
+      "id": "V-03",
+      "class": "core",
+      "title": "An unsupported version is refused, not silently substituted",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/lifecycle.md#1-version-negotiation",
+      "milestone": "M2",
+      "implementation_review": "partial",
+      "official_outcome": "not_run",
+      "baseline_note": "Preview has related code/local coverage; official outcome is unverified."
+    },
+    {
+      "id": "A-01",
+      "class": "core",
+      "title": "Authenticated endpoints reject an absent credential",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/architecture.md#5-authentication",
+      "milestone": "M2",
+      "implementation_review": "partial",
+      "official_outcome": "not_run",
+      "baseline_note": "Preview has related code/local coverage; official outcome is unverified."
+    },
+    {
+      "id": "A-02",
+      "class": "core",
+      "title": "Authenticated endpoints reject an invalid credential",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/architecture.md#5-authentication",
+      "milestone": "M2",
+      "implementation_review": "partial",
+      "official_outcome": "not_run",
+      "baseline_note": "Preview has related code/local coverage; official outcome is unverified."
+    },
+    {
+      "id": "E-01",
+      "class": "core",
+      "title": "Errors use the structured envelope",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/errors.md#1-the-error-envelope",
+      "milestone": "M2",
+      "implementation_review": "partial",
+      "official_outcome": "not_run",
+      "baseline_note": "Preview has related code/local coverage; official outcome is unverified."
+    },
+    {
+      "id": "E-02",
+      "class": "core",
+      "title": "Unknown harness reports harness_not_found",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/errors.md#31-request-and-routing",
+      "milestone": "M2",
+      "implementation_review": "partial",
+      "official_outcome": "not_run",
+      "baseline_note": "Preview has related code/local coverage; official outcome is unverified."
+    },
+    {
+      "id": "E-03",
+      "class": "core",
+      "title": "Unknown response reports response_not_found",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/errors.md#31-request-and-routing",
+      "milestone": "M2",
+      "implementation_review": "partial",
+      "official_outcome": "not_run",
+      "baseline_note": "Preview has related code/local coverage; official outcome is unverified."
+    },
+    {
+      "id": "E-04",
+      "class": "core",
+      "title": "Error messages carry no stack traces",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/errors.md#1-the-error-envelope",
+      "milestone": "M2",
+      "implementation_review": "partial",
+      "official_outcome": "not_run",
+      "baseline_note": "Preview has related code/local coverage; official outcome is unverified."
+    },
+    {
+      "id": "H-01",
+      "class": "core",
+      "title": "Harness list is served and well formed",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/harnesses.md#1-discovering-harnesses",
+      "milestone": "M2",
+      "implementation_review": "partial",
+      "official_outcome": "not_run",
+      "baseline_note": "Preview has related code/local coverage; official outcome is unverified."
+    },
+    {
+      "id": "H-02",
+      "class": "core",
+      "title": "A harness can be fetched by id",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/harnesses.md#1-discovering-harnesses",
+      "milestone": "M2",
+      "implementation_review": "partial",
+      "official_outcome": "not_run",
+      "baseline_note": "Preview has related code/local coverage; official outcome is unverified."
+    },
+    {
+      "id": "H-03",
+      "class": "core",
+      "title": "Model catalogue is served and availability is a boolean",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/harnesses.md#3-models",
+      "milestone": "M2",
+      "implementation_review": "partial",
+      "official_outcome": "not_run",
+      "baseline_note": "Preview has related code/local coverage; official outcome is unverified."
+    },
+    {
+      "id": "H-04",
+      "class": "core",
+      "title": "Per-harness model list is served",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/harnesses.md#3-models",
+      "milestone": "M2",
+      "implementation_review": "partial",
+      "official_outcome": "not_run",
+      "baseline_note": "Preview has related code/local coverage; official outcome is unverified."
+    },
+    {
+      "id": "T-01",
+      "class": "core",
+      "title": "A non-streaming task returns a valid Response",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/tasks.md#3-the-response-object",
+      "milestone": "M2",
+      "implementation_review": "partial",
+      "official_outcome": "not_run",
+      "baseline_note": "Preview has related code/local coverage; official outcome is unverified."
+    },
+    {
+      "id": "T-02",
+      "class": "core",
+      "title": "A finished task is in a terminal state",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/lifecycle.md#3-task-lifecycle",
+      "milestone": "M2",
+      "implementation_review": "partial",
+      "official_outcome": "not_run",
+      "baseline_note": "Preview has related code/local coverage; official outcome is unverified."
+    },
+    {
+      "id": "T-03",
+      "class": "core",
+      "title": "The response names the model that actually ran",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/tasks.md#13-model-selection-and-substitution",
+      "milestone": "M2",
+      "implementation_review": "partial",
+      "official_outcome": "not_run",
+      "baseline_note": "Preview has related code/local coverage; official outcome is unverified."
+    },
+    {
+      "id": "T-04",
+      "class": "core",
+      "title": "The response reports its session",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/lifecycle.md#4-session-lifecycle",
+      "milestone": "M2",
+      "implementation_review": "partial",
+      "official_outcome": "not_run",
+      "baseline_note": "Preview has related code/local coverage; official outcome is unverified."
+    },
+    {
+      "id": "T-05",
+      "class": "core",
+      "title": "usage is an object or explicitly null, never fabricated",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/tasks.md#3-the-response-object",
+      "milestone": "M2",
+      "implementation_review": "partial",
+      "official_outcome": "not_run",
+      "baseline_note": "Current writer omits unknown usage; official check requires an explicit null key."
+    },
+    {
+      "id": "T-06",
+      "class": "core",
+      "title": "A stored response can be read back",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/tasks.md#4-reading-a-task-back",
+      "milestone": "M2",
+      "implementation_review": "partial",
+      "official_outcome": "not_run",
+      "baseline_note": "Preview has related code/local coverage; official outcome is unverified."
+    },
+    {
+      "id": "T-07",
+      "class": "core",
+      "title": "Response ids are prefixed",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/architecture.md#3-object-model",
+      "milestone": "M2",
+      "implementation_review": "partial",
+      "official_outcome": "not_run",
+      "baseline_note": "Preview has related code/local coverage; official outcome is unverified."
+    },
+    {
+      "id": "T-11",
+      "class": "core",
+      "title": "A background task read while it runs reports in_progress",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/lifecycle.md#3-task-lifecycle",
+      "milestone": "M2",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Current request parser rejects background=true."
+    },
+    {
+      "id": "S-01",
+      "class": "core",
+      "title": "A streaming task emits events",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/streaming.md#1-opening-a-stream",
+      "milestone": "M2",
+      "implementation_review": "partial",
+      "official_outcome": "not_run",
+      "baseline_note": "Preview has related code/local coverage; official outcome is unverified."
+    },
+    {
+      "id": "S-02",
+      "class": "core",
+      "title": "Stream content type is text/event-stream",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/streaming.md#1-opening-a-stream",
+      "milestone": "M2",
+      "implementation_review": "partial",
+      "official_outcome": "not_run",
+      "baseline_note": "Preview has related code/local coverage; official outcome is unverified."
+    },
+    {
+      "id": "S-03",
+      "class": "core",
+      "title": "Every event validates against the schema",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/schema.md",
+      "milestone": "M2",
+      "implementation_review": "partial",
+      "official_outcome": "not_run",
+      "baseline_note": "Preview has related code/local coverage; official outcome is unverified."
+    },
+    {
+      "id": "S-04",
+      "class": "core",
+      "title": "sequence_number starts at 0 and has no gaps",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/streaming.md#3-ordering-guarantees",
+      "milestone": "M2",
+      "implementation_review": "partial",
+      "official_outcome": "not_run",
+      "baseline_note": "Preview has related code/local coverage; official outcome is unverified."
+    },
+    {
+      "id": "S-05",
+      "class": "core",
+      "title": "The first event is response.created",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/streaming.md#3-ordering-guarantees",
+      "milestone": "M2",
+      "implementation_review": "partial",
+      "official_outcome": "not_run",
+      "baseline_note": "Preview has related code/local coverage; official outcome is unverified."
+    },
+    {
+      "id": "S-06",
+      "class": "core",
+      "title": "The stream ends with exactly one terminal event",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/streaming.md#4-terminal-events",
+      "milestone": "M2",
+      "implementation_review": "partial",
+      "official_outcome": "not_run",
+      "baseline_note": "Preview has related code/local coverage; official outcome is unverified."
+    },
+    {
+      "id": "S-07",
+      "class": "core",
+      "title": "The terminal event carries the complete response",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/streaming.md#4-terminal-events",
+      "milestone": "M2",
+      "implementation_review": "partial",
+      "official_outcome": "not_run",
+      "baseline_note": "Preview has related code/local coverage; official outcome is unverified."
+    },
+    {
+      "id": "S-08",
+      "class": "core",
+      "title": "Streaming and non-streaming agree on the result shape",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/streaming.md#6-non-streaming",
+      "milestone": "M2",
+      "implementation_review": "partial",
+      "official_outcome": "not_run",
+      "baseline_note": "Preview has related code/local coverage; official outcome is unverified."
+    },
+    {
+      "id": "S-09",
+      "class": "core",
+      "title": "The stream is progressive, not buffered to the end",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/streaming.md#1-opening-a-stream",
+      "milestone": "M2",
+      "implementation_review": "partial",
+      "official_outcome": "not_run",
+      "baseline_note": "Preview has related code/local coverage; official outcome is unverified."
+    },
+    {
+      "id": "C-01",
+      "class": "core",
+      "title": "A task can continue a session",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/sessions.md#1-continuing-a-session",
+      "milestone": "M2",
+      "implementation_review": "partial",
+      "official_outcome": "not_run",
+      "baseline_note": "Preview has related code/local coverage; official outcome is unverified."
+    },
+    {
+      "id": "C-02",
+      "class": "core",
+      "title": "Cancelling a terminal task succeeds and changes nothing",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/sessions.md#4-cancelling",
+      "milestone": "M2",
+      "implementation_review": "partial",
+      "official_outcome": "not_run",
+      "baseline_note": "Preview has related code/local coverage; official outcome is unverified."
+    },
+    {
+      "id": "C-03",
+      "class": "core",
+      "title": "A running task can be cancelled and ends non-running",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/sessions.md#4-cancelling",
+      "milestone": "M2",
+      "implementation_review": "blocked_by_background",
+      "official_outcome": "not_run",
+      "baseline_note": "Official cancellation setup uses background=true, which the current parser rejects."
+    },
+    {
+      "id": "X-01",
+      "class": "extended",
+      "title": "Sessions can be listed",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/sessions.md#2-listing-sessions",
+      "milestone": "M3",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "X-02",
+      "class": "extended",
+      "title": "Session listing reports the end of pagination explicitly",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/sessions.md#2-listing-sessions",
+      "milestone": "M3",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "X-03",
+      "class": "extended",
+      "title": "A session can be inspected",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/sessions.md#3-inspecting-a-session",
+      "milestone": "M3",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "X-04",
+      "class": "extended",
+      "title": "A session's turn history is available, in the specified shape",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/sessions.md#3-inspecting-a-session",
+      "milestone": "M3",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "X-05",
+      "class": "extended",
+      "title": "A file can be sent as task input",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/files.md#1-sending-files-in",
+      "milestone": "M4",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "X-06",
+      "class": "extended",
+      "title": "Artifacts of a session can be listed",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/files.md#22-by-listing-the-session",
+      "milestone": "M4",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "X-07",
+      "class": "extended",
+      "title": "An artifact downloads as raw bytes with nosniff",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/files.md#3-downloading",
+      "milestone": "M4",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "X-08",
+      "class": "extended",
+      "title": "Artifact ids do not traverse outside their container",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/files.md#5-retention-and-scope",
+      "milestone": "M4",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "X-09",
+      "class": "extended",
+      "title": "A file uploaded through POST /v1/files is accepted and can be sent as task input",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/files.md#12-by-upload",
+      "milestone": "M4",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "F-01",
+      "class": "full",
+      "title": "A harness can be created, updated and deleted",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/harnesses.md#4-managing-harnesses",
+      "milestone": "M5",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "F-03",
+      "class": "full",
+      "title": "A skill folder round-trips through create and read",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/harnesses.md#42-skills",
+      "milestone": "M5",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "F-04",
+      "class": "full",
+      "title": "An unrelated harness edit does not destroy skill contents",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/harnesses.md#42-skills",
+      "milestone": "M5",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "F-05",
+      "class": "full",
+      "title": "A skill bundle without SKILL.md is refused at config time",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/harnesses.md#42-skills",
+      "milestone": "M5",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "F-06",
+      "class": "full",
+      "title": "MCP servers and disabled tools round-trip",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/harnesses.md#41-mcp-servers",
+      "milestone": "M5",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "P-01",
+      "class": "full",
+      "title": "The plugins capability names the manifest schemas it installs",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/plugins.md#7-discovery",
+      "milestone": "M7",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "P-02",
+      "class": "full",
+      "title": "A plugin package round-trips, and is derived rather than copied",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/plugins.md#2-the-plugin-object",
+      "milestone": "M7",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "P-03",
+      "class": "full",
+      "title": "A package without plugin.json is refused at configuration time",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/plugins.md#21-files",
+      "milestone": "M7",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "P-04",
+      "class": "full",
+      "title": "A component name collision across the harness and a plugin is refused",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/plugins.md#42-one-namespace-checked-at-configuration-time",
+      "milestone": "M7",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "P-05",
+      "class": "full",
+      "title": "An unrelated harness edit does not destroy plugin contents",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/plugins.md#3-installing-a-plugin",
+      "milestone": "M7",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "P-06",
+      "class": "full",
+      "title": "A harness exports as a package that installs, without its credentials",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/plugins.md#5-exporting-a-harness-as-a-plugin",
+      "milestone": "M7",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "P-07",
+      "class": "full",
+      "title": "A component that fails to load is recorded, not silently dropped",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/plugins.md#22-what-the-server-derives",
+      "milestone": "M7",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "P-08",
+      "class": "full",
+      "title": "A disabled plugin stays installed, and stays disabled",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/plugins.md#3-installing-a-plugin",
+      "milestone": "M7",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "P-09",
+      "class": "full",
+      "title": "An unsupported manifest schema is refused, naming the supported ones",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/plugins.md#22-what-the-server-derives",
+      "milestone": "M7",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "P-11",
+      "class": "full",
+      "title": "A plugin's MCP server answers the agent's tool call",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/plugins.md#4-binding-at-run-time",
+      "milestone": "M7",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "P-10",
+      "class": "full",
+      "title": "Two plugins with the same name are refused",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/plugins.md#3-installing-a-plugin",
+      "milestone": "M7",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "F-07",
+      "class": "full",
+      "title": "Configured harnesses are cleaned up",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/harnesses.md#53-delete",
+      "milestone": "M5",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "F-08",
+      "class": "full",
+      "title": "A session can be deleted at the protocol path",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/sessions.md#6-deleting",
+      "milestone": "M3",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "F-09",
+      "class": "full",
+      "title": "Deleting a harness keeps its sessions, or states how long they can be restored",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/harnesses.md#53-delete",
+      "milestone": "M5",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "F-10",
+      "class": "full",
+      "title": "A repeated create with the same Idempotency-Key returns the first harness",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/harnesses.md#51-create",
+      "milestone": "M5",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "F-02",
+      "class": "full",
+      "title": "Creating a harness with an unsupported base is refused",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/harnesses.md#41-create",
+      "milestone": "M5",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "T-08",
+      "class": "core",
+      "title": "A request carrying reserved fields is accepted, not rejected",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/tasks.md#11-request-fields",
+      "milestone": "M2",
+      "implementation_review": "partial",
+      "official_outcome": "not_run",
+      "baseline_note": "Preview has related code/local coverage; official outcome is unverified."
+    },
+    {
+      "id": "T-09",
+      "class": "core",
+      "title": "Reserved fields are reported in metadata.ignored_fields",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/tasks.md#14-reserved-fields-tools-and-include",
+      "milestone": "M2",
+      "implementation_review": "partial",
+      "official_outcome": "not_run",
+      "baseline_note": "Preview has related code/local coverage; official outcome is unverified."
+    },
+    {
+      "id": "T-10",
+      "class": "core",
+      "title": "A task that sends no reserved field is not told one was ignored",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/tasks.md#11-request-fields",
+      "milestone": "M2",
+      "implementation_review": "partial",
+      "official_outcome": "not_run",
+      "baseline_note": "Preview has related code/local coverage; official outcome is unverified."
+    },
+    {
+      "id": "T-12",
+      "class": "full",
+      "title": "A task over its step budget ends incomplete, naming the budget",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/tasks.md#11-request-fields",
+      "milestone": "M5",
+      "implementation_review": "partial",
+      "official_outcome": "not_run",
+      "baseline_note": "Budget DTO/validation and backend responsibility exist; actual tool-round enforcement is not verified."
+    },
+    {
+      "id": "T-13",
+      "class": "full",
+      "title": "A task ends on a question for the person, and its answer continues it",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/tasks.md#32-asking-the-person",
+      "milestone": "M8",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "T-14",
+      "class": "full",
+      "title": "A secret answer reaches the harness and nothing a client reads",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/tasks.md#32-asking-the-person",
+      "milestone": "M8",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "R-01",
+      "class": "full",
+      "title": "A shared session is published, and the link alone opens it",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/sessions.md#5-session-sharing",
+      "milestone": "M6",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "R-02",
+      "class": "full",
+      "title": "The share can be read back from the endpoint that minted it",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/sessions.md#5-session-sharing",
+      "milestone": "M6",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "R-03",
+      "class": "full",
+      "title": "A share id is not a credential for the API",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/sessions.md#5-session-sharing",
+      "milestone": "M6",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "R-04",
+      "class": "full",
+      "title": "The shared view is read-only",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/sessions.md#5-session-sharing",
+      "milestone": "M6",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "R-05",
+      "class": "full",
+      "title": "The shared view exposes no credentials",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/sessions.md#5-session-sharing",
+      "milestone": "M6",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "R-06",
+      "class": "full",
+      "title": "Revocation kills every link minted for the session",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/sessions.md#5-session-sharing",
+      "milestone": "M6",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "R-07",
+      "class": "full",
+      "title": "Deleting a session takes its shared view with it",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/sessions.md#6-deleting",
+      "milestone": "M6",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "R-08",
+      "class": "full",
+      "title": "A bodyless POST publishes, as §5 says it does",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/sessions.md#5-session-sharing",
+      "milestone": "M6",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "EN-01",
+      "class": "full",
+      "title": "An environment is created with a fixed mount path and reads back",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/environments.md#2-the-environment-object",
+      "milestone": "M9",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "EN-02",
+      "class": "full",
+      "title": "Files go in by path and come back byte for byte; escapes are refused",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/environments.md#3-files",
+      "milestone": "M9",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "EN-03",
+      "class": "full",
+      "title": "A build snapshots the source and becomes the active version",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/environments.md#4-builds-and-versions",
+      "milestone": "M9",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "EN-04",
+      "class": "full",
+      "title": "Editing the source changes nothing until the next build; rollback is a pointer",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/environments.md#4-builds-and-versions",
+      "milestone": "M9",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "EN-05",
+      "class": "full",
+      "title": "A harness names an environment; a task on an unbuilt one is refused before it starts",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/environments.md#5-attaching-an-environment",
+      "milestone": "M9",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "EN-06",
+      "class": "full",
+      "title": "The environment's harness list names the harness that reads it",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/environments.md#5-attaching-an-environment",
+      "milestone": "M9",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "EN-07",
+      "class": "full",
+      "title": "A task reads the environment at its mount path, read-only, and its session names it",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/environments.md#6-what-a-session-sees",
+      "milestone": "M9",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "EN-09",
+      "class": "full",
+      "title": "A package check answers for a known name and reports one that is not there",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/environments.md#4-builds-and-versions",
+      "milestone": "M9",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "EN-08",
+      "class": "full",
+      "title": "Configured environments are cleaned up",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/environments.md#2-the-environment-object",
+      "milestone": "M9",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "ME-01",
+      "class": "full",
+      "title": "A memory is a node in a tree: it reads back with its parent, its ancestors and the caller's privileges",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/memories.md#2-the-memory-object",
+      "milestone": "M10",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "ME-02",
+      "class": "full",
+      "title": "A stated record is kept as stated, marked untrusted, and its writer is the server's stamp",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/memories.md#4-records",
+      "milestone": "M10",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "ME-03",
+      "class": "full",
+      "title": "A question covers the memory and what is below it, names where each answer is, and never looks above",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/memories.md#61-search-finds-the-place-then-the-agent-walks",
+      "milestone": "M10",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "ME-04",
+      "class": "full",
+      "title": "What a provider does not do is said, never ignored",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/memories.md#63-the-response",
+      "milestone": "M10",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "ME-05",
+      "class": "full",
+      "title": "A revision appends a version and the earlier one stays in the history",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/memories.md#53-nothing-is-overwritten",
+      "milestone": "M10",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "ME-06",
+      "class": "full",
+      "title": "A record of one memory is not found through another",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/memories.md#33-enforcement",
+      "milestone": "M10",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "ME-07",
+      "class": "full",
+      "title": "Forget closes a record and keeps its trace; erase reports what could not be reached",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/memories.md#52-two-ways-to-remove",
+      "milestone": "M10",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "ME-09",
+      "class": "full",
+      "title": "Content is an ordered list of text and file parts, and a provider keeps what it says it keeps",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/memories.md#43-content",
+      "milestone": "M10",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "ME-10",
+      "class": "full",
+      "title": "Entities and relationships are records and references, read as one graph",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/memories.md#66-the-graph",
+      "milestone": "M10",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "ME-11",
+      "class": "full",
+      "title": "A fact that holds one value ends what it replaced, keeps a disagreement, takes its place in the past, and says what it did",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/memories.md#44-facts-that-change",
+      "milestone": "M10",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "ME-12",
+      "class": "full",
+      "title": "A record found on one side of a disagreement brings the other",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/memories.md#63-the-response",
+      "milestone": "M10",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "ME-13",
+      "class": "full",
+      "title": "A memory's standing records are read newest first, within a budget, from that memory alone",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/memories.md#91-what-a-session-does",
+      "milestone": "M10",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    },
+    {
+      "id": "ME-08",
+      "class": "full",
+      "title": "A memory moves with its subtree, and deleting it takes the subtree",
+      "spec": "https://github.com/HarnessRouter/harnessrouter/blob/80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6/protocol/versions/2026-10-19/memories.md#2-the-memory-object",
+      "milestone": "M10",
+      "implementation_review": "missing",
+      "official_outcome": "not_run",
+      "baseline_note": "Required feature family is outside the current preview."
+    }
+  ]
+}

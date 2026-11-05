@@ -5,7 +5,7 @@ namespace StaticNorth.Uhp.Core.Serialization;
 
 internal static class UhpRequestJsonWriter
 {
-    public static void Write(Utf8JsonWriter writer, UhpTaskRequest request, bool stream)
+    public static void Write(Utf8JsonWriter writer, UhpTaskRequest request, bool stream, bool background = false)
     {
         var harness = request.HarnessId;
 
@@ -19,6 +19,12 @@ internal static class UhpRequestJsonWriter
         writer.WritePropertyName(UhpJsonFields.Input);
         request.Input.WriteTo(writer);
         writer.WriteBoolean("stream", stream);
+
+        if (background)
+        {
+            writer.WriteBoolean("background", true);
+        }
+
         UhpJsonWriter.WriteOptional(writer, UhpJsonFields.Model, request.Model);
         UhpJsonWriter.WriteOptional(writer, UhpJsonFields.PreviousResponseId, request.PreviousResponseId);
         UhpJsonWriter.WriteOptional(writer, "instructions", request.Instructions);

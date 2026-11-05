@@ -1,5 +1,7 @@
 # Allocation and async verification
 
+The non-packable reference memory provider also has warmed allocation checks: owner-scoped record reads allocate **0 B/read**; small retained text writes measure **700 B/write** in both the managed and Native AOT macOS arm64 runs against a 2,048 B/write ceiling. Writes include owned JSON/content, immutable record and history objects, final IDs, and amortized dictionary growth. Neither measurement covers arbitrary payload sizes or the full HTTP memory facade. See [test support](../tests/StaticNorth.Uhp.TestSupport/README.md).
+
 The requirement is zero avoidable allocations in repeated hot paths. HTTP messages/content, owned JSON snapshots, parsed result graphs, and UTF-8 SSE frames have explicit allocation budgets. Neither an entire request nor the SDK as a whole is claimed to allocate zero bytes.
 
 Measurements below use the pinned .NET SDK 10.0.401 on macOS arm64. `AllocationTests` warms the serializers, reuses a caller-owned 16 KiB buffer and `Utf8JsonWriter`, and measures 256 synchronous writes with `GC.GetAllocatedBytesForCurrentThread`. Buffer creation/growth, model creation, assertions, logging, and awaits are outside the measured interval. Tests run without competing test workloads.
@@ -22,18 +24,18 @@ Required operations use a separate warmed 128-operation measurement, with payloa
 | Owned text request snapshot with harness/trace metadata | 360 B/operation | 4,096 B |
 | Parsed response with session metadata from an owned input | 2,184 B/operation | 8,192 B |
 | `JsonContent` for a generated-metadata payload | 248 B/operation | 1,024 B |
-| Generated UTF-8 response-created SSE frame | 240 B/operation | 4,096 B |
+| Generated UTF-8 response-created SSE frame | 320 B/operation | 4,096 B |
 
 These are fixture-specific allocation figures and regression ceilings, not production RSS, latency, or maximum payload sizes. Parsing includes source-generated structural validation and an immutable result graph; payload size and output collections change its required costs. SSE owns one byte array per frame because ASP.NET Core's standard SSE result consumes byte arrays. It writes that array as JSON text without an intermediate DOM, runtime polymorphic lookup, or second serialization. Request bodies use `JsonContent` with generated metadata, avoiding the former UTF-16 string and re-encoding copy.
 
-The SDK also reuses a stream's inactivity deadline between reads, caches immutable ignored-field combinations, validates task budgets as a value type, reads headers without temporary arrays, and uses indexed collection loops in hot writers. The fixture replays events with an index rather than allocating batch snapshots and finishes only after publishing the terminal event. Ownership copies required for independent execution and principal isolation remain. All 98 local tests, including these allocation assertions, also pass as a Native AOT executable.
+The SDK also reuses a stream's inactivity deadline between reads, caches immutable ignored-field combinations, validates task budgets as a value type, reads headers without temporary arrays, and uses indexed collection loops in hot writers. The fixture replays events with an index rather than allocating batch snapshots and finishes only after publishing the terminal event. Ownership copies required for independent execution and principal isolation remain. The full suite reruns these allocation assertions on managed .NET and Native AOT. Typed contract calls deserialize directly from the HTTP stream using generated metadata, without an intermediate JSON document.
 
 Network/stream I/O and generator file/network I/O use async APIs with cancellation. JSON encoding, validation, and hashing stay synchronous CPU work. The implementation introduces no blocking waits or `Task.Run` wrappers. Schema directory metadata operations use the available platform APIs.
 
 Run the warmed checks with:
 
 ```sh
-dotnet run --project tests/StaticNorth.Uhp.Client.Tests --configuration Release --no-build --no-restore -- --treenode-filter '/*/*/AllocationTests/*' --minimum-expected-tests 11 --report-trx --results-directory artifacts/performance
+dotnet run --project tests/StaticNorth.Uhp.Client.Tests --configuration Release --no-build --no-restore -- --treenode-filter '/*/*/*AllocationTests/*' --minimum-expected-tests 13 --report-trx --results-directory artifacts/performance
 ```
 
 TRX files retain per-test measured output. The complete suite and packed native HTTP/SSE scenario provide the behavioral and AOT checks alongside these local allocation measurements.

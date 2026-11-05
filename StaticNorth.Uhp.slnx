@@ -1,6 +1,11 @@
 <Solution>
   <Folder Name="/eng/">
+    <Project Path="eng/StaticNorth.Uhp.Conformance/StaticNorth.Uhp.Conformance.csproj" />
+    <Project Path="eng/StaticNorth.Uhp.ConformanceHost/StaticNorth.Uhp.ConformanceHost.csproj" />
     <Project Path="eng/StaticNorth.Uhp.SchemaGen/StaticNorth.Uhp.SchemaGen.csproj" />
+  </Folder>
+  <Folder Name="/samples/">
+    <Project Path="samples/StaticNorth.Uhp.Reference/StaticNorth.Uhp.Reference.csproj" />
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/StaticNorth.Uhp.Client/StaticNorth.Uhp.Client.csproj" />
@@ -8,6 +13,7 @@
     <Project Path="src/StaticNorth.Uhp.Server/StaticNorth.Uhp.Server.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/StaticNorth.Uhp.TestSupport/StaticNorth.Uhp.TestSupport.csproj" />
     <Project Path="tests/StaticNorth.Uhp.Client.InteropTests/StaticNorth.Uhp.Client.InteropTests.csproj" />
     <Project Path="tests/StaticNorth.Uhp.Client.Tests/StaticNorth.Uhp.Client.Tests.csproj" />
   </Folder>

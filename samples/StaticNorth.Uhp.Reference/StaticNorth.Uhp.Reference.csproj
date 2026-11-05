@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <IsAotCompatible>true</IsAotCompatible>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/StaticNorth.Uhp.Server/StaticNorth.Uhp.Server.csproj" Condition="'$(UseUhpPackages)' != 'true'" />
+    <PackageReference Include="StaticNorth.Uhp.Server" Version="$(Version)" Condition="'$(UseUhpPackages)' == 'true'" />
+    <ProjectReference Include="../../tests/StaticNorth.Uhp.TestSupport/StaticNorth.Uhp.TestSupport.csproj" />
+  </ItemGroup>
+</Project>

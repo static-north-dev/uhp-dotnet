@@ -2,7 +2,7 @@ using StaticNorth.Uhp.Core;
 
 namespace StaticNorth.Uhp.Server.Transport;
 
-internal sealed class LimitedReadStream(Stream inner, long maximumBytes) : Stream
+internal sealed class LimitedReadStream(Stream inner, long maximumBytes, string errorCode = UhpProtocol.InvalidInput) : Stream
 {
     private long _received;
 
@@ -19,7 +19,15 @@ internal sealed class LimitedReadStream(Stream inner, long maximumBytes) : Strea
 
         if (_received > maximumBytes)
         {
-            throw new UhpServerException(413, new(UhpProtocol.InvalidRequestError, UhpProtocol.InvalidInput, "The request body exceeds the configured size limit."));
+            throw new UhpServerException(413, new(UhpProtocol.InvalidRequestError, errorCode, "The request body exceeds the configured size limit.")
+            {
+                Detail = UhpJson.CreateElement(writer =>
+                {
+                    writer.WriteStartObject();
+                    writer.WriteNumber("max_bytes", maximumBytes);
+                    writer.WriteEndObject();
+                })
+            });
         }
 
         return count;

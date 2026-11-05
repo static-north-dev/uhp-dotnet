@@ -24,6 +24,8 @@ public static class UhpServerExtensions
         services.TryAddSingleton<IUhpServerBackend, TBackend>();
         services.AddOptions<ValiantEndpointOptions>();
         services.ConfigureHttpJsonOptions(json => json.SerializerOptions.TypeInfoResolverChain.Insert(0, UhpJsonContext.Default));
+        services.ConfigureHttpJsonOptions(json => json.SerializerOptions.TypeInfoResolverChain.Add(Core.Contracts.UhpContractJsonContext.Default));
+        services.ConfigureHttpJsonOptions(json => json.SerializerOptions.TypeInfoResolverChain.Add(Transport.UhpServerJsonContext.Default));
         services.TryAddSingleton(new UhpTaskBudgetsValidator(new ValiantValidationOptions { Mode = ValiantValidationMode.Fast }));
         return services;
     }
@@ -31,10 +33,12 @@ public static class UhpServerExtensions
     public static RouteGroupBuilder MapUhp(this IEndpointRouteBuilder builder, string prefix = "")
     {
         ArgumentNullException.ThrowIfNull(builder);
-        _ = builder.ServiceProvider.GetRequiredService<UhpServerOptions>();
+        var options = builder.ServiceProvider.GetRequiredService<UhpServerOptions>();
+        UhpFeatureBackends.Validate(builder.ServiceProvider, options);
         _ = builder.ServiceProvider.GetRequiredService<IAuthenticationService>();
 
         var group = builder.MapGroup(prefix);
+        ((IEndpointConventionBuilder)group).Add(Transport.UhpBasePathMetadata.Attach);
 
         // Map this assembly's generated routes without remapping the host's unrelated endpoints under this prefix.
         new StaticNorth.Valiant.Endpoints.AspNetCore.Generated.ValiantEndpointRouteRegistrar().MapEndpoints(group);

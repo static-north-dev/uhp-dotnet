@@ -20,10 +20,13 @@ internal sealed class DiscoveryEndpoint : IEndpoint
 
     private static Ok<UhpDiscovery> HandleAsync([FromServices] UhpServerOptions options)
     {
-        var discovery = new UhpDiscovery(options.Versions, options.DefaultVersion, "core", options.Capabilities)
+        var extended = options.Capabilities["session_listing"] && options.Capabilities["files_input"] && options.Capabilities["files_output"];
+        var profile = extended ? options.Capabilities["harness_management"] ? "full" : "extended" : "core";
+        var discovery = new UhpDiscovery(options.Versions, options.DefaultVersion, profile, options.Capabilities)
         {
             ImplementationName = options.ImplementationName,
-            ImplementationVersion = options.ImplementationVersion
+            ImplementationVersion = options.ImplementationVersion,
+            PluginSchemas = options.PluginSchemas
         };
 
         return TypedResults.Ok(discovery);

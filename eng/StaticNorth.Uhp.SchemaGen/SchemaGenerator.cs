@@ -45,6 +45,18 @@ internal sealed class SchemaGenerator(string root)
 
         _definitions = JsonNode.Parse(await File.ReadAllTextAsync(Path.Combine(root, "spec/upstream/uhp-2026-10-19.schema.json"), ct).ConfigureAwait(false))!["$defs"]!.AsObject();
 
+        // Plugins §3 accepts an installation containing files only; Plugin is the derived read shape.
+        var installation = _definitions["Plugin"]!.DeepClone().AsObject();
+        installation["required"] = new JsonArray();
+        _definitions["PluginInstall"] = installation;
+        _definitions["HarnessCreate"]!["properties"]!["plugins"]!["items"] = new JsonObject { ["$ref"] = "#/$defs/PluginInstall" };
+
+        // Memories §4 permits a title to stand alone, apart from its content.
+        var memoryWrite = _definitions["MemoryRecordCreate"]!.AsObject();
+        memoryWrite["required"] = new JsonArray();
+        memoryWrite["properties"]!["title"] = new JsonObject { ["type"] = "string", ["maxLength"] = 300 };
+        _definitions["MemoryRecordRevise"]!["properties"]!["title"] = new JsonObject { ["type"] = "string", ["maxLength"] = 300 };
+
         foreach (var name in Roots)
         {
             EmitObject(name, _definitions[name]!.AsObject());
@@ -98,6 +110,11 @@ internal sealed class SchemaGenerator(string root)
         }
 
         Console.WriteLine($"{(check ? "Verified" : "Generated")} {_files.Count} files from pinned UHP schema; all input hashes verified.");
+        var contracts = new ContractGenerator(root, _definitions);
+        var api = new ApiGenerator(root, contracts);
+        await api.PrepareAsync(ct).ConfigureAwait(false);
+        await contracts.GenerateAsync(check, ct).ConfigureAwait(false);
+        await api.GenerateAsync(check, ct).ConfigureAwait(false);
     }
 
     private void EmitObject(string name, JsonObject schema)

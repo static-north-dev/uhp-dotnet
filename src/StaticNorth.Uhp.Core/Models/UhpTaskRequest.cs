@@ -44,9 +44,18 @@ public sealed record UhpTaskRequest
         });
     }
 
-    internal UhpTaskRequest(JsonElement input) => Input = input.Clone();
+    internal UhpTaskRequest(JsonElement input)
+    {
+        InputFeatures = UhpInputValidation.Validate(input);
+        Input = input.Clone();
+    }
 
-    public JsonElement Input { get; }
+    public static UhpTaskRequest FromInput(JsonElement input) => new(input);
+
+    public UhpTaskRequest WithInput(JsonElement input) => this with { Input = input.Clone(), InputFeatures = UhpInputValidation.Validate(input) };
+
+    public JsonElement Input { get; private init; }
+    public UhpInputFeatures InputFeatures { get; private init; }
     public string? HarnessId { get; init; }
     public string? Model { get; init; }
     public string? PreviousResponseId { get; init; }

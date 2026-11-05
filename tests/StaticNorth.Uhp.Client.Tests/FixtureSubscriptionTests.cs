@@ -1,5 +1,6 @@
 using StaticNorth.Uhp.Core;
 using StaticNorth.Uhp.FixtureServer;
+using StaticNorth.Uhp.Reference;
 using TUnit.Assertions;
 using TUnit.Core;
 
@@ -13,7 +14,9 @@ public sealed class FixtureSubscriptionTests
     public async Task ConcurrentAndLateReadersObserveTerminalPublication(bool cancel)
     {
         using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-        using var fixture = new FixtureExecution("owner", "session", new UhpTaskRequest(cancel ? "hold" : "text"), [], deadline.Token);
+        var task = new UhpTaskRequest(cancel ? "hold" : "text");
+        using var fixture = new ReferenceExecution("owner", "session", task, [], deadline.Token, new FixtureRuntime(),
+            new ReferenceRuntimeRequest("session", Path.GetTempPath(), task, new Core.Contracts.Harness { Id = "h", Name = "test", Base = "fixture" }));
         fixture.Start(static () => { });
         var first = ReadAsync(fixture.Execution.Subscribe(deadline.Token));
         var second = ReadAsync(fixture.Execution.Subscribe(deadline.Token));

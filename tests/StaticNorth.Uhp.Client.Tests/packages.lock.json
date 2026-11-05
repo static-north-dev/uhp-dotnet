@@ -122,8 +122,18 @@
           "StaticNorth.Uhp.Core": "[0.1.0-preview.1, )"
         }
       },
+      "staticnorth.uhp.conformance": {
+        "type": "Project"
+      },
       "staticnorth.uhp.core": {
         "type": "Project"
+      },
+      "staticnorth.uhp.reference": {
+        "type": "Project",
+        "dependencies": {
+          "StaticNorth.Uhp.Server": "[0.1.0-preview.1, )",
+          "StaticNorth.Uhp.TestSupport": "[0.1.0-preview.1, )"
+        }
       },
       "staticnorth.uhp.server": {
         "type": "Project",
@@ -132,6 +142,9 @@
           "StaticNorth.Valiant.Endpoints.AspNetCore": "[1.2.1, )",
           "StaticNorth.Valiant.Validation": "[1.2.1, )"
         }
+      },
+      "staticnorth.uhp.testsupport": {
+        "type": "Project"
       }
     }
   }

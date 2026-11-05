@@ -42,6 +42,7 @@ public static class UhpJson
         {
             ImplementationName = wire.Implementation?.Name,
             ImplementationVersion = wire.Implementation?.Version,
+            PluginSchemas = wire.PluginSchemas is { } schemas ? Array.AsReadOnly(schemas) : [],
             Raw = value
         };
     }
@@ -165,30 +166,26 @@ public static class UhpJson
     }
 
     public static JsonElement SerializeSessionCancelResult(UhpSessionCancelResult result) => JsonSerializer.SerializeToElement(result, UhpJsonContext.Default.UhpSessionCancelResult);
-    public static JsonElement SerializeRequest(UhpTaskRequest request, bool stream)
+    public static JsonElement SerializeRequest(UhpTaskRequest request, bool stream) => SerializeRequest(request, stream, false);
+
+    public static JsonElement SerializeRequest(UhpTaskRequest request, bool stream, bool background)
     {
         ArgumentNullException.ThrowIfNull(request);
+        UhpInputValidation.ValidateContinuation(request.InputFeatures, request.PreviousResponseId);
 
         if (request.MaxStep < 0 || request.MaxOutputTokens < 0 || request.TimeoutSeconds < 0)
         {
             throw new ArgumentOutOfRangeException(nameof(request), "Task budgets cannot be negative.");
         }
 
-        return JsonSerializer.SerializeToElement(new UhpRequestPayload(request, stream), WireJsonContext.Default.UhpRequestPayload);
+        return JsonSerializer.SerializeToElement(new UhpRequestPayload(request, stream, background), WireJsonContext.Default.UhpRequestPayload);
     }
 
     public static UhpTaskRequest ParseRequest(JsonElement value, string? idempotencyKey = null)
     {
         value = value.Clone();
         var wire = Read(value, WireJsonContext.Default.CreateResponseRequestWire);
-        ValidateTextInput(wire.Input);
-
-        if (wire.Background == true)
-        {
-            throw new UhpProtocolException("Background execution is outside this preview.");
-        }
-
-        return new UhpTaskRequest(wire.Input)
+        var request = new UhpTaskRequest(wire.Input)
         {
             Model = wire.Model,
             Metadata = Own(wire.Metadata),
@@ -200,6 +197,8 @@ public static class UhpJson
             TimeoutSeconds = wire.TimeoutSeconds,
             IdempotencyKey = idempotencyKey
         };
+        UhpInputValidation.ValidateContinuation(request.InputFeatures, request.PreviousResponseId);
+        return request;
     }
 
     public static JsonElement SerializeResponse(UhpResponse response) => JsonSerializer.SerializeToElement(response, UhpJsonContext.Default.UhpResponse);
@@ -226,38 +225,6 @@ public static class UhpJson
         if (string.IsNullOrWhiteSpace(value))
         {
             throw new UhpProtocolException($"Missing or empty {name}.");
-        }
-    }
-
-    private static void ValidateTextInput(JsonElement input)
-    {
-        if (input.ValueKind == JsonValueKind.String)
-        {
-            RequireText(input.GetString(), UhpJsonFields.Input);
-            return;
-        }
-
-        if (input.ValueKind != JsonValueKind.Array || input.GetArrayLength() == 0)
-        {
-            throw new UhpProtocolException("Text input must be a string or a nonempty user-message array.");
-        }
-
-        foreach (var message in input.EnumerateArray())
-        {
-            if (message.ValueKind != JsonValueKind.Object || !message.TryGetProperty("role", out var role) || role.GetString() != "user" || !message.TryGetProperty("content", out var content) || content.ValueKind != JsonValueKind.Array || content.GetArrayLength() == 0)
-            {
-                throw new UhpProtocolException("This preview accepts typed user text messages only.");
-            }
-
-            foreach (var part in content.EnumerateArray())
-            {
-                if (part.ValueKind != JsonValueKind.Object || !part.TryGetProperty(UhpJsonFields.Type, out var type) || type.GetString() != "input_text" || !part.TryGetProperty(UhpJsonFields.Text, out var text) || text.ValueKind != JsonValueKind.String)
-                {
-                    throw new UhpProtocolException("This preview accepts input_text content only.");
-                }
-
-                RequireText(text.GetString(), "input.text");
-            }
         }
     }
 

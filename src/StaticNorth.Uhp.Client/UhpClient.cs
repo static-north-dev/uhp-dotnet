@@ -9,7 +9,7 @@ using StaticNorth.Uhp.Core;
 
 namespace StaticNorth.Uhp.Client;
 
-public sealed class UhpClient
+public sealed partial class UhpClient
 {
     private readonly HttpClient _http;
     private readonly Uri _root;
@@ -88,15 +88,27 @@ public sealed class UhpClient
     public Task<UhpHarnessModels> GetHarnessModelsAsync(string harnessId, CancellationToken ct = default) => GetAsync($"{UhpProtocol.HarnessesPath}/{Segment(harnessId)}/models", UhpJson.ParseHarnessModels, ct);
     public Task<UhpResponse> GetResponseAsync(string responseId, CancellationToken ct = default) => GetAsync($"{UhpProtocol.ResponsesPath}/{Segment(responseId)}", UhpJson.ParseResponse, ct);
 
-    public async Task<UhpResponse> RunAsync(UhpTaskRequest request, CancellationToken ct = default)
+    public Task<UhpResponse> RunAsync(UhpTaskRequest request, CancellationToken ct = default) => SubmitAsync(request, false, ct);
+
+    /// <summary>Accepts work without waiting for completion. An idempotency replay can return the original terminal result.</summary>
+    public Task<UhpResponse> SubmitBackgroundAsync(UhpTaskRequest request, CancellationToken ct = default) => SubmitAsync(request, true, ct);
+
+    private async Task<UhpResponse> SubmitAsync(UhpTaskRequest request, bool background, CancellationToken ct)
     {
-        var body = Prepare(request, false);
+        var body = Prepare(request, false, background);
         using var response = await SendAsync(HttpMethod.Post, UhpProtocol.ResponsesPath, body, request.IdempotencyKey, ProtocolVersion, true, true, ct).ConfigureAwait(false);
 
         try
         {
             using var document = await ReadJsonAsync(response, ct).ConfigureAwait(false);
-            return UhpJson.ParseResponse(document.RootElement);
+            var result = UhpJson.ParseResponse(document.RootElement);
+
+            if (!background && result.Status == UhpResponseStatus.InProgress)
+            {
+                throw new UhpProtocolException("A non-background submission must return a terminal response.");
+            }
+
+            return result;
         }
         catch (Exception exception) when (exception is HttpRequestException or IOException || exception is OperationCanceledException && !ct.IsCancellationRequested)
         {
@@ -138,9 +150,19 @@ public sealed class UhpClient
         return discovery;
     }
 
-    private JsonElement Prepare(UhpTaskRequest request, bool stream)
+    private JsonElement Prepare(UhpTaskRequest request, bool stream, bool background = false)
     {
         ArgumentNullException.ThrowIfNull(request);
+
+        if ((request.InputFeatures & UhpInputFeatures.Files) != 0)
+        {
+            RequireCapability("files_input");
+        }
+
+        if ((request.InputFeatures & UhpInputFeatures.Interactive) != 0)
+        {
+            RequireCapability("input_requests");
+        }
 
         if (request.IdempotencyKey is { } key)
         {
@@ -155,7 +177,7 @@ public sealed class UhpClient
             }
         }
 
-        return UhpJson.SerializeRequest(request, stream);
+        return UhpJson.SerializeRequest(request, stream, background);
     }
 
     private async Task<T> GetAsync<T>(string path, Func<JsonElement, T> parse, CancellationToken ct)
@@ -165,7 +187,7 @@ public sealed class UhpClient
         return parse(document.RootElement);
     }
 
-    private async Task<HttpResponseMessage> SendAsync(HttpMethod method, string path, JsonElement? body, string? key, string? version, bool authenticated, bool submission, CancellationToken ct)
+    private async Task<HttpResponseMessage> SendAsync(HttpMethod method, string path, JsonElement? body, string? key, string? version, bool authenticated, bool submission, CancellationToken ct, HttpContent? content = null)
     {
         ct.ThrowIfCancellationRequested();
         using var message = new HttpRequestMessage(method, new Uri(_root, path));
@@ -193,6 +215,10 @@ public sealed class UhpClient
         if (body is { } data)
         {
             message.Content = JsonContent.Create(data, UhpJsonContext.Default.JsonElement);
+        }
+        else
+        {
+            message.Content = content;
         }
 
         HttpResponseMessage response;

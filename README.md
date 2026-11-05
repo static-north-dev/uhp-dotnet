@@ -74,7 +74,7 @@ if (result.Status == UhpResponseStatus.Completed)
 
 The base URL is the deployment root, such as `http://localhost:3000/api/harness`; both trailing-slash forms preserve the prefix. HTTPS is required except on loopback. The caller owns `HttpClient`. Credentials and negotiated version headers are set per authenticated request. Configure the transport without default credentials, credential-injecting discovery handlers, credential-forwarding redirects, automatic POST retries, or hedging.
 
-The preview includes harness and model catalogs, non-streaming and streaming text tasks, stored response lookup, explicit continuation, and response/session cancellation. Typed user-message arrays use `UhpUserTextMessage`. File transfers, session browsing/sharing, harness administration, plugins, environments, memories, background execution, and interactive input responses are outside the preview. Their unfamiliar response/output data remains inspectable through owned `Raw` JSON. Unknown statuses preserve their original `Value`.
+The SDK includes harness and model catalogs, foreground and background tasks, streaming, continuation, cancellation, and response lookup. It also exposes typed methods for file transfers, sessions and sharing, harness management, plugins, environments, memories, and interactive answers. The deployment determines which capabilities are available. Use `UhpUserTextMessage` for text message arrays or `UhpTaskRequest.FromInput` for structured inputs. Unknown statuses preserve their original `Value`.
 
 ## Recovery, errors and cancellation
 
@@ -102,7 +102,7 @@ The SDK is pinned in `global.json`. Valiant Endpoints and Validation `1.2.1` res
 dotnet restore StaticNorth.Uhp.slnx --locked-mode
 dotnet run --project eng/StaticNorth.Uhp.SchemaGen --configuration Release -- --check
 dotnet build StaticNorth.Uhp.slnx --configuration Release --no-restore
-dotnet run --project tests/StaticNorth.Uhp.Client.Tests --configuration Release --no-build --no-restore -- --minimum-expected-tests 98
+dotnet run --project tests/StaticNorth.Uhp.Client.Tests --configuration Release --no-build --no-restore -- --minimum-expected-tests 179
 dotnet format StaticNorth.Uhp.slnx --no-restore --verify-no-changes
 dotnet pack src/StaticNorth.Uhp.Core --configuration Release --no-build
 dotnet pack src/StaticNorth.Uhp.Client --configuration Release --no-build
@@ -110,7 +110,7 @@ dotnet pack src/StaticNorth.Uhp.Server --configuration Release --no-build
 python3 eng/package-smoke.py
 ```
 
-The smoke gate checks package metadata/notices/symbols, installs both sample consumers from the local feed with no project references and a fresh package cache, publishes both with Native AOT and reflection-based JSON disabled, and runs the shared lifecycle scenario. It selects the patched .NET runtime/compiler `10.0.14`; override with `--runtime-version` when updating that pin. On an offline workstation with the dependencies cached, pass `--offline-cache /path/to/nuget/packages`. Native AOT requires the platform's native compiler toolchain.
+The smoke gate checks package metadata/notices/symbols, installs both sample consumers from the local feed with no SDK project references and a fresh package cache, publishes both with Native AOT and reflection-based JSON disabled, and runs the shared lifecycle scenario. It selects the patched .NET runtime/compiler `10.0.14`; override with `--runtime-version` when updating that pin. On an offline workstation with the dependencies cached, pass `--offline-cache /path/to/nuget/packages`. Native AOT requires the platform's native compiler toolchain.
 
 After packing, run the console sample against a configured server with `UHP_BASE_URL`, `UHP_TOKEN`, and `UHP_HARNESS_ID` in the environment:
 
@@ -118,8 +118,12 @@ After packing, run the console sample against a configured server with `UHP_BASE
 dotnet run --project samples/StaticNorth.Uhp.Console --configuration Release
 ```
 
-The samples' NuGet configuration includes `artifacts/packages`; they use published package contracts and have no project references.
+The samples' NuGet configuration includes `artifacts/packages`. The packed smoke test uses SDK packages for both consumers; the reference host and fixture share non-packable implementation code.
 
-Read [server integration](docs/server.md), [schema maintenance](eng/README.md), and [interoperability evidence](docs/interoperability.md). This preview has **not been published**. Fixture/AOT success does not replace the two pinned real-server checks required before publishing.
+Read [server integration](docs/server.md), [schema maintenance](eng/README.md), and [interoperability evidence](docs/interoperability.md). The preview has **not been published**. Independent client interoperability with the two pinned servers remains a separate release gate.
+
+The [Codex reference deployment](docs/conformance-deployment.md) passed the unmodified official UHP **Full** suite for `2026-10-19`: **104 checks passed, zero skips, failures, or errors**. See the [verification record](docs/verification.md) for the tested host, report, and commands, and the [review plan](docs/full-conformance-plan.md) for scope and protocol decisions.
+
+The [in-memory reference provider](tests/StaticNorth.Uhp.TestSupport/README.md) supplies stateful memory storage for testing. It lives in a non-packable support project; the published SDK packages retain pluggable backend boundaries.
 
 Apache-2.0. Vendored upstream license, attribution, and hashes are under `spec/upstream` and included in each package.
