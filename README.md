@@ -2,7 +2,7 @@
 
 [![CI on develop](https://github.com/static-north-dev/uhp-dotnet/actions/workflows/ci.yml/badge.svg?branch=develop&event=push)](https://github.com/static-north-dev/uhp-dotnet/actions/workflows/ci.yml?query=branch%3Adevelop+event%3Apush)
 
-Community .NET SDK for connecting to UHP servers, with shared contracts and an ASP.NET Core server integration. Targets .NET 10 and supports Native AOT. The preview package version is `0.1.0-preview.1`; package versions are independent of negotiated protocol dates.
+Community .NET SDK for connecting to UHP servers, with shared contracts and an ASP.NET Core server integration. Targets .NET 10 and supports Native AOT. Package versions come from release tags and are independent of negotiated protocol dates.
 
 The [official Unified Harness Protocol documentation](https://unifiedharnessprotocol.org/) is the source of truth for protocol behavior, schemas, and conformance requirements. Target date: **2026-10-19**. Tested fixture compatibility dates: **2026-09-28** and **2026-09-12**. Inputs are pinned to upstream commit `80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6` in [spec/upstream](spec/upstream).
 
@@ -124,10 +124,16 @@ dotnet run --project samples/StaticNorth.Uhp.Console --configuration Release
 
 The console sample restores SDK packages from `artifacts/packages`. The reference sample uses that feed when `UseUhpPackages=true`. The packed smoke test uses SDK packages for both consumers, and the reference host and fixture share non-packable implementation code.
 
-Read [server integration](docs/server.md), [repository tools](tools/README.md), and [interoperability evidence](docs/interoperability.md). The preview has **not been published**. Independent client interoperability with the two pinned servers remains a separate release gate.
+Read [server integration](docs/server.md), [repository tools](tools/README.md), and [interoperability evidence](docs/interoperability.md).
 
 The [Codex reference deployment](docs/conformance-deployment.md) passed the unmodified official UHP **Full** suite for `2026-10-19`: **104 checks passed, zero skips, failures, or errors**. See the [verification record](docs/verification.md) for the tested host, report, and commands, and the [review plan](docs/full-conformance-plan.md) for scope and protocol decisions.
 
 The [in-memory reference provider](tests/StaticNorth.Uhp.TestSupport/README.md) supplies stateful memory storage for testing. It lives in a non-packable support project; the published SDK packages retain pluggable backend boundaries.
+
+## Publish to NuGet.org
+
+The [release workflow](.github/workflows/release.yml) builds and tests the tagged commit, then publishes Core, Client, and Server using the tag version with the leading `v` removed. To publish the first preview, push the tag `v0.1.0-preview.1` from a verified commit that contains the workflow.
+
+Before the first tag push, set the GitHub Actions variable `NUGET_USER` to the NuGet.org username. On NuGet.org, configure [Trusted Publishing](https://learn.microsoft.com/en-us/nuget/nuget-org/trusted-publishing) for `static-north-dev/uhp-dotnet`, workflow `release.yml`, and environment `production`. Scope the policy to `StaticNorth.Uhp.*` and allow publishing new packages and new versions.
 
 Apache-2.0. Vendored upstream license, attribution, and hashes are under `spec/upstream` and included in each package.

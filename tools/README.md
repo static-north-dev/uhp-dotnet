@@ -25,4 +25,4 @@ To change the upstream pin, deliberately review all three dates' inputs, update 
 
 The samples consume freshly rebuilt local preview packages, so they do not commit content-hash lock files for those unpublished artifacts. The smoke gate creates its own isolated lock files. Library, tooling and test dependencies retain checked-in lock files.
 
-`check-interop.py` requires both pinned real-server reports and every operation to pass. A missing report or skipped operation fails this publishing gate. Neither workflow publishes automatically.
+`check-interop.py` verifies that both pinned real-server reports exist and every operation passed. Run it after the [local interoperability tests](../docs/interoperability.md).

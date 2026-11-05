@@ -13,7 +13,7 @@ dotnet run --project tests/StaticNorth.Uhp.Client.Tests --configuration Release 
 
 Use Microsoft.Testing.Platform's `--report-trx` options, rather than VSTest logger options. `global.json` selects that runner for SDK test commands. Timing-sensitive tests and allocation benchmarks are isolated from parallel execution; independent behavioral cases remain parallel.
 
-Real-server tests still write structured reports from `finally` even when skipped. Their release workflow requires two executed cases and validates every reported operation, so a skipped configuration cannot become a successful release gate.
+Real-server tests write structured reports from `finally` even when skipped. The local `check-interop.py` script requires both reports and a pass for every operation.
 
 The same 98 local cases also pass under Native AOT. Reproduce on macOS arm64 with the pinned SDK; CI uses `linux-x64`:
 
