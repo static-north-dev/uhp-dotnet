@@ -31,7 +31,8 @@ internal static class CodexHarnessBinding
         {
             if (skill.Enabled != false)
             {
-                await MaterializeAsync(Path.Combine(request.Workspace, ".agents", "skills", SafeFolder(skill.Name)), skill.Files ?? [new() { Path = "SKILL.md", Content = skill.Content ?? "" }], ct).ConfigureAwait(false);
+                await MaterializeAsync(Path.Combine(request.Workspace, ".agents", "skills", SafeFolder(skill.Name)), skill.Files ?? [new() { Path = "SKILL.md", Content = skill.Content ?? "" }], ct)
+                    .ConfigureAwait(false);
             }
         }
 
@@ -45,13 +46,18 @@ internal static class CodexHarnessBinding
             var root = Path.Combine(request.Workspace, ".uhp", "plugins", SafeFolder(plugin.Name));
             var data = Path.Combine(request.Workspace, ".uhp", "plugin-data", SafeFolder(plugin.Name));
             Directory.CreateDirectory(data);
-            await MaterializeAsync(root, plugin.Files ?? [], ct).ConfigureAwait(false);
+            await MaterializeAsync(root, plugin.Files ?? [], ct)
+                .ConfigureAwait(false);
 
             foreach (var skill in plugin.Skills ?? [])
             {
                 var source = "skills/" + skill.Name + "/";
-                var files = (plugin.Files ?? []).Where(file => file.Path.StartsWith(source, StringComparison.Ordinal)).Select(file => file with { Path = file.Path[source.Length..] }).ToArray();
-                await MaterializeAsync(Path.Combine(request.Workspace, ".agents", "skills", SafeFolder(skill.Name)), files, ct).ConfigureAwait(false);
+                var files = (plugin.Files ?? [])
+                    .Where(file => file.Path.StartsWith(source, StringComparison.Ordinal))
+                    .Select(file => file with { Path = file.Path[source.Length..] })
+                    .ToArray();
+                await MaterializeAsync(Path.Combine(request.Workspace, ".agents", "skills", SafeFolder(skill.Name)), files, ct)
+                    .ConfigureAwait(false);
             }
 
             foreach (var server in plugin.McpServers ?? [])
@@ -68,10 +74,13 @@ internal static class CodexHarnessBinding
                 }
 
                 var command = Expand(server.Command ?? throw new IOException("A stdio plugin requires a command."), root, data);
-                var arguments = (server.Args ?? []).Select(value => Expand(value, root, data)).ToArray();
+                var arguments = (server.Args ?? [])
+                    .Select(value => Expand(value, root, data))
+                    .ToArray();
                 var pluginHome = Path.Combine(home, "plugin-sandboxes", SafeFolder(server.Name));
                 Directory.CreateDirectory(pluginHome);
-                await WriteSandboxAsync(pluginHome, root, data, ct).ConfigureAwait(false);
+                await WriteSandboxAsync(pluginHome, root, data, ct)
+                    .ConfigureAwait(false);
                 var args = new List<string> { "sandbox", "--", "/usr/bin/env", "-i", "PATH=/usr/bin:/bin:/opt/homebrew/bin", "HOME=" + data };
 
                 foreach (var variable in server.Env ?? [])
@@ -180,11 +189,19 @@ internal static class CodexHarnessBinding
         }
 
         config.AppendLine("[permissions.uhp-plugin.network]\nenabled = false");
-        await System.IO.File.WriteAllTextAsync(Path.Combine(home, "config.toml"), config.ToString(), ct).ConfigureAwait(false);
+        await System.IO.File
+            .WriteAllTextAsync(Path.Combine(home, "config.toml"), config.ToString(), ct)
+            .ConfigureAwait(false);
     }
 
-    private static void AddPath(StringBuilder config, string path, string access) => config.Append(JsonSerializer.Serialize(path, Wire.UhpContractJsonContext.Default.String)).Append(" = \"").Append(access).AppendLine("\"");
-    private static string Expand(string value, string root, string data) => value.Replace("${PLUGIN_ROOT}", root, StringComparison.Ordinal).Replace("${PLUGIN_DATA}", data, StringComparison.Ordinal);
+    private static void AddPath(StringBuilder config, string path, string access) => config
+        .Append(JsonSerializer.Serialize(path, Wire.UhpContractJsonContext.Default.String))
+        .Append(" = \"")
+        .Append(access)
+        .AppendLine("\"");
+    private static string Expand(string value, string root, string data) => value
+        .Replace("${PLUGIN_ROOT}", root, StringComparison.Ordinal)
+        .Replace("${PLUGIN_DATA}", data, StringComparison.Ordinal);
     private static string SafeFolder(string name) => Convert.ToHexStringLower(System.Security.Cryptography.SHA256.HashData(Encoding.UTF8.GetBytes(name)));
 
     private static async Task MaterializeAsync(string root, Wire.SkillFile[] files, CancellationToken ct)
@@ -196,7 +213,9 @@ internal static class CodexHarnessBinding
         {
             var path = Path.Combine(root, file.Path);
             Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-            await System.IO.File.WriteAllBytesAsync(path, ReferencePlugins.Bytes(file), ct).ConfigureAwait(false);
+            await System.IO.File
+                .WriteAllBytesAsync(path, ReferencePlugins.Bytes(file), ct)
+                .ConfigureAwait(false);
         }
     }
 }

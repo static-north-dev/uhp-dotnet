@@ -44,7 +44,11 @@ public partial class ReferenceBackend
                 sessions[state.SessionId] = session;
             }
 
-            var page = sessions.Values.OrderBy(value => value.Id, StringComparer.Ordinal).Skip(offset).Take((int)limit).ToArray();
+            var page = sessions.Values
+                .OrderBy(value => value.Id, StringComparer.Ordinal)
+                .Skip(offset)
+                .Take((int)limit)
+                .ToArray();
             return Task.FromResult(new Wire.SessionList { Sessions = page, NextCursor = offset + page.Length < sessions.Count ? (offset + page.Length).ToString(CultureInfo.InvariantCulture) : null });
         }
     }
@@ -121,7 +125,9 @@ public partial class ReferenceBackend
             await state.Execution.Completion.ConfigureAwait(false);
         }
 
-        await _runtime.DeleteSessionAsync(sessionId, CancellationToken.None).ConfigureAwait(false);
+        await _runtime
+            .DeleteSessionAsync(sessionId, CancellationToken.None)
+            .ConfigureAwait(false);
 
         lock (_gate)
         {
@@ -137,7 +143,10 @@ public partial class ReferenceBackend
             _pendingInputs.Remove(sessionId);
             DeleteSessionFiles(sessionId);
             _deletingSessions.Remove(sessionId);
-            var keys = _keys.Where(pair => pair.Value.State.SessionId == sessionId).Select(pair => pair.Key).ToArray();
+            var keys = _keys
+                .Where(pair => pair.Value.State.SessionId == sessionId)
+                .Select(pair => pair.Key)
+                .ToArray();
 
             foreach (var key in keys)
             {

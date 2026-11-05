@@ -12,13 +12,19 @@ public sealed class ReferenceExecutionTests
         await using var server = await ServerTestHost.StartAsync();
         using var http = server.CreateHttp();
         var client = await ServerTestHost.ConnectAsync(http);
-        var error = (await Assert.That((Func<Task>)(async () => await client.RunAsync(new UhpTaskRequest("test")
-        {
-            TimeoutSeconds = uint.MaxValue
-        }))).ThrowsExactly<UhpApiException>())!;
+        var error = (await Assert
+            .That((Func<Task>)(async () => await client.RunAsync(new UhpTaskRequest("test")
+            {
+                TimeoutSeconds = uint.MaxValue
+            })))
+            .ThrowsExactly<UhpApiException>())!;
 
-        await Assert.That(error.StatusCode).IsEqualTo(HttpStatusCode.BadRequest);
-        await Assert.That(server.Backend.SubmissionCount).IsEqualTo(0);
+        await Assert
+            .That(error.StatusCode)
+            .IsEqualTo(HttpStatusCode.BadRequest);
+        await Assert
+            .That(server.Backend.SubmissionCount)
+            .IsEqualTo(0);
     }
 
     [Test]
@@ -31,8 +37,12 @@ public sealed class ReferenceExecutionTests
         execution.Start(() => released++);
         using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(5));
         var result = await execution.Execution.Completion.WaitAsync(deadline.Token);
-        await Assert.That(result.Status).IsEqualTo(UhpResponseStatus.Failed);
-        await Assert.That(released).IsEqualTo(1);
+        await Assert
+            .That(result.Status)
+            .IsEqualTo(UhpResponseStatus.Failed);
+        await Assert
+            .That(released)
+            .IsEqualTo(1);
         var terminals = 0;
 
         await foreach (var item in execution.Execution.Subscribe(deadline.Token))
@@ -43,6 +53,8 @@ public sealed class ReferenceExecutionTests
             }
         }
 
-        await Assert.That(terminals).IsEqualTo(1);
+        await Assert
+            .That(terminals)
+            .IsEqualTo(1);
     }
 }

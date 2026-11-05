@@ -20,7 +20,9 @@ internal sealed class CancelResponseEndpoint : IEndpoint
 
     private static async Task<Ok<UhpResponse>> HandleAsync([FromRoute(Name = UhpProtocol.ResponseId)] string responseId, [FromServices] IUhpServerBackend backend, HttpContext http, CancellationToken ct)
     {
-        var response = await backend.CancelResponseAsync(responseId, UhpHttp.GetContext(http), ct).ConfigureAwait(false);
+        var response = await backend
+            .CancelResponseAsync(responseId, UhpHttp.GetContext(http), ct)
+            .ConfigureAwait(false);
         return TypedResults.Ok(response);
     }
 }

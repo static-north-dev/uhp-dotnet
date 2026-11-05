@@ -20,7 +20,9 @@ internal sealed class GetModelsEndpoint : IEndpoint
 
     private static async Task<Ok<UhpModelCatalog>> HandleAsync([FromServices] IUhpServerBackend backend, HttpContext http, CancellationToken ct)
     {
-        var models = await backend.GetModelsAsync(UhpHttp.GetContext(http), ct).ConfigureAwait(false);
+        var models = await backend
+            .GetModelsAsync(UhpHttp.GetContext(http), ct)
+            .ConfigureAwait(false);
         return TypedResults.Ok(models);
     }
 }

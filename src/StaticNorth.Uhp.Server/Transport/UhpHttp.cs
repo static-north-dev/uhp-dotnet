@@ -45,7 +45,9 @@ internal static class UhpHttp
         try
         {
             using var body = new LimitedReadStream(http.Request.Body, options.MaximumRequestBodyBytes);
-            using var document = await JsonDocument.ParseAsync(body, new JsonDocumentOptions { MaxDepth = 64 }, http.RequestAborted).ConfigureAwait(false);
+            using var document = await JsonDocument
+                .ParseAsync(body, new JsonDocumentOptions { MaxDepth = 64 }, http.RequestAborted)
+                .ConfigureAwait(false);
             request = UhpJson.ParseRequest(document.RootElement, context.IdempotencyKey);
             ignored = IgnoredFields(document.RootElement);
             stream = document.RootElement.TryGetProperty("stream", out var streamField) && streamField.GetBoolean();
@@ -81,7 +83,9 @@ internal static class UhpHttp
 
         http.RequestAborted.ThrowIfCancellationRequested();
         var stopping = http.RequestServices.GetRequiredService<IHostApplicationLifetime>().ApplicationStopping;
-        var execution = await backend.SubmitAsync(new UhpSubmission(request, ignored) { Background = background }, context, stopping).ConfigureAwait(false);
+        var execution = await backend
+            .SubmitAsync(new UhpSubmission(request, ignored) { Background = background }, context, stopping)
+            .ConfigureAwait(false);
 
         if (execution.InitialResponse.Status != UhpResponseStatus.InProgress || string.IsNullOrWhiteSpace(execution.InitialResponse.Id))
         {
@@ -90,7 +94,9 @@ internal static class UhpHttp
 
         if (execution.IsReplay)
         {
-            await execution.Completion.WaitAsync(http.RequestAborted).ConfigureAwait(false);
+            await execution.Completion
+                .WaitAsync(http.RequestAborted)
+                .ConfigureAwait(false);
         }
 
         if (background && !stream && !execution.IsReplay)
@@ -100,7 +106,9 @@ internal static class UhpHttp
 
         if (!stream)
         {
-            var response = await execution.Completion.WaitAsync(http.RequestAborted).ConfigureAwait(false);
+            var response = await execution.Completion
+                .WaitAsync(http.RequestAborted)
+                .ConfigureAwait(false);
             ValidateTerminal(execution.InitialResponse.Id, response);
             return TypedResults.Ok(response);
         }
@@ -158,7 +166,10 @@ internal static class UhpHttp
     {
         long next = 0;
 
-        await foreach (var update in execution.Subscribe(ct).WithCancellation(ct).ConfigureAwait(false))
+        await foreach (var update in execution
+            .Subscribe(ct)
+            .WithCancellation(ct)
+            .ConfigureAwait(false))
         {
             if (update.SequenceNumber != next || next == 0 && update is not UhpResponseCreated)
             {

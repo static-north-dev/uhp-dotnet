@@ -15,7 +15,9 @@ public sealed class UhpOutputItem
         Type = type.GetString()!;
 
         if (Type == "message" && Raw.TryGetProperty("content", out var content) &&
-            (content.ValueKind != JsonValueKind.Array || content.EnumerateArray().Any(part => part.ValueKind != JsonValueKind.Object)))
+            (content.ValueKind != JsonValueKind.Array || content
+                .EnumerateArray()
+                .Any(part => part.ValueKind != JsonValueKind.Object)))
         {
             throw new UhpProtocolException("Message content must be an array of objects.");
         }
@@ -40,7 +42,12 @@ public sealed class UhpOutputItem
                 return null;
             }
 
-            return string.Concat(content.EnumerateArray().Where(part => part.ValueKind == JsonValueKind.Object && part.TryGetProperty("text", out var text) && text.ValueKind == JsonValueKind.String).Select(part => part.GetProperty("text").GetString()));
+            return string.Concat(content
+                .EnumerateArray()
+                .Where(part => part.ValueKind == JsonValueKind.Object && part.TryGetProperty("text", out var text) && text.ValueKind == JsonValueKind.String)
+                .Select(part => part
+                    .GetProperty("text")
+                    .GetString()));
         }
     }
 

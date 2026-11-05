@@ -21,12 +21,21 @@ internal static class ReferenceNetworkPolicy
 
     public static void WriteToml(StringBuilder text, string profile)
     {
-        text.Append("[permissions.").Append(profile).AppendLine(".network]\nenabled = true");
-        text.Append("[permissions.").Append(profile).AppendLine(".network.domains]");
+        text
+            .Append("[permissions.")
+            .Append(profile)
+            .AppendLine(".network]\nenabled = true");
+        text
+            .Append("[permissions.")
+            .Append(profile)
+            .AppendLine(".network.domains]");
 
         for (var index = 0; index < Domains.Length; index++)
         {
-            text.Append('"').Append(Domains[index]).AppendLine("\" = \"allow\"");
+            text
+                .Append('"')
+                .Append(Domains[index])
+                .AppendLine("\" = \"allow\"");
         }
     }
 }

@@ -53,36 +53,46 @@ internal sealed class CodexConnection : IAsyncDisposable
 
         try
         {
-            await connection.CallAsync("initialize", UhpJson.CreateElement(writer =>
+            await connection
+                .CallAsync("initialize", UhpJson.CreateElement(writer =>
             {
                 writer.WriteStartObject();
                 writer.WriteStartObject("clientInfo"); writer.WriteString("name", "staticnorth_uhp"); writer.WriteString("version", "0.1.0"); writer.WriteEndObject();
                 writer.WriteStartObject("capabilities"); writer.WriteBoolean("experimentalApi", true); writer.WriteEndObject();
                 writer.WriteEndObject();
-            }), ct).ConfigureAwait(false);
-            await connection.NotifyAsync("initialized", UhpJson.CreateElement(static writer => { writer.WriteStartObject(); writer.WriteEndObject(); }), ct).ConfigureAwait(false);
+            }), ct)
+                .ConfigureAwait(false);
+            await connection
+                .NotifyAsync("initialized", UhpJson.CreateElement(static writer => { writer.WriteStartObject(); writer.WriteEndObject(); }), ct)
+                .ConfigureAwait(false);
             return connection;
         }
         catch
         {
-            await connection.DisposeAsync().ConfigureAwait(false);
+            await connection
+                .DisposeAsync()
+                .ConfigureAwait(false);
             throw;
         }
     }
 
     public async Task<JsonElement> CallAsync(string method, JsonElement parameters, CancellationToken ct)
     {
-        var id = await SendAsync(method, parameters, ct).ConfigureAwait(false);
+        var id = await SendAsync(method, parameters, ct)
+            .ConfigureAwait(false);
 
         while (true)
         {
-            var packet = await ReadPacketAsync(ct).ConfigureAwait(false);
+            var packet = await ReadPacketAsync(ct)
+                .ConfigureAwait(false);
 
             if (packet.TryGetProperty("id", out var responseId) && responseId.ValueKind == JsonValueKind.Number && responseId.GetInt64() == id && !packet.TryGetProperty("method", out _))
             {
                 if (packet.TryGetProperty("error", out var error))
                 {
-                    throw new IOException("Codex refused RPC method: " + method + ": " + error.GetProperty("message").GetString());
+                    throw new IOException("Codex refused RPC method: " + method + ": " + error
+                        .GetProperty("message")
+                        .GetString());
                 }
 
                 return packet.GetProperty("result");
@@ -99,7 +109,8 @@ internal sealed class CodexConnection : IAsyncDisposable
         {
             writer.WriteStartObject(); writer.WriteNumber("id", id); writer.WriteString("method", method);
             writer.WritePropertyName("params"); parameters.WriteTo(writer); writer.WriteEndObject();
-        }), ct).ConfigureAwait(false);
+        }), ct)
+            .ConfigureAwait(false);
         return id;
     }
 
@@ -117,15 +128,23 @@ internal sealed class CodexConnection : IAsyncDisposable
 
     private async Task<JsonElement> ReadPacketAsync(CancellationToken ct)
     {
-        var line = await _process.StandardOutput.ReadLineAsync(ct).ConfigureAwait(false) ?? throw new EndOfStreamException("Codex closed its RPC channel.");
+        var line = await _process.StandardOutput
+            .ReadLineAsync(ct)
+            .ConfigureAwait(false) ?? throw new EndOfStreamException("Codex closed its RPC channel.");
         using var document = JsonDocument.Parse(line);
         return document.RootElement.Clone();
     }
 
     private async Task WriteAsync(JsonElement packet, CancellationToken ct)
     {
-        await _process.StandardInput.WriteLineAsync(packet.GetRawText().AsMemory(), ct).ConfigureAwait(false);
-        await _process.StandardInput.FlushAsync(ct).ConfigureAwait(false);
+        await _process.StandardInput
+            .WriteLineAsync(packet
+                .GetRawText()
+                .AsMemory(), ct)
+            .ConfigureAwait(false);
+        await _process.StandardInput
+            .FlushAsync(ct)
+            .ConfigureAwait(false);
     }
 
     public async ValueTask DisposeAsync()
@@ -135,14 +154,18 @@ internal sealed class CodexConnection : IAsyncDisposable
             _process.Kill(true);
         }
 
-        await _process.WaitForExitAsync().ConfigureAwait(false);
+        await _process
+            .WaitForExitAsync()
+            .ConfigureAwait(false);
         await _stderr.ConfigureAwait(false);
         _process.Dispose();
     }
 
     private static async Task DrainAsync(StreamReader reader)
     {
-        while (await reader.ReadLineAsync().ConfigureAwait(false) is not null)
+        while (await reader
+            .ReadLineAsync()
+            .ConfigureAwait(false) is not null)
         {
             // The host does not retain native diagnostics, which may contain request material.
         }

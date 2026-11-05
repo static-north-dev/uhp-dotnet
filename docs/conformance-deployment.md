@@ -19,17 +19,17 @@ The host invokes native Codex inference, streaming, continuation, and interrupti
 
 Use a Unix machine with .NET 10, its native compiler, Codex 0.166.0 authenticated locally, Python, npm if building Node environments, and `uv`. Set `CODEX_HOME` if the login lives outside the default local Codex home. The runner configures the origin from its loopback URL; a manually run host may use `--public-origin` for absolute artifact links. Keep provider credentials local.
 
-From the repository root, restore/build, pack the three SDK projects, and prepare the suite from the [locked runner instructions](../eng/conformance/README.md). Then run:
+From the repository root, restore/build, pack the three SDK projects, and prepare the suite from the [locked runner instructions](../tools/conformance/README.md). Then run:
 
 ```sh
-python3 eng/package-smoke.py --reference-host
-python3 eng/run-reference-conformance.py --class full --probe-runtime \
+python3 tools/package-smoke.py --reference-host
+python3 tools/run-reference-conformance.py --class full --probe-runtime \
   --host-executable artifacts/aot/StaticNorth.Uhp.ConformanceHost/StaticNorth.Uhp.ConformanceHost \
   --report artifacts/conformance/reference-full.json
-dotnet run --project eng/StaticNorth.Uhp.Conformance -c Release --no-build -- \
+dotnet run --project tools/StaticNorth.Uhp.Conformance -c Release --no-build -- \
   validate . artifacts/conformance/reference-full.json
 ```
 
 The runner creates a temporary loopback listener and bearer credential, shuts down its process group, and removes copied authentication state. `--probe-runtime` adds independent checks for actual secret use agent-granted memory priming and writes, and artifact citation, download, and deletion; it leaves the official suite and report untouched. Omit `--host-executable` to use a previously built managed Release host.
 
-The [official UHP documentation](https://unifiedharnessprotocol.org/) is authoritative. [Suite provenance](../eng/conformance/manifest.json), [Codex schema hashes](../eng/conformance/codex-manifest.json), and the [source inventory](conformance-checks.json) pin what was tested. [Independent client interoperability](interoperability.md) with HarnessRouter CE and SuperQode is separate and remains unverified without configured instances.
+The [official UHP documentation](https://unifiedharnessprotocol.org/) is authoritative. [Suite provenance](../tools/conformance/manifest.json), [Codex schema hashes](../tools/conformance/codex-manifest.json), and the [source inventory](conformance-checks.json) pin what was tested. [Independent client interoperability](interoperability.md) with HarnessRouter CE and SuperQode is separate and remains unverified without configured instances.

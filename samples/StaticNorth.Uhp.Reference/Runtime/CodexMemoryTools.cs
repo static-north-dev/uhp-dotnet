@@ -30,7 +30,9 @@ internal static class CodexMemoryTools
 
         try
         {
-            return CodexInteractive.ToolResult(await memory.InvokeAsync(tool, arguments, ct).ConfigureAwait(false), true);
+            return CodexInteractive.ToolResult(await memory
+                .InvokeAsync(tool, arguments, ct)
+                .ConfigureAwait(false), true);
         }
         catch (UhpServerException exception)
         {

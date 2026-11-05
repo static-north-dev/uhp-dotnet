@@ -68,7 +68,7 @@ All I/O remains async with cancellation. Request cancellation detaches readers; 
 
 ### M0 — Reproducible coverage and a real integration boundary
 
-Add a separate suite provenance manifest and pinned installation/runner under `eng/conformance`; do not rewrite historical schema provenance. Extract the registry and compare it with the check inventory, including IDs/classes and schema availability. Capture strict report semantics in a validator, with negative cases for exit-zero-with-skips, subset runs, duplicates, missing schema and version mismatch. Lock transitive suite dependencies as well as its Git revision.
+Add a separate suite provenance manifest and pinned installation/runner under `tools/conformance`; do not rewrite historical schema provenance. Extract the registry and compare it with the check inventory, including IDs/classes and schema availability. Capture strict report semantics in a validator, with negative cases for exit-zero-with-skips, subset runs, duplicates, missing schema and version mismatch. Lock transitive suite dependencies as well as its Git revision.
 
 Deliver an operation/prose coverage ledger in M0/M1: method/path or normative rule, source/version, capability condition, Core/Client/Server/backend owner, implementation milestone and independent test. Include all 83 schema operations, prose-only operations and unresolved source conflicts. Unsupported conditional features need an explicit specified disposition; absence from the official registry does not remove a requirement.
 
@@ -80,7 +80,7 @@ Exit: reproducible suite/check inventory, validated reporting, and a selected ex
 
 ### M1 — Complete shared contracts and prove AOT binding early
 
-Extend `eng/StaticNorth.Uhp.SchemaGen`, Core models, writers, constants and JSON contexts for selected schema families. Generate internal DTOs deterministically; use public typed models for task messages/roles, text/images/files, standalone input responses, harness configuration, pages, shares, builds and memory records. Preserve unknown fields/statuses/types and caller ownership. Distinguish absent values from required nulls and test serialized bytes against schema plus prose rules. The nullable-field matrix must cover response usage/error/incomplete details/previous response, required metadata/store, and error param/detail. Keep public text constructors compatible.
+Extend `tools/StaticNorth.Uhp.SchemaGen`, Core models, writers, constants and JSON contexts for selected schema families. Generate internal DTOs deterministically; use public typed models for task messages/roles, text/images/files, standalone input responses, harness configuration, pages, shares, builds and memory records. Preserve unknown fields/statuses/types and caller ownership. Distinguish absent values from required nulls and test serialized bytes against schema plus prose rules. The nullable-field matrix must cover response usage/error/incomplete details/previous response, required metadata/store, and error param/detail. Keep public text constructors compatible.
 
 Preserve support for all three protocol dates already promised by the preview, with version-specific serialization/behavior and discovery evidence. An older date can keep its compatible surface without claiming every new capability. Any removal requires a separately agreed breaking migration. Do not advertise identical Full coverage for all dates by assumption, and do not add `2026-10-04` merely because upstream supports it.
 

@@ -89,10 +89,18 @@ public sealed class AllocationTests
         var frameBytes = MeasureRequired(() => _ = JsonSerializer.SerializeToUtf8Bytes(update, UhpJsonContext.Default.UhpEvent));
         Console.WriteLine($"Required allocations B/operation: request snapshot={requestBytes}, parsed response={responseBytes}, HTTP JSON content={contentBytes}, SSE UTF-8 frame={frameBytes}.");
 
-        await Assert.That(requestBytes).IsGreaterThan(0L).And.IsLessThanOrEqualTo(4096L);
-        await Assert.That(responseBytes).IsGreaterThan(0L).And.IsLessThanOrEqualTo(8192L);
-        await Assert.That(contentBytes).IsGreaterThan(0L).And.IsLessThanOrEqualTo(1024L);
-        await Assert.That(frameBytes).IsGreaterThan(0L).And.IsLessThanOrEqualTo(4096L);
+        await Assert
+            .That(requestBytes)
+            .IsGreaterThan(0L).And.IsLessThanOrEqualTo(4096L);
+        await Assert
+            .That(responseBytes)
+            .IsGreaterThan(0L).And.IsLessThanOrEqualTo(8192L);
+        await Assert
+            .That(contentBytes)
+            .IsGreaterThan(0L).And.IsLessThanOrEqualTo(1024L);
+        await Assert
+            .That(frameBytes)
+            .IsGreaterThan(0L).And.IsLessThanOrEqualTo(4096L);
     }
 
     [Test]
@@ -111,8 +119,12 @@ public sealed class AllocationTests
         }
 
         var allocated = GC.GetAllocatedBytesForCurrentThread() - before;
-        await Assert.That(valid).IsEqualTo(iterations);
-        await Assert.That(allocated).IsEqualTo(0L);
+        await Assert
+            .That(valid)
+            .IsEqualTo(iterations);
+        await Assert
+            .That(allocated)
+            .IsEqualTo(0L);
     }
 
     private static long MeasureRequired(Action operation)
@@ -160,6 +172,8 @@ public sealed class AllocationTests
 
         var allocated = GC.GetAllocatedBytesForCurrentThread() - before;
         Console.WriteLine($"{typeof(T).Name}: {allocated / iterations} B/write after warmup; caller-owned buffer.");
-        await Assert.That(allocated).IsEqualTo(0L);
+        await Assert
+            .That(allocated)
+            .IsEqualTo(0L);
     }
 }

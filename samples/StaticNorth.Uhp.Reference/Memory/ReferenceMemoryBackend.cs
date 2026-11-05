@@ -24,7 +24,8 @@ public sealed partial class ReferenceMemoryBackend(IReferenceMemoryProvider prov
 
     public async Task<Wire.Memory> CreateMemoryAsync(Wire.MemoryCreate request, UhpRequestContext context, CancellationToken ct)
     {
-        using var lease = await EnterAsync(ct).ConfigureAwait(false);
+        using var lease = await EnterAsync(ct)
+            .ConfigureAwait(false);
         var caller = Caller(context);
 
         if (request.ParentId is { } parent)
@@ -42,7 +43,9 @@ public sealed partial class ReferenceMemoryBackend(IReferenceMemoryProvider prov
             throw Invalid("A memory requires a name.");
         }
 
-        var id = await provider.CreateMemoryAsync(caller, ct).ConfigureAwait(false);
+        var id = await provider
+            .CreateMemoryAsync(caller, ct)
+            .ConfigureAwait(false);
         var node = new ReferenceMemoryNode(id, caller, request.Name, request.ParentId, request.Description, request.Restricted ?? false);
         _nodes.Add(id, node);
         return View(node, caller);
@@ -50,13 +53,15 @@ public sealed partial class ReferenceMemoryBackend(IReferenceMemoryProvider prov
 
     public async Task<Wire.Memory> GetMemoryAsync(string memoryId, UhpRequestContext context, CancellationToken ct)
     {
-        using var lease = await EnterAsync(ct).ConfigureAwait(false);
+        using var lease = await EnterAsync(ct)
+            .ConfigureAwait(false);
         return View(Require(memoryId, Caller(context), "read"), Caller(context));
     }
 
     public async Task<Wire.MemoryList> ListMemoriesAsync(Wire.ListMemoriesQuery query, UhpRequestContext context, CancellationToken ct)
     {
-        using var lease = await EnterAsync(ct).ConfigureAwait(false);
+        using var lease = await EnterAsync(ct)
+            .ConfigureAwait(false);
         var caller = Caller(context);
         var result = new List<Wire.Memory>();
 
@@ -89,7 +94,8 @@ public sealed partial class ReferenceMemoryBackend(IReferenceMemoryProvider prov
 
     public async Task<Wire.Memory> UpdateMemoryAsync(string memoryId, Wire.MemoryUpdate request, UhpRequestContext context, CancellationToken ct)
     {
-        using var lease = await EnterAsync(ct).ConfigureAwait(false);
+        using var lease = await EnterAsync(ct)
+            .ConfigureAwait(false);
         var caller = Caller(context);
         var node = Require(memoryId, caller, "write");
 
@@ -116,14 +122,17 @@ public sealed partial class ReferenceMemoryBackend(IReferenceMemoryProvider prov
 
     public async Task<Wire.MemoryDeleted> DeleteMemoryAsync(string memoryId, UhpRequestContext context, CancellationToken ct)
     {
-        using var lease = await EnterAsync(ct).ConfigureAwait(false);
+        using var lease = await EnterAsync(ct)
+            .ConfigureAwait(false);
         Require(memoryId, Caller(context), "delete");
         var nodes = Descendants(memoryId, null);
 
         for (var index = nodes.Count - 1; index >= 0; index--)
         {
             var node = nodes[index];
-            await provider.DeleteMemoryAsync(node.Owner, node.Id, ct).ConfigureAwait(false);
+            await provider
+                .DeleteMemoryAsync(node.Owner, node.Id, ct)
+                .ConfigureAwait(false);
             _nodes.Remove(node.Id);
         }
 
@@ -132,7 +141,8 @@ public sealed partial class ReferenceMemoryBackend(IReferenceMemoryProvider prov
 
     public async Task<Wire.MemoryGrantList> ListMemoryGrantsAsync(string memoryId, UhpRequestContext context, CancellationToken ct)
     {
-        using var lease = await EnterAsync(ct).ConfigureAwait(false);
+        using var lease = await EnterAsync(ct)
+            .ConfigureAwait(false);
         var node = Require(memoryId, Caller(context), "read");
         var result = new List<Wire.MemoryGrant>();
 
@@ -149,10 +159,13 @@ public sealed partial class ReferenceMemoryBackend(IReferenceMemoryProvider prov
 
     public async Task<Wire.MemoryGrant> CreateMemoryGrantAsync(string memoryId, Wire.MemoryGrantCreate request, UhpRequestContext context, CancellationToken ct)
     {
-        using var lease = await EnterAsync(ct).ConfigureAwait(false);
+        using var lease = await EnterAsync(ct)
+            .ConfigureAwait(false);
         var node = Require(memoryId, Caller(context), "delete");
 
-        if (!request.Principal.StartsWith(MemberPrefix, StringComparison.Ordinal) || request.Principal.AsSpan(MemberPrefix.Length).IsWhiteSpace() || request.Privileges.Length == 0 || request.Privileges.Any(value => Privilege(value) == 0))
+        if (!request.Principal.StartsWith(MemberPrefix, StringComparison.Ordinal) || request.Principal
+            .AsSpan(MemberPrefix.Length)
+            .IsWhiteSpace() || request.Privileges.Length == 0 || request.Privileges.Any(value => Privilege(value) == 0))
         {
             throw Invalid("A grant requires a member principal and valid privileges.");
         }
@@ -164,7 +177,8 @@ public sealed partial class ReferenceMemoryBackend(IReferenceMemoryProvider prov
 
     public async Task<Wire.Deleted> DeleteMemoryGrantAsync(string memoryId, string grantId, UhpRequestContext context, CancellationToken ct)
     {
-        using var lease = await EnterAsync(ct).ConfigureAwait(false);
+        using var lease = await EnterAsync(ct)
+            .ConfigureAwait(false);
         var node = Require(memoryId, Caller(context), "delete");
 
         if (!node.Grants.Remove(grantId))
@@ -177,7 +191,9 @@ public sealed partial class ReferenceMemoryBackend(IReferenceMemoryProvider prov
 
     private async ValueTask<ReferenceMemoryLease> EnterAsync(CancellationToken ct)
     {
-        await _gate.WaitAsync(ct).ConfigureAwait(false);
+        await _gate
+            .WaitAsync(ct)
+            .ConfigureAwait(false);
         return new(_gate);
     }
 
@@ -225,7 +241,9 @@ public sealed partial class ReferenceMemoryBackend(IReferenceMemoryProvider prov
 
             foreach (var grant in current.Grants.Values)
             {
-                if (grant.Principal.AsSpan(MemberPrefix.Length).SequenceEqual(caller.AsSpan()))
+                if (grant.Principal
+                    .AsSpan(MemberPrefix.Length)
+                    .SequenceEqual(caller.AsSpan()))
                 {
                     for (var index = 0; index < grant.Privileges.Length; index++)
                     {

@@ -23,7 +23,9 @@ public partial class ReferenceBackend : IUhpFileBackend
             throw Failure(400, "invalid_input", "An uploaded file requires a filename.");
         }
         using var content = new MemoryStream();
-        await request.Content.CopyToAsync(content, ct).ConfigureAwait(false);
+        await request.Content
+            .CopyToAsync(content, ct)
+            .ConfigureAwait(false);
 
         lock (_gate)
         {
@@ -41,7 +43,10 @@ public partial class ReferenceBackend : IUhpFileBackend
             SessionStates(sessionId, owner);
             return Task.FromResult(new Wire.ListSessionFilesResponse
             {
-                Files = _files.Values.Where(entry => entry.Owner == owner && entry.SessionId == sessionId).Select(entry => entry.File).ToArray()
+                Files = _files.Values
+                    .Where(entry => entry.Owner == owner && entry.SessionId == sessionId)
+                    .Select(entry => entry.File)
+                    .ToArray()
             });
         }
     }
@@ -68,7 +73,9 @@ public partial class ReferenceBackend : IUhpFileBackend
                 continue;
             }
 
-            var bytes = await ReferenceFileSystem.ReadAsync(workspace, relative, MaximumArtifactBytes, ct).ConfigureAwait(false);
+            var bytes = await ReferenceFileSystem
+                .ReadAsync(workspace, relative, MaximumArtifactBytes, ct)
+                .ConfigureAwait(false);
 
             if (bytes is null)
             {
@@ -82,7 +89,9 @@ public partial class ReferenceBackend : IUhpFileBackend
                     break;
                 }
 
-                if (_artifactPaths.TryGetValue((sessionId, relative), out var id) && bytes.AsSpan().SequenceEqual(_files[id].Content))
+                if (_artifactPaths.TryGetValue((sessionId, relative), out var id) && bytes
+                    .AsSpan()
+                    .SequenceEqual(_files[id].Content))
                 {
                     continue;
                 }
@@ -99,7 +108,8 @@ public partial class ReferenceBackend : IUhpFileBackend
 
     public async Task<UhpBinaryContent> DownloadSessionArchiveAsync(string sessionId, UhpRequestContext context, CancellationToken ct)
     {
-        var files = await ListSessionFilesAsync(sessionId, context, ct).ConfigureAwait(false);
+        var files = await ListSessionFilesAsync(sessionId, context, ct)
+            .ConfigureAwait(false);
         var buffer = new MemoryStream();
 
         try
@@ -109,11 +119,16 @@ public partial class ReferenceBackend : IUhpFileBackend
                 for (var index = 0; index < files.Files.Length; index++)
                 {
                     var file = files.Files[index];
-                    var source = await DownloadFileAsync(file.ContainerId!, file.Id, context, ct).ConfigureAwait(false);
+                    var source = await DownloadFileAsync(file.ContainerId!, file.Id, context, ct)
+                        .ConfigureAwait(false);
                     await using var content = source.Content;
                     var entry = archive.CreateEntry(file.Filename);
-                    await using var target = await entry.OpenAsync(ct).ConfigureAwait(false);
-                    await content.CopyToAsync(target, ct).ConfigureAwait(false);
+                    await using var target = await entry
+                        .OpenAsync(ct)
+                        .ConfigureAwait(false);
+                    await content
+                        .CopyToAsync(target, ct)
+                        .ConfigureAwait(false);
                 }
             }
 
@@ -122,7 +137,9 @@ public partial class ReferenceBackend : IUhpFileBackend
         }
         catch
         {
-            await buffer.DisposeAsync().ConfigureAwait(false);
+            await buffer
+                .DisposeAsync()
+                .ConfigureAwait(false);
             throw;
         }
     }
@@ -231,12 +248,17 @@ public partial class ReferenceBackend : IUhpFileBackend
     {
         _artifactContainers.Remove(sessionId);
 
-        foreach (var key in _artifactPaths.Keys.Where(key => key.Session == sessionId).ToArray())
+        foreach (var key in _artifactPaths.Keys
+            .Where(key => key.Session == sessionId)
+            .ToArray())
         {
             _artifactPaths.Remove(key);
         }
 
-        foreach (var id in _files.Values.Where(entry => entry.SessionId == sessionId).Select(entry => entry.File.Id).ToArray())
+        foreach (var id in _files.Values
+            .Where(entry => entry.SessionId == sessionId)
+            .Select(entry => entry.File.Id)
+            .ToArray())
         {
             _files.Remove(id);
         }

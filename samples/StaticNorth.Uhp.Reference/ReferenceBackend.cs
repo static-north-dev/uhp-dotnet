@@ -126,8 +126,10 @@ public partial class ReferenceBackend(IReferenceRuntime runtime, Environments.Re
                 }
             }
 
-            memory = await memories.SelectForSessionAsync(selectedHarness, owner, selectedMemory, request.PreviousResponseId is not null,
-                context.ProtocolVersion, serverStopping).ConfigureAwait(false);
+            memory = await memories
+                .SelectForSessionAsync(selectedHarness, owner, selectedMemory, request.PreviousResponseId is not null,
+                context.ProtocolVersion, serverStopping)
+                .ConfigureAwait(false);
         }
         else if (requestedMemory is not null)
         {
@@ -141,7 +143,9 @@ public partial class ReferenceBackend(IReferenceRuntime runtime, Environments.Re
                 return replay;
             }
 
-            var session = request.PreviousResponseId is { } previous ? Find(previous, owner).SessionId : "hsess_" + Guid.NewGuid().ToString("N");
+            var session = request.PreviousResponseId is { } previous ? Find(previous, owner).SessionId : "hsess_" + Guid
+                .NewGuid()
+                .ToString("N");
 
             if (request.PreviousResponseId is { } previousId && _deletedResponses.Contains(previousId))
             {

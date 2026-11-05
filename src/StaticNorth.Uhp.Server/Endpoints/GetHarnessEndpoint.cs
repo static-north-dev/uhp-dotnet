@@ -20,7 +20,9 @@ internal sealed class GetHarnessEndpoint : IEndpoint
 
     private static async Task<Ok<UhpHarness>> HandleAsync([FromRoute(Name = UhpProtocol.HarnessId)] string harnessId, [FromServices] IUhpServerBackend backend, HttpContext http, CancellationToken ct)
     {
-        var harness = await backend.GetHarnessAsync(harnessId, UhpHttp.GetContext(http), ct).ConfigureAwait(false);
+        var harness = await backend
+            .GetHarnessAsync(harnessId, UhpHttp.GetContext(http), ct)
+            .ConfigureAwait(false);
         return TypedResults.Ok(harness);
     }
 }

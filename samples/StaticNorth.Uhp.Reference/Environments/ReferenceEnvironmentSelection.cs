@@ -16,7 +16,9 @@ public sealed class ReferenceEnvironmentSelection
 
     internal async ValueTask<ReferenceEnvironmentLease> AcquireAsync(CancellationToken ct)
     {
-        await _node.ExecutionGate.WaitAsync(ct).ConfigureAwait(false);
+        await _node.ExecutionGate
+            .WaitAsync(ct)
+            .ConfigureAwait(false);
 
         try
         {
@@ -31,7 +33,9 @@ public sealed class ReferenceEnvironmentSelection
 
                 try
                 {
-                    await ReferenceEnvironmentBackend.PublishSnapshotAsync(Root, temporary, ct).ConfigureAwait(false);
+                    await ReferenceEnvironmentBackend
+                        .PublishSnapshotAsync(Root, temporary, ct)
+                        .ConfigureAwait(false);
 
                     if (Directory.Exists(Mount))
                     {

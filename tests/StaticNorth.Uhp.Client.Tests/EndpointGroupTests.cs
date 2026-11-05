@@ -17,12 +17,18 @@ public sealed class EndpointGroupTests
         });
         using var http = server.CreateHttp();
         using var rejected = await http.GetAsync("v1/uhp");
-        await Assert.That(rejected.StatusCode).IsEqualTo(HttpStatusCode.NotFound);
+        await Assert
+            .That(rejected.StatusCode)
+            .IsEqualTo(HttpStatusCode.NotFound);
         using var health = await http.GetAsync("/health");
-        await Assert.That(health.StatusCode).IsEqualTo(HttpStatusCode.OK);
+        await Assert
+            .That(health.StatusCode)
+            .IsEqualTo(HttpStatusCode.OK);
         http.DefaultRequestHeaders.Host = "uhp.example";
         using var accepted = await http.GetAsync("v1/uhp");
-        await Assert.That(accepted.StatusCode).IsEqualTo(HttpStatusCode.OK);
+        await Assert
+            .That(accepted.StatusCode)
+            .IsEqualTo(HttpStatusCode.OK);
     }
 
     [Test]
@@ -34,8 +40,12 @@ public sealed class EndpointGroupTests
         });
         using var http = server.CreateHttp();
         using var discovery = await http.GetAsync("v1/uhp");
-        await Assert.That(discovery.StatusCode).IsEqualTo(HttpStatusCode.NotFound);
+        await Assert
+            .That(discovery.StatusCode)
+            .IsEqualTo(HttpStatusCode.NotFound);
         using var health = await http.GetAsync("/health");
-        await Assert.That(health.StatusCode).IsEqualTo(HttpStatusCode.OK);
+        await Assert
+            .That(health.StatusCode)
+            .IsEqualTo(HttpStatusCode.OK);
     }
 }

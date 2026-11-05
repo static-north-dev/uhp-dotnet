@@ -44,7 +44,9 @@ internal sealed class UhpProtocolFilter : IEndpointFilter
 
             if (http.GetEndpoint()?.Metadata.GetMetadata<UhpDiscoveryMetadata>() is null && http.GetEndpoint()?.Metadata.GetMetadata<UhpSharedViewMetadata>() is null)
             {
-                var authentication = await http.AuthenticateAsync(options.AuthenticationScheme).ConfigureAwait(false);
+                var authentication = await http
+                    .AuthenticateAsync(options.AuthenticationScheme)
+                    .ConfigureAwait(false);
 
                 if (!authentication.Succeeded || authentication.Principal?.Identity?.IsAuthenticated != true)
                 {
@@ -57,7 +59,9 @@ internal sealed class UhpProtocolFilter : IEndpointFilter
                 {
                     var authorization = http.RequestServices.GetRequiredService<IAuthorizationService>();
 
-                    if (!(await authorization.AuthorizeAsync(http.User, http, policy).ConfigureAwait(false)).Succeeded)
+                    if (!(await authorization
+                        .AuthorizeAsync(http.User, http, policy)
+                        .ConfigureAwait(false)).Succeeded)
                     {
                         throw new UhpServerException(403, new UhpError("permission_error", "insufficient_scope", "The credential is not permitted to perform this operation."));
                     }
@@ -93,7 +97,8 @@ internal sealed class UhpProtocolFilter : IEndpointFilter
             {
                 BasePath = string.Concat(http.Request.PathBase.Value, prefix)
             });
-            return await next(invocation).ConfigureAwait(false);
+            return await next(invocation)
+                .ConfigureAwait(false);
         }
         catch (OperationCanceledException) when (http.RequestAborted.IsCancellationRequested)
         {

@@ -10,9 +10,14 @@ public sealed class ConformanceReportTests
     public async Task AcceptsCompleteReport()
     {
         using var inventory = JsonDocument.Parse("""{"protocol_version":"2026-10-19","suite_version":"2026.10.19.post5","checks":[{"id":"D-01","class":"core"}]}""");
-        using var report = JsonDocument.Parse(CreateReport().ToJsonString());
+        using var report = JsonDocument.Parse(CreateReport()
+            .ToJsonString());
         ReportValidator.Validate(report.RootElement, inventory.RootElement);
-        await Assert.That(report.RootElement.GetProperty("conformant").GetBoolean()).IsTrue();
+        await Assert
+            .That(report.RootElement
+                .GetProperty("conformant")
+                .GetBoolean())
+            .IsTrue();
     }
 
     [Test]
@@ -42,10 +47,14 @@ public sealed class ConformanceReportTests
                 report["summary"]![defect] = 1;
                 break;
             case "duplicate":
-                report["checks"]!.AsArray().Add(report["checks"]![0]!.DeepClone());
+                report["checks"]!
+                    .AsArray()
+                    .Add(report["checks"]![0]!.DeepClone());
                 break;
             case "missing":
-                report["checks"]!.AsArray().Clear();
+                report["checks"]!
+                    .AsArray()
+                    .Clear();
                 break;
             case "class":
                 report["checks"]![0]!["class"] = "full";
@@ -74,7 +83,9 @@ public sealed class ConformanceReportTests
         }
 
         using var document = JsonDocument.Parse(report.ToJsonString());
-        await Assert.That(() => ReportValidator.Validate(document.RootElement, inventory.RootElement)).ThrowsExactly<InvalidOperationException>();
+        await Assert
+            .That(() => ReportValidator.Validate(document.RootElement, inventory.RootElement))
+            .ThrowsExactly<InvalidOperationException>();
     }
 
     private static JsonObject CreateReport() => JsonNode.Parse("""

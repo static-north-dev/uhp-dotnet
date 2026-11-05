@@ -10,7 +10,9 @@ internal static class OpenApiReader
 {
     public static async Task<JsonObject> ReadAsync(string path, CancellationToken ct)
     {
-        var text = await File.ReadAllTextAsync(path, ct).ConfigureAwait(false);
+        var text = await File
+            .ReadAllTextAsync(path, ct)
+            .ConfigureAwait(false);
         var parser = new Parser(new StringReader(text));
         parser.Consume<StreamStart>();
         parser.Consume<DocumentStart>();

@@ -18,7 +18,9 @@ await runtime.InitializeAsync(CancellationToken.None);
 builder.Services.AddSingleton<IReferenceRuntime>(runtime);
 builder.Services.AddSingleton(environments);
 builder.Services.AddSingleton<IUhpEnvironmentBackend>(environments);
-builder.Services.AddAuthentication("Host").AddScheme<AuthenticationSchemeOptions, HostAuthenticationHandler>("Host", null);
+builder.Services
+    .AddAuthentication("Host")
+    .AddScheme<AuthenticationSchemeOptions, HostAuthenticationHandler>("Host", null);
 builder.Services.AddUhpServer<ReferenceBackend>(options =>
 {
     options.AuthenticationScheme = "Host";

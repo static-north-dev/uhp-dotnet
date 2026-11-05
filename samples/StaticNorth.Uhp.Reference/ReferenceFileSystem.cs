@@ -23,7 +23,9 @@ internal static partial class ReferenceFileSystem
         }
 
         var bytes = GC.AllocateUninitializedArray<byte>(checked((int)length));
-        var read = await stream.ReadAtLeastAsync(bytes, bytes.Length, false, ct).ConfigureAwait(false);
+        var read = await stream
+            .ReadAtLeastAsync(bytes, bytes.Length, false, ct)
+            .ConfigureAwait(false);
         return read == bytes.Length ? bytes : null;
     }
 

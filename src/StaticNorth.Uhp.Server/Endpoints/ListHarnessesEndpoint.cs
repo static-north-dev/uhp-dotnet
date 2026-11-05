@@ -20,7 +20,9 @@ internal sealed class ListHarnessesEndpoint : IEndpoint
 
     private static async Task<Ok<UhpHarnessList>> HandleAsync([FromServices] IUhpServerBackend backend, HttpContext http, CancellationToken ct)
     {
-        var harnesses = await backend.ListHarnessesAsync(UhpHttp.GetContext(http), ct).ConfigureAwait(false);
+        var harnesses = await backend
+            .ListHarnessesAsync(UhpHttp.GetContext(http), ct)
+            .ConfigureAwait(false);
         return TypedResults.Ok(new UhpHarnessList(harnesses));
     }
 }

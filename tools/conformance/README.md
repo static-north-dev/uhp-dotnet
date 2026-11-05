@@ -5,9 +5,9 @@ The source and suite pin is in `manifest.json`. `uv.lock` here locks the complet
 Create a checkout at `artifacts/conformance/upstream` and check out exactly the manifest commit. Then run from the repository root:
 
 ```sh
-dotnet run --project eng/StaticNorth.Uhp.Conformance --configuration Release -- verify-suite . artifacts/conformance/upstream
-uv sync --locked --project eng/conformance
-uv run --frozen --project eng/conformance uhp-conformance --help
+dotnet run --project tools/StaticNorth.Uhp.Conformance --configuration Release -- verify-suite . artifacts/conformance/upstream
+uv sync --locked --project tools/conformance
+uv run --frozen --project tools/conformance uhp-conformance --help
 ```
 
 The verifier checks the upstream source/schema/license/lock hashes and matches every check ID/class to `docs/conformance-checks.json`. The inventory itself is pinned by hash. Review and update that hash when deliberately changing inventory metadata or upgrading the suite.
@@ -15,13 +15,13 @@ The verifier checks the upstream source/schema/license/lock hashes and matches e
 To run the official suite, supply a dedicated real .NET server deployment, configured harness/model and agent-reachable MCP fixture URL. Supply the bearer credential through `UHP_API_KEY`; never commit it or put it in command arguments:
 
 ```sh
-uv run --frozen --project eng/conformance uhp-conformance \
+uv run --frozen --project tools/conformance uhp-conformance \
   --base-url "$UHP_CONFORMANCE_BASE_URL" \
   --harness-id "$UHP_CONFORMANCE_HARNESS_ID" \
   --model "$UHP_CONFORMANCE_MODEL" \
   --plugin-mcp-url "$UHP_CONFORMANCE_MCP_URL" \
   --class full --json artifacts/conformance/full.json --plain
-dotnet run --project eng/StaticNorth.Uhp.Conformance --configuration Release -- validate . artifacts/conformance/full.json
+dotnet run --project tools/StaticNorth.Uhp.Conformance --configuration Release -- validate . artifacts/conformance/full.json
 ```
 
 The CLI accepts a base URL with a deployment prefix. The final gate independently checks every check ID/class/outcome, totals, full coverage, version fields, timestamp and strict verdict; an exit-zero run with skips is rejected. This validates a report, not the identity of a remote server. Retain deployment provenance separately, including the SDK/backend/runtime/provider versions and enabled capabilities.

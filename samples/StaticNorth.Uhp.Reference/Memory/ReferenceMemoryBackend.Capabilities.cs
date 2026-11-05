@@ -35,15 +35,21 @@ public sealed partial class ReferenceMemoryBackend
 
     public async Task<Wire.HarnessMemories> ListHarnessMemoriesAsync(string harnessId, UhpRequestContext context, CancellationToken ct)
     {
-        await harnesses.GetHarnessAsync(harnessId, context, ct).ConfigureAwait(false);
-        using var lease = await EnterAsync(ct).ConfigureAwait(false);
+        await harnesses
+            .GetHarnessAsync(harnessId, context, ct)
+            .ConfigureAwait(false);
+        using var lease = await EnterAsync(ct)
+            .ConfigureAwait(false);
         return HarnessMemories(AgentId(harnessId, Caller(context)));
     }
 
     public async Task<Wire.HarnessMemories> SetHarnessMemoriesAsync(string harnessId, Wire.HarnessMemorySettings request, UhpRequestContext context, CancellationToken ct)
     {
-        await harnesses.GetHarnessAsync(harnessId, context, ct).ConfigureAwait(false);
-        using var lease = await EnterAsync(ct).ConfigureAwait(false);
+        await harnesses
+            .GetHarnessAsync(harnessId, context, ct)
+            .ConfigureAwait(false);
+        using var lease = await EnterAsync(ct)
+            .ConfigureAwait(false);
         var agent = AgentId(harnessId, Caller(context));
 
         if (request.DefaultMemoryId is { } memory)
@@ -65,7 +71,8 @@ public sealed partial class ReferenceMemoryBackend
 
     internal async Task<ReferenceAgentMemory?> SelectForSessionAsync(string harnessId, string owner, string? selected, bool continuation, string version, CancellationToken ct)
     {
-        using var lease = await EnterAsync(ct).ConfigureAwait(false);
+        using var lease = await EnterAsync(ct)
+            .ConfigureAwait(false);
 
         if (selected is null && _nodes.Count == 0)
         {
@@ -123,7 +130,8 @@ public sealed partial class ReferenceMemoryBackend
 
     private async Task<T> UnsupportedAsync<T>(string memoryId, UhpRequestContext context, CancellationToken ct)
     {
-        using var lease = await EnterAsync(ct).ConfigureAwait(false);
+        using var lease = await EnterAsync(ct)
+            .ConfigureAwait(false);
         Require(memoryId, Caller(context), "read");
         throw ReferenceBackend.Failure(422, "memory_unsupported", "This connected provider does not support the requested operation.");
     }

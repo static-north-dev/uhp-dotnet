@@ -20,7 +20,9 @@ public sealed partial class ReferenceEnvironmentBackend
             catalog = _runtimeCatalog ??= ReadRuntimesAsync(_stopping.Token);
         }
 
-        return await catalog.WaitAsync(ct).ConfigureAwait(false);
+        return await catalog
+            .WaitAsync(ct)
+            .ConfigureAwait(false);
     }
 
     private async Task<Wire.EnvironmentRuntimes> ReadRuntimesAsync(CancellationToken ct)
@@ -28,8 +30,12 @@ public sealed partial class ReferenceEnvironmentBackend
         var work = Path.Combine(Path.GetFullPath(root), "toolchain-probe");
         Directory.CreateDirectory(work);
         var home = work + "-sandbox";
-        await ReferenceSandboxProcess.PrepareAsync(home, work, ct).ConfigureAwait(false);
-        var python = await ReferenceSandboxProcess.RunAsync(home, work, ReferenceSandboxProcess.FindExecutable("python3"), ["-c", "import sys; print(str(sys.version_info.major)+'.'+str(sys.version_info.minor))"], ct).ConfigureAwait(false);
+        await ReferenceSandboxProcess
+            .PrepareAsync(home, work, ct)
+            .ConfigureAwait(false);
+        var python = await ReferenceSandboxProcess
+            .RunAsync(home, work, ReferenceSandboxProcess.FindExecutable("python3"), ["-c", "import sys; print(str(sys.version_info.major)+'.'+str(sys.version_info.minor))"], ct)
+            .ConfigureAwait(false);
 
         if (python.ExitCode != 0)
         {
@@ -41,11 +47,16 @@ public sealed partial class ReferenceEnvironmentBackend
 
         try
         {
-            var result = await ReferenceSandboxProcess.RunAsync(home, work, ReferenceSandboxProcess.FindExecutable("node"), ["--version"], ct).ConfigureAwait(false);
+            var result = await ReferenceSandboxProcess
+                .RunAsync(home, work, ReferenceSandboxProcess.FindExecutable("node"), ["--version"], ct)
+                .ConfigureAwait(false);
 
             if (result.ExitCode == 0)
             {
-                node = [result.Output.Trim().TrimStart('v').Split('.')[0]];
+                node = [result.Output
+                    .Trim()
+                    .TrimStart('v')
+                    .Split('.')[0]];
             }
         }
         catch (FileNotFoundException)
@@ -65,7 +76,9 @@ public sealed partial class ReferenceEnvironmentBackend
             throw ReferenceBackend.Failure(400, "environment_invalid", "The local toolchain supports pip and npm registry checks.");
         }
 
-        var end = spec.AsSpan().IndexOfAny("<>=!~[; ".AsSpan());
+        var end = spec
+            .AsSpan()
+            .IndexOfAny("<>=!~[; ".AsSpan());
         var name = end < 0 ? spec : spec[..end];
         string? pin = null;
 
@@ -94,7 +107,9 @@ public sealed partial class ReferenceEnvironmentBackend
 
         try
         {
-            using var response = await _registries.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, ct).ConfigureAwait(false);
+            using var response = await _registries
+                .GetAsync(url, HttpCompletionOption.ResponseHeadersRead, ct)
+                .ConfigureAwait(false);
 
             if (response.StatusCode == HttpStatusCode.NotFound)
             {
@@ -106,11 +121,20 @@ public sealed partial class ReferenceEnvironmentBackend
                 return answer with { Error = "The package registry did not answer successfully." };
             }
 
-            await using var stream = await response.Content.ReadAsStreamAsync(ct).ConfigureAwait(false);
-            var bytes = await ReadMemberAsync(stream, 8_388_608, ct).ConfigureAwait(false);
+            await using var stream = await response.Content
+                .ReadAsStreamAsync(ct)
+                .ConfigureAwait(false);
+            var bytes = await ReadMemberAsync(stream, 8_388_608, ct)
+                .ConfigureAwait(false);
             using var document = JsonDocument.Parse(bytes);
             var body = document.RootElement;
-            var latest = manager == "pip" ? body.GetProperty("info").GetProperty("version").GetString() : body.GetProperty("dist-tags").GetProperty("latest").GetString();
+            var latest = manager == "pip" ? body
+                .GetProperty("info")
+                .GetProperty("version")
+                .GetString() : body
+                    .GetProperty("dist-tags")
+                    .GetProperty("latest")
+                    .GetString();
             var versions = body.GetProperty(manager == "pip" ? "releases" : "versions");
             return answer with { Exists = true, Latest = latest, Version = pin is not null && versions.TryGetProperty(pin, out _) ? pin : null };
         }

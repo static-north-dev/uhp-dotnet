@@ -8,7 +8,8 @@ public sealed partial class ReferenceMemoryBackend
 {
     public async Task<Wire.MemoryRecall> RecallMemoryAsync(string memoryId, Wire.MemoryRecallRequest request, UhpRequestContext context, CancellationToken ct)
     {
-        using var lease = await EnterAsync(ct).ConfigureAwait(false);
+        using var lease = await EnterAsync(ct)
+            .ConfigureAwait(false);
         var caller = Caller(context);
         var root = Require(memoryId, caller, "read");
 
@@ -29,7 +30,8 @@ public sealed partial class ReferenceMemoryBackend
             degraded.Add("filters:not_supported");
         }
 
-        var candidates = await CandidatesAsync(root, caller, request.Depth, ct).ConfigureAwait(false);
+        var candidates = await CandidatesAsync(root, caller, request.Depth, ct)
+            .ConfigureAwait(false);
         var selected = new List<Wire.MemoryRecallResultsItem>();
 
         for (var index = 0; index < candidates.Count; index++)
@@ -58,7 +60,9 @@ public sealed partial class ReferenceMemoryBackend
         }
 
         var primaryCount = selected.Count;
-        var included = selected.Select(result => result.Record.Id).ToHashSet(StringComparer.Ordinal);
+        var included = selected
+            .Select(result => result.Record.Id)
+            .ToHashSet(StringComparer.Ordinal);
 
         for (var index = 0; index < primaryCount; index++)
         {
@@ -85,16 +89,21 @@ public sealed partial class ReferenceMemoryBackend
             Degraded = degraded.ToArray(),
             Abstain = selected.Count == 0,
             Parent = root.ParentId is { } parent && (EffectivePrivileges(_nodes[parent], caller) & Read) != 0 ? Neighbour(_nodes[parent], caller) : null,
-            Children = _nodes.Values.Where(node => node.ParentId == root.Id && (EffectivePrivileges(node, caller) & Read) != 0).Select(node => Neighbour(node, caller)).ToArray()
+            Children = _nodes.Values
+                .Where(node => node.ParentId == root.Id && (EffectivePrivileges(node, caller) & Read) != 0)
+                .Select(node => Neighbour(node, caller))
+                .ToArray()
         };
     }
 
     public async Task<Wire.MemoryPrime> PrimeMemoryAsync(string memoryId, Wire.PrimeMemoryQuery query, UhpRequestContext context, CancellationToken ct)
     {
-        using var lease = await EnterAsync(ct).ConfigureAwait(false);
+        using var lease = await EnterAsync(ct)
+            .ConfigureAwait(false);
         var caller = Caller(context);
         var root = Require(memoryId, caller, "read");
-        var candidates = await CandidatesAsync(root, caller, query.Depth ?? 0, ct).ConfigureAwait(false);
+        var candidates = await CandidatesAsync(root, caller, query.Depth ?? 0, ct)
+            .ConfigureAwait(false);
         candidates.RemoveAll(static record => record.Attributes?.TryGetValue("standing", out var standing) != true || standing.ValueKind != JsonValueKind.True);
         candidates.Sort(static (left, right) => string.CompareOrdinal(right.Time?.WrittenAt, left.Time?.WrittenAt));
         var result = new List<Wire.MemoryRecord>();
@@ -125,10 +134,12 @@ public sealed partial class ReferenceMemoryBackend
 
     public async Task<Wire.MemoryGraph> GraphMemoryAsync(string memoryId, Wire.MemoryGraphRequest request, UhpRequestContext context, CancellationToken ct)
     {
-        using var lease = await EnterAsync(ct).ConfigureAwait(false);
+        using var lease = await EnterAsync(ct)
+            .ConfigureAwait(false);
         var caller = Caller(context);
         var root = Require(memoryId, caller, "read");
-        var candidates = await CandidatesAsync(root, caller, null, ct).ConfigureAwait(false);
+        var candidates = await CandidatesAsync(root, caller, null, ct)
+            .ConfigureAwait(false);
         var byId = candidates.ToDictionary(record => record.Id, StringComparer.Ordinal);
         var edges = new List<Wire.MemoryGraphEdgesItem>();
 
@@ -191,13 +202,27 @@ public sealed partial class ReferenceMemoryBackend
         }
 
         var limit = (int)(request.Limit ?? 1000);
-        var nodes = candidates.Where(record => visited.Contains(record.Id)).Take(limit).Select(record => new Wire.MemoryGraphNodesItem
+        var nodes = candidates
+            .Where(record => visited.Contains(record.Id))
+            .Take(limit)
+            .Select(record => new Wire.MemoryGraphNodesItem
+            {
+                Record = record,
+                Memory = new() { Id = record.MemoryId, Name = _nodes[record.MemoryId].Name }
+            })
+            .ToArray();
+        var returned = nodes
+            .Select(node => node.Record.Id)
+            .ToHashSet(StringComparer.Ordinal);
+        return new()
         {
-            Record = record,
-            Memory = new() { Id = record.MemoryId, Name = _nodes[record.MemoryId].Name }
-        }).ToArray();
-        var returned = nodes.Select(node => node.Record.Id).ToHashSet(StringComparer.Ordinal);
-        return new() { Nodes = nodes, Edges = edges.Where(edge => returned.Contains(edge.From.RecordId) && (!edge.Available || returned.Contains(edge.To.RecordId))).ToArray(), Truncated = nodes.Length < visited.Count, Degraded = [] };
+            Nodes = nodes,
+            Edges = edges
+                .Where(edge => returned.Contains(edge.From.RecordId) && (!edge.Available || returned.Contains(edge.To.RecordId)))
+                .ToArray(),
+            Truncated = nodes.Length < visited.Count,
+            Degraded = []
+        };
     }
 
     private async Task<List<Wire.MemoryRecord>> CandidatesAsync(ReferenceMemoryNode root, string caller, long? depth, CancellationToken ct)
@@ -211,7 +236,9 @@ public sealed partial class ReferenceMemoryBackend
                 continue;
             }
 
-            var records = await provider.ListAsync(node.Owner, node.Id, ct).ConfigureAwait(false);
+            var records = await provider
+                .ListAsync(node.Owner, node.Id, ct)
+                .ConfigureAwait(false);
 
             for (var index = 0; index < records.Count; index++)
             {

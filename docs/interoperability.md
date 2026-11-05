@@ -19,7 +19,7 @@ The shared public-consumer scenario runs against either server by changing confi
 
 ```sh
 UHP_INTEROP_RESULTS="$PWD/artifacts/interop" dotnet run --project tests/StaticNorth.Uhp.Client.InteropTests --configuration Release -- --minimum-expected-tests 2 --report-trx --results-directory artifacts/interop-test-results
-python3 eng/check-interop.py artifacts/interop
+python3 tools/check-interop.py artifacts/interop
 ```
 
 Missing configuration is recorded as skip/unverified. Reports contain configured and advertised server versions, negotiated date, discovery capabilities, and pass/fail/skip for each operation. If discovery advertises a different implementation version than the configured pin, the run fails. Real tasks can consume provider credits. Use a dedicated trusted test environment. The manual `Real server release gate` workflow runs outside pull requests using its environment's configuration/secrets. It does not publish packages.

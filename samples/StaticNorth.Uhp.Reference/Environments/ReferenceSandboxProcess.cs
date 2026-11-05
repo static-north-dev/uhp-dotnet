@@ -24,7 +24,9 @@ internal static class ReferenceSandboxProcess
         }
 
         ReferenceNetworkPolicy.WriteToml(config, "uhp-build");
-        await System.IO.File.WriteAllTextAsync(Path.Combine(home, "config.toml"), config.ToString(), ct).ConfigureAwait(false);
+        await System.IO.File
+            .WriteAllTextAsync(Path.Combine(home, "config.toml"), config.ToString(), ct)
+            .ConfigureAwait(false);
     }
 
     public static async Task<ReferenceProcessResult> RunAsync(string home, string cwd, string executable, IReadOnlyList<string> arguments, CancellationToken ct)
@@ -60,8 +62,12 @@ internal static class ReferenceSandboxProcess
 
         try
         {
-            await process.WaitForExitAsync(ct).ConfigureAwait(false);
-            await Task.WhenAll(output, error).ConfigureAwait(false);
+            await process
+                .WaitForExitAsync(ct)
+                .ConfigureAwait(false);
+            await Task
+                .WhenAll(output, error)
+                .ConfigureAwait(false);
             return new(process.ExitCode, await output.ConfigureAwait(false), await error.ConfigureAwait(false));
         }
         finally
@@ -69,13 +75,17 @@ internal static class ReferenceSandboxProcess
             if (!process.HasExited)
             {
                 process.Kill(true);
-                await process.WaitForExitAsync().ConfigureAwait(false);
+                await process
+                    .WaitForExitAsync()
+                    .ConfigureAwait(false);
             }
 
             // Observe both pipe readers even on cancellation.
             try
             {
-                await Task.WhenAll(output, error).ConfigureAwait(false);
+                await Task
+                    .WhenAll(output, error)
+                    .ConfigureAwait(false);
             }
             catch (OperationCanceledException) when (ct.IsCancellationRequested)
             {
@@ -107,7 +117,9 @@ internal static class ReferenceSandboxProcess
         {
             int read;
 
-            while ((read = await reader.ReadAsync(buffer.AsMemory(), ct).ConfigureAwait(false)) > 0)
+            while ((read = await reader
+                .ReadAsync(buffer.AsMemory(), ct)
+                .ConfigureAwait(false)) > 0)
             {
                 var retained = Math.Min(read, 1_048_576 - result.Length);
 
@@ -125,5 +137,9 @@ internal static class ReferenceSandboxProcess
         }
     }
 
-    private static void PathRule(StringBuilder text, string path, string access) => text.Append(JsonSerializer.Serialize(path, Wire.UhpContractJsonContext.Default.String)).Append(" = \"").Append(access).AppendLine("\"");
+    private static void PathRule(StringBuilder text, string path, string access) => text
+        .Append(JsonSerializer.Serialize(path, Wire.UhpContractJsonContext.Default.String))
+        .Append(" = \"")
+        .Append(access)
+        .AppendLine("\"");
 }

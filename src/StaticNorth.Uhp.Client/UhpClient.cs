@@ -2,7 +2,6 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Net.ServerSentEvents;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Text.Json;
 using StaticNorth.Uhp.Client.Streaming;
 using StaticNorth.Uhp.Core;
@@ -59,7 +58,9 @@ public sealed partial class UhpClient
 
         var root = new Uri(address.AbsoluteUri.TrimEnd('/') + "/", UriKind.Absolute);
         var client = new UhpClient(httpClient, root, options, null!, "");
-        var discovery = await client.DiscoverAsync(null, ct).ConfigureAwait(false);
+        var discovery = await client
+            .DiscoverAsync(null, ct)
+            .ConfigureAwait(false);
         var selected = options.ProtocolVersion ?? UhpProtocolVersions.Supported.FirstOrDefault(version => discovery.Versions.Contains(version, StringComparer.Ordinal));
 
         if (selected is null || !discovery.Versions.Contains(selected, StringComparer.Ordinal))
@@ -69,7 +70,9 @@ public sealed partial class UhpClient
 
         if (selected != discovery.DefaultVersion)
         {
-            discovery = await client.DiscoverAsync(selected, ct).ConfigureAwait(false);
+            discovery = await client
+                .DiscoverAsync(selected, ct)
+                .ConfigureAwait(false);
 
             if (!discovery.Versions.Contains(selected, StringComparer.Ordinal))
             {
@@ -96,11 +99,13 @@ public sealed partial class UhpClient
     private async Task<UhpResponse> SubmitAsync(UhpTaskRequest request, bool background, CancellationToken ct)
     {
         var body = Prepare(request, false, background);
-        using var response = await SendAsync(HttpMethod.Post, UhpProtocol.ResponsesPath, body, request.IdempotencyKey, ProtocolVersion, true, true, ct).ConfigureAwait(false);
+        using var response = await SendAsync(HttpMethod.Post, UhpProtocol.ResponsesPath, body, request.IdempotencyKey, ProtocolVersion, true, true, ct)
+            .ConfigureAwait(false);
 
         try
         {
-            using var document = await ReadJsonAsync(response, ct).ConfigureAwait(false);
+            using var document = await ReadJsonAsync(response, ct)
+                .ConfigureAwait(false);
             var result = UhpJson.ParseResponse(document.RootElement);
 
             if (!background && result.Status == UhpResponseStatus.InProgress)
@@ -124,22 +129,28 @@ public sealed partial class UhpClient
 
     public async Task<UhpResponse> CancelResponseAsync(string responseId, CancellationToken ct = default)
     {
-        using var response = await SendAsync(HttpMethod.Post, $"{UhpProtocol.ResponsesPath}/{Segment(responseId)}/cancel", null, null, ProtocolVersion, true, false, ct).ConfigureAwait(false);
-        using var document = await ReadJsonAsync(response, ct).ConfigureAwait(false);
+        using var response = await SendAsync(HttpMethod.Post, $"{UhpProtocol.ResponsesPath}/{Segment(responseId)}/cancel", null, null, ProtocolVersion, true, false, ct)
+            .ConfigureAwait(false);
+        using var document = await ReadJsonAsync(response, ct)
+            .ConfigureAwait(false);
         return UhpJson.ParseResponse(document.RootElement);
     }
 
     public async Task<UhpSessionCancelResult> CancelSessionAsync(string sessionId, CancellationToken ct = default)
     {
-        using var response = await SendAsync(HttpMethod.Post, $"{UhpProtocol.SessionsPath}/{Segment(sessionId)}/cancel", null, null, ProtocolVersion, true, false, ct).ConfigureAwait(false);
-        using var document = await ReadJsonAsync(response, ct).ConfigureAwait(false);
+        using var response = await SendAsync(HttpMethod.Post, $"{UhpProtocol.SessionsPath}/{Segment(sessionId)}/cancel", null, null, ProtocolVersion, true, false, ct)
+            .ConfigureAwait(false);
+        using var document = await ReadJsonAsync(response, ct)
+            .ConfigureAwait(false);
         return UhpJson.ParseSessionCancelResult(document.RootElement);
     }
 
     private async Task<UhpDiscovery> DiscoverAsync(string? version, CancellationToken ct)
     {
-        using var response = await SendAsync(HttpMethod.Get, UhpProtocol.DiscoveryPath, null, null, version, false, false, ct).ConfigureAwait(false);
-        using var document = await ReadJsonAsync(response, ct).ConfigureAwait(false);
+        using var response = await SendAsync(HttpMethod.Get, UhpProtocol.DiscoveryPath, null, null, version, false, false, ct)
+            .ConfigureAwait(false);
+        using var document = await ReadJsonAsync(response, ct)
+            .ConfigureAwait(false);
         var discovery = UhpJson.ParseDiscovery(document.RootElement);
 
         if (version is null && GetVersion(response) != discovery.DefaultVersion)
@@ -182,8 +193,10 @@ public sealed partial class UhpClient
 
     private async Task<T> GetAsync<T>(string path, Func<JsonElement, T> parse, CancellationToken ct)
     {
-        using var response = await SendAsync(HttpMethod.Get, path, null, null, ProtocolVersion, true, false, ct).ConfigureAwait(false);
-        using var document = await ReadJsonAsync(response, ct).ConfigureAwait(false);
+        using var response = await SendAsync(HttpMethod.Get, path, null, null, ProtocolVersion, true, false, ct)
+            .ConfigureAwait(false);
+        using var document = await ReadJsonAsync(response, ct)
+            .ConfigureAwait(false);
         return parse(document.RootElement);
     }
 
@@ -204,7 +217,8 @@ public sealed partial class UhpClient
 
         if (authenticated && _getToken is not null)
         {
-            var token = await _getToken(ct).ConfigureAwait(false);
+            var token = await _getToken(ct)
+                .ConfigureAwait(false);
 
             if (!string.IsNullOrEmpty(token))
             {
@@ -225,7 +239,9 @@ public sealed partial class UhpClient
 
         try
         {
-            response = await _http.SendAsync(message, HttpCompletionOption.ResponseHeadersRead, ct).ConfigureAwait(false);
+            response = await _http
+                .SendAsync(message, HttpCompletionOption.ResponseHeadersRead, ct)
+                .ConfigureAwait(false);
         }
         catch (Exception exception) when (submission && (exception is HttpRequestException or IOException || exception is OperationCanceledException && !ct.IsCancellationRequested))
         {
@@ -240,7 +256,8 @@ public sealed partial class UhpClient
 
                 try
                 {
-                    using var document = await ReadJsonAsync(response, ct).ConfigureAwait(false);
+                    using var document = await ReadJsonAsync(response, ct)
+                        .ConfigureAwait(false);
                     error = UhpJson.ParseError(document.RootElement);
                 }
                 catch (Exception exception) when (exception is UhpProtocolException or JsonException or IOException or HttpRequestException)
@@ -274,7 +291,8 @@ public sealed partial class UhpClient
 
         try
         {
-            response = await SendAsync(HttpMethod.Post, UhpProtocol.ResponsesPath, body, key, ProtocolVersion, true, true, ct).ConfigureAwait(false);
+            response = await SendAsync(HttpMethod.Post, UhpProtocol.ResponsesPath, body, key, ProtocolVersion, true, true, ct)
+                .ConfigureAwait(false);
         }
         catch (UhpSubmissionException exception)
         {
@@ -295,7 +313,9 @@ public sealed partial class UhpClient
 
             try
             {
-                raw = await response.Content.ReadAsStreamAsync(ct).ConfigureAwait(false);
+                raw = await response.Content
+                    .ReadAsStreamAsync(ct)
+                    .ConfigureAwait(false);
             }
             catch (Exception exception) when (!ct.IsCancellationRequested)
             {
@@ -303,8 +323,11 @@ public sealed partial class UhpClient
             }
 
             await using var stream = raw;
-            using var inactivity = new InactivityStream(stream, _inactivityTimeout);
-            await using var events = SseParser.Create(inactivity).EnumerateAsync(ct).GetAsyncEnumerator(ct);
+            await using var inactivity = new InactivityStream(stream, _inactivityTimeout);
+            await using var events = SseParser
+                .Create(inactivity)
+                .EnumerateAsync(ct)
+                .GetAsyncEnumerator(ct);
 
             while (true)
             {
@@ -312,7 +335,9 @@ public sealed partial class UhpClient
 
                 try
                 {
-                    if (!await events.MoveNextAsync().ConfigureAwait(false))
+                    if (!await events
+                        .MoveNextAsync()
+                        .ConfigureAwait(false))
                     {
                         throw new EndOfStreamException("The task stream ended without a terminal response.");
                     }
@@ -397,7 +422,7 @@ public sealed partial class UhpClient
             return null;
         }
 
-        var enumerator = values.GetEnumerator();
+        using var enumerator = values.GetEnumerator();
         return enumerator.MoveNext() ? enumerator.Current : null;
     }
 
@@ -410,8 +435,12 @@ public sealed partial class UhpClient
                 throw new UhpProtocolException("A successful UHP JSON response requires application/json.");
             }
 
-            await using var stream = await response.Content.ReadAsStreamAsync(ct).ConfigureAwait(false);
-            return await JsonDocument.ParseAsync(stream, cancellationToken: ct).ConfigureAwait(false);
+            await using var stream = await response.Content
+                .ReadAsStreamAsync(ct)
+                .ConfigureAwait(false);
+            return await JsonDocument
+                .ParseAsync(stream, cancellationToken: ct)
+                .ConfigureAwait(false);
         }
         catch (JsonException exception)
         {

@@ -18,14 +18,23 @@ public sealed class CodexRuntime(string stateRoot, string authenticationHome) : 
     {
         var directory = Path.Combine(stateRoot, "catalog");
         Directory.CreateDirectory(directory);
-        var home = await PrepareHomeAsync(directory, ct).ConfigureAwait(false);
-        await using var connection = await CodexConnection.StartAsync(home, directory, ct).ConfigureAwait(false);
-        var result = await connection.CallAsync("model/list", Empty(), ct).ConfigureAwait(false);
+        var home = await PrepareHomeAsync(directory, ct)
+            .ConfigureAwait(false);
+        await using var connection = await CodexConnection
+            .StartAsync(home, directory, ct)
+            .ConfigureAwait(false);
+        var result = await connection
+            .CallAsync("model/list", Empty(), ct)
+            .ConfigureAwait(false);
         var models = new List<UhpModel>();
 
-        foreach (var model in result.GetProperty("data").EnumerateArray())
+        foreach (var model in result
+            .GetProperty("data")
+            .EnumerateArray())
         {
-            var id = model.GetProperty("model").GetString()!;
+            var id = model
+                .GetProperty("model")
+                .GetString()!;
             var isDefault = model.TryGetProperty("isDefault", out var field) && field.GetBoolean();
             models.Add(new(id, true) { IsDefault = isDefault, Backend = Base });
 
@@ -51,17 +60,21 @@ public sealed class CodexRuntime(string stateRoot, string authenticationHome) : 
 
     public async Task<ReferenceRuntimeResult> RunAsync(ReferenceRuntimeRequest request, Func<string, ValueTask> textDelta, CancellationToken ct)
     {
-        using var environmentLease = request.Environment is { } selected ? await selected.AcquireAsync(ct).ConfigureAwait(false) : default(Environments.ReferenceEnvironmentLease);
+        using var environmentLease = request.Environment is { } selected ? await selected
+            .AcquireAsync(ct)
+            .ConfigureAwait(false) : default(Environments.ReferenceEnvironmentLease);
         try
         {
-            return await RunTurnAsync(request, textDelta, ct).ConfigureAwait(false);
+            return await RunTurnAsync(request, textDelta, ct)
+                .ConfigureAwait(false);
         }
         catch
         {
             if (_sessions.TryGetValue(request.SessionId, out var session) && session.Executing && _sessions.TryRemove(request.SessionId, out _))
             {
                 _lostSessions.TryAdd(request.SessionId, 0);
-                await DisposeSessionAsync(session).ConfigureAwait(false);
+                await DisposeSessionAsync(session)
+                    .ConfigureAwait(false);
             }
 
             throw;
@@ -74,19 +87,34 @@ public sealed class CodexRuntime(string stateRoot, string authenticationHome) : 
 
         if (!_sessions.TryGetValue(request.SessionId, out var session))
         {
-            var home = await PrepareHomeAsync(Path.Combine(stateRoot, request.SessionId), ct).ConfigureAwait(false);
-            var bindings = await CodexHarnessBinding.PrepareAsync(request, home, ct).ConfigureAwait(false);
-            var connection = await CodexConnection.StartAsync(home, request.Workspace, ct).ConfigureAwait(false);
+            var home = await PrepareHomeAsync(Path.Combine(stateRoot, request.SessionId), ct)
+                .ConfigureAwait(false);
+            var bindings = await CodexHarnessBinding
+                .PrepareAsync(request, home, ct)
+                .ConfigureAwait(false);
+            var connection = await CodexConnection
+                .StartAsync(home, request.Workspace, ct)
+                .ConfigureAwait(false);
 
             try
             {
-                var started = await connection.CallAsync("thread/start", StartParameters(request, home, bindings), ct).ConfigureAwait(false);
-                session = new(connection, started.GetProperty("thread").GetProperty("id").GetString()!, started.GetProperty("model").GetString()!, home, bindings) { Environment = request.Environment };
+                var started = await connection
+                    .CallAsync("thread/start", StartParameters(request, home, bindings), ct)
+                    .ConfigureAwait(false);
+                session = new(connection, started
+                    .GetProperty("thread")
+                    .GetProperty("id")
+                    .GetString()!, started
+                        .GetProperty("model")
+                        .GetString()!, home, bindings)
+                { Environment = request.Environment };
                 _sessions[request.SessionId] = session;
             }
             catch
             {
-                await connection.DisposeAsync().ConfigureAwait(false);
+                await connection
+                    .DisposeAsync()
+                    .ConfigureAwait(false);
                 throw;
             }
         }
@@ -94,7 +122,8 @@ public sealed class CodexRuntime(string stateRoot, string authenticationHome) : 
         else if (session.Environment?.Id != request.Environment?.Id || session.Environment?.Version != request.Environment?.Version)
         {
             var parameters = StartParameters(request, session.Home, session.Bindings);
-            var forked = await session.Connection.CallAsync("thread/fork", UhpJson.CreateElement(writer =>
+            var forked = await session.Connection
+                .CallAsync("thread/fork", UhpJson.CreateElement(writer =>
             {
                 writer.WriteStartObject(); writer.WriteString("threadId", session.ThreadId);
 
@@ -107,29 +136,44 @@ public sealed class CodexRuntime(string stateRoot, string authenticationHome) : 
                 }
 
                 writer.WriteEndObject();
-            }), ct).ConfigureAwait(false);
-            session.ThreadId = forked.GetProperty("thread").GetProperty("id").GetString()!;
+            }), ct)
+                .ConfigureAwait(false);
+            session.ThreadId = forked
+                .GetProperty("thread")
+                .GetProperty("id")
+                .GetString()!;
             session.Environment = request.Environment;
         }
 
         var model = request.Task.Model ?? request.Harness.DefaultModel ?? session.Model;
         var secretReference = request.Answer is { Kind: "secret" } secret ? session.Secrets.Store(secret.Value) : null;
-        var prime = request.Memory is { } memory && !session.MemoryPrimed ? await memory.PrimeAsync(ct).ConfigureAwait(false) : null;
-        var input = await CodexInput.PrepareAsync(request, secretReference, prime, ct).ConfigureAwait(false);
+        var prime = request.Memory is { } memory && !session.MemoryPrimed ? await memory
+            .PrimeAsync(ct)
+            .ConfigureAwait(false) : null;
+        var input = await CodexInput
+            .PrepareAsync(request, secretReference, prime, ct)
+            .ConfigureAwait(false);
         session.MemoryPrimed |= prime is not null;
         session.Executing = true;
-        var startedTurn = await session.Connection.CallAsync("turn/start", UhpJson.CreateElement(writer =>
+        var startedTurn = await session.Connection
+            .CallAsync("turn/start", UhpJson.CreateElement(writer =>
         {
             writer.WriteStartObject(); writer.WriteString("threadId", session.ThreadId); writer.WriteString("model", model);
             writer.WritePropertyName("input"); input.WriteTo(writer); writer.WriteEndObject();
-        }), ct).ConfigureAwait(false);
-        var turnId = startedTurn.GetProperty("turn").GetProperty("id").GetString()!;
+        }), ct)
+            .ConfigureAwait(false);
+        var turnId = startedTurn
+            .GetProperty("turn")
+            .GetProperty("id")
+            .GetString()!;
 
         try
         {
             while (true)
             {
-                var packet = await session.Connection.NextAsync(ct).ConfigureAwait(false);
+                var packet = await session.Connection
+                    .NextAsync(ct)
+                    .ConfigureAwait(false);
 
                 if (!packet.TryGetProperty("method", out var method))
                 {
@@ -146,13 +190,20 @@ public sealed class CodexRuntime(string stateRoot, string authenticationHome) : 
 
                 if (method.ValueEquals("item/agentMessage/delta"))
                 {
-                    await textDelta(parameters.GetProperty("delta").GetString()!).ConfigureAwait(false);
+                    await textDelta(parameters
+                        .GetProperty("delta")
+                        .GetString()!)
+                        .ConfigureAwait(false);
                 }
-                else if (method.ValueEquals("item/tool/call") && parameters.GetProperty("tool").ValueEquals("ask_user"))
+                else if (method.ValueEquals("item/tool/call") && parameters
+                    .GetProperty("tool")
+                    .ValueEquals("ask_user"))
                 {
                     var question = CodexInteractive.Read(parameters);
-                    await StopTurnAsync(session, turnId, ct).ConfigureAwait(false);
-                    await textDelta("\n" + question.Prompt).ConfigureAwait(false);
+                    await StopTurnAsync(session, turnId, ct)
+                        .ConfigureAwait(false);
+                    await textDelta("\n" + question.Prompt)
+                        .ConfigureAwait(false);
                     return new(model, UhpResponseStatus.Incomplete)
                     {
                         Output = [question.Call, question.Request],
@@ -162,16 +213,29 @@ public sealed class CodexRuntime(string stateRoot, string authenticationHome) : 
                         })
                     };
                 }
-                else if (method.ValueEquals("item/tool/call") && parameters.GetProperty("tool").ValueEquals("use_secret"))
+                else if (method.ValueEquals("item/tool/call") && parameters
+                    .GetProperty("tool")
+                    .ValueEquals("use_secret"))
                 {
-                    var reference = parameters.GetProperty("arguments").GetProperty("reference").GetString()!;
+                    var reference = parameters
+                        .GetProperty("arguments")
+                        .GetProperty("reference")
+                        .GetString()!;
                     var fingerprint = session.Secrets.ConsumeFingerprint(reference);
-                    await session.Connection.RespondAsync(packet.GetProperty("id"), CodexInteractive.ToolResult(fingerprint), ct).ConfigureAwait(false);
+                    await session.Connection
+                        .RespondAsync(packet.GetProperty("id"), CodexInteractive.ToolResult(fingerprint), ct)
+                        .ConfigureAwait(false);
                 }
-                else if (method.ValueEquals("item/tool/call") && parameters.GetProperty("tool").GetString() is { } tool && tool.StartsWith("memory_", StringComparison.Ordinal))
+                else if (method.ValueEquals("item/tool/call") && parameters
+                    .GetProperty("tool")
+                    .GetString() is { } tool && tool.StartsWith("memory_", StringComparison.Ordinal))
                 {
-                    var result = await CodexMemoryTools.InvokeAsync(request.Memory, tool, parameters.GetProperty("arguments"), ct).ConfigureAwait(false);
-                    await session.Connection.RespondAsync(packet.GetProperty("id"), result, ct).ConfigureAwait(false);
+                    var result = await CodexMemoryTools
+                        .InvokeAsync(request.Memory, tool, parameters.GetProperty("arguments"), ct)
+                        .ConfigureAwait(false);
+                    await session.Connection
+                        .RespondAsync(packet.GetProperty("id"), result, ct)
+                        .ConfigureAwait(false);
                 }
                 else if (method.ValueEquals("thread/compacted"))
                 {
@@ -181,14 +245,20 @@ public sealed class CodexRuntime(string stateRoot, string authenticationHome) : 
                 {
                     var turn = parameters.GetProperty("turn");
 
-                    if (turn.GetProperty("id").GetString() != turnId)
+                    if (turn
+                        .GetProperty("id")
+                        .GetString() != turnId)
                     {
                         continue;
                     }
 
-                    var status = turn.GetProperty("status").GetString();
+                    var status = turn
+                        .GetProperty("status")
+                        .GetString();
 
-                    await session.Connection.CallAsync("thread/backgroundTerminals/clean", ThreadParameters(session.ThreadId), ct).ConfigureAwait(false);
+                    await session.Connection
+                        .CallAsync("thread/backgroundTerminals/clean", ThreadParameters(session.ThreadId), ct)
+                        .ConfigureAwait(false);
                     session.Executing = false;
 
                     return new(model,
@@ -197,10 +267,12 @@ public sealed class CodexRuntime(string stateRoot, string authenticationHome) : 
                 else if (packet.TryGetProperty("id", out var id))
                 {
                     // No approval can expand this test host's filesystem or network permissions.
-                    await session.Connection.RespondAsync(id, UhpJson.CreateElement(static writer =>
+                    await session.Connection
+                        .RespondAsync(id, UhpJson.CreateElement(static writer =>
                     {
                         writer.WriteStartObject(); writer.WriteString("decision", "decline"); writer.WriteEndObject();
-                    }), ct).ConfigureAwait(false);
+                    }), ct)
+                        .ConfigureAwait(false);
                 }
             }
         }
@@ -210,13 +282,15 @@ public sealed class CodexRuntime(string stateRoot, string authenticationHome) : 
 
             try
             {
-                await StopTurnAsync(session, turnId, cleanup.Token).ConfigureAwait(false);
+                await StopTurnAsync(session, turnId, cleanup.Token)
+                    .ConfigureAwait(false);
             }
             catch (Exception)
             {
                 _sessions.TryRemove(request.SessionId, out _);
                 _lostSessions.TryAdd(request.SessionId, 0);
-                await DisposeSessionAsync(session).ConfigureAwait(false);
+                await DisposeSessionAsync(session)
+                    .ConfigureAwait(false);
             }
 
             throw;
@@ -233,31 +307,46 @@ public sealed class CodexRuntime(string stateRoot, string authenticationHome) : 
 
     private static async Task StopTurnAsync(CodexRuntimeSession session, string turnId, CancellationToken ct)
     {
-        await session.Connection.CallAsync("turn/interrupt", UhpJson.CreateElement(writer =>
+        await session.Connection
+            .CallAsync("turn/interrupt", UhpJson.CreateElement(writer =>
         {
             writer.WriteStartObject(); writer.WriteString("threadId", session.ThreadId); writer.WriteString("turnId", turnId); writer.WriteEndObject();
-        }), ct).ConfigureAwait(false);
+        }), ct)
+            .ConfigureAwait(false);
 
         while (true)
         {
-            var packet = await session.Connection.NextAsync(ct).ConfigureAwait(false);
+            var packet = await session.Connection
+                .NextAsync(ct)
+                .ConfigureAwait(false);
 
             if (packet.TryGetProperty("method", out var method) && method.ValueEquals("turn/completed") &&
-                packet.GetProperty("params").GetProperty("threadId").GetString() == session.ThreadId &&
-                packet.GetProperty("params").GetProperty("turn").GetProperty("id").GetString() == turnId)
+                packet
+                    .GetProperty("params")
+                    .GetProperty("threadId")
+                    .GetString() == session.ThreadId &&
+                packet
+                    .GetProperty("params")
+                    .GetProperty("turn")
+                    .GetProperty("id")
+                    .GetString() == turnId)
             {
                 break;
             }
         }
 
-        await session.Connection.CallAsync("thread/backgroundTerminals/clean", ThreadParameters(session.ThreadId), ct).ConfigureAwait(false);
+        await session.Connection
+            .CallAsync("thread/backgroundTerminals/clean", ThreadParameters(session.ThreadId), ct)
+            .ConfigureAwait(false);
         session.Executing = false;
     }
 
     private static async ValueTask DisposeSessionAsync(CodexRuntimeSession session)
     {
         session.Secrets.Dispose();
-        await session.Connection.DisposeAsync().ConfigureAwait(false);
+        await session.Connection
+            .DisposeAsync()
+            .ConfigureAwait(false);
     }
 
     private static JsonElement StartParameters(ReferenceRuntimeRequest request, string home, List<CodexMcpBinding> bindings) => UhpJson.CreateElement(writer =>
@@ -335,7 +424,9 @@ public sealed class CodexRuntime(string stateRoot, string authenticationHome) : 
             Directory.CreateDirectory(home, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
         }
 
-        var credentials = await System.IO.File.ReadAllBytesAsync(Path.Combine(authenticationHome, "auth.json"), ct).ConfigureAwait(false);
+        var credentials = await System.IO.File
+            .ReadAllBytesAsync(Path.Combine(authenticationHome, "auth.json"), ct)
+            .ConfigureAwait(false);
 
         try
         {
@@ -347,14 +438,18 @@ public sealed class CodexRuntime(string stateRoot, string authenticationHome) : 
             }
 
             await using var file = new FileStream(Path.Combine(home, "auth.json"), options);
-            await file.WriteAsync(credentials, ct).ConfigureAwait(false);
+            await file
+                .WriteAsync(credentials, ct)
+                .ConfigureAwait(false);
         }
         finally
         {
             System.Security.Cryptography.CryptographicOperations.ZeroMemory(credentials);
         }
 
-        await System.IO.File.WriteAllTextAsync(Path.Combine(home, "config.toml"), "approval_policy = \"never\"\nweb_search = \"disabled\"\n[features]\napps = false\nworkspace_dependencies = false\nskip_host_skill_discovery = true\n[shell_environment_policy]\ninherit = \"none\"\n", ct).ConfigureAwait(false);
+        await System.IO.File
+            .WriteAllTextAsync(Path.Combine(home, "config.toml"), "approval_policy = \"never\"\nweb_search = \"disabled\"\n[features]\napps = false\nworkspace_dependencies = false\nskip_host_skill_discovery = true\n[shell_environment_policy]\ninherit = \"none\"\n", ct)
+            .ConfigureAwait(false);
         return home;
     }
 
@@ -362,7 +457,8 @@ public sealed class CodexRuntime(string stateRoot, string authenticationHome) : 
     {
         foreach (var entry in _sessions)
         {
-            await DisposeSessionAsync(entry.Value).ConfigureAwait(false);
+            await DisposeSessionAsync(entry.Value)
+                .ConfigureAwait(false);
         }
 
         _sessions.Clear();
@@ -377,7 +473,8 @@ public sealed class CodexRuntime(string stateRoot, string authenticationHome) : 
     {
         if (_sessions.TryRemove(sessionId, out var session))
         {
-            await DisposeSessionAsync(session).ConfigureAwait(false);
+            await DisposeSessionAsync(session)
+                .ConfigureAwait(false);
         }
 
         _lostSessions.TryRemove(sessionId, out _);

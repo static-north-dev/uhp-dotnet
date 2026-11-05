@@ -41,7 +41,7 @@ public static class UhpProtocol
             return false;
         }
 
-        foreach (char t in value)
+        foreach (var t in value)
         {
             if (t is < (char)0x21 or > (char)0x7e)
             {
@@ -55,13 +55,15 @@ public static class UhpProtocol
     public static bool IsJsonContentType(string? value)
     {
         var mediaType = value.AsSpan();
-        int separator = mediaType.IndexOf(';');
+        var separator = mediaType.IndexOf(';');
 
         if (separator >= 0)
         {
             mediaType = mediaType[..separator];
         }
 
-        return mediaType.Trim().Equals(JsonMediaType, StringComparison.OrdinalIgnoreCase);
+        return mediaType
+            .Trim()
+            .Equals(JsonMediaType, StringComparison.OrdinalIgnoreCase);
     }
 }

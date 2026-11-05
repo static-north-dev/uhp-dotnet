@@ -29,7 +29,14 @@ public sealed partial class ReferenceEnvironmentBackend
                 entries.Add(new() { Path = file.Key, Dir = false, Bytes = file.Value.Length });
             }
 
-            return Task.FromResult(new Wire.EnvironmentFileList { Entries = entries.OrderBy(entry => entry.Path, StringComparer.Ordinal).ToArray(), Count = node.Files.Count, Bytes = node.Files.Values.Sum(value => (long)value.Length) });
+            return Task.FromResult(new Wire.EnvironmentFileList
+            {
+                Entries = entries
+                    .OrderBy(entry => entry.Path, StringComparer.Ordinal)
+                    .ToArray(),
+                Count = node.Files.Count,
+                Bytes = node.Files.Values.Sum(value => (long)value.Length)
+            });
         }
     }
 
@@ -55,7 +62,8 @@ public sealed partial class ReferenceEnvironmentBackend
     {
         path = SourcePath(path);
         ValidateReference(environmentId, Owner(context));
-        var bytes = await ReadMemberAsync(request.Content, MaximumImportBytes, ct).ConfigureAwait(false);
+        var bytes = await ReadMemberAsync(request.Content, MaximumImportBytes, ct)
+            .ConfigureAwait(false);
 
         lock (_gate)
         {
@@ -87,8 +95,12 @@ public sealed partial class ReferenceEnvironmentBackend
         {
             var node = Find(environmentId, Owner(context));
             var prefix = path + "/";
-            var files = node.Files.Keys.Where(key => key == path || key.StartsWith(prefix, StringComparison.Ordinal)).ToArray();
-            var directories = node.Directories.Where(key => key == path || key.StartsWith(prefix, StringComparison.Ordinal)).ToArray();
+            var files = node.Files.Keys
+                .Where(key => key == path || key.StartsWith(prefix, StringComparison.Ordinal))
+                .ToArray();
+            var directories = node.Directories
+                .Where(key => key == path || key.StartsWith(prefix, StringComparison.Ordinal))
+                .ToArray();
 
             foreach (var file in files)
             {
@@ -107,7 +119,8 @@ public sealed partial class ReferenceEnvironmentBackend
     public async Task<Wire.EnvironmentImportResult> ImportEnvironmentAsync(string environmentId, UhpRequestBody request, Wire.ImportEnvironmentQuery query, UhpRequestContext context, CancellationToken ct)
     {
         ValidateReference(environmentId, Owner(context));
-        var input = await ReadMemberAsync(request.Content, MaximumImportBytes, ct).ConfigureAwait(false);
+        var input = await ReadMemberAsync(request.Content, MaximumImportBytes, ct)
+            .ConfigureAwait(false);
         List<ReferenceEnvironmentMember> members;
         long skipped = 0;
         var replace = query.Replace == 1;
@@ -124,18 +137,23 @@ public sealed partial class ReferenceEnvironmentBackend
 
             replace |= body.TryGetProperty("replace", out var replaceField) && replaceField.ValueKind == JsonValueKind.True;
             var reference = git.TryGetProperty("ref", out var branch) ? branch.GetString() : null;
-            members = await ImportRepositoryAsync(url.GetString()!, reference, ct).ConfigureAwait(false);
+            members = await ImportRepositoryAsync(url.GetString()!, reference, ct)
+                .ConfigureAwait(false);
         }
         else
         {
-            (members, skipped) = await ReadArchiveAsync(input, ct).ConfigureAwait(false);
+            (members, skipped) = await ReadArchiveAsync(input, ct)
+                .ConfigureAwait(false);
         }
 
         var prefix = members.Count > 0 ? members[0].Path.Split('/')[0] : "";
 
         if (prefix.Length > 0 && members.All(member => member.Path == prefix && member.Content is null || member.Path.StartsWith(prefix + "/", StringComparison.Ordinal)))
         {
-            members = members.Where(member => member.Path != prefix).Select(member => member with { Path = member.Path[(prefix.Length + 1)..] }).ToList();
+            members = members
+                .Where(member => member.Path != prefix)
+                .Select(member => member with { Path = member.Path[(prefix.Length + 1)..] })
+                .ToList();
         }
 
         lock (_gate)
@@ -203,8 +221,11 @@ public sealed partial class ReferenceEnvironmentBackend
                         continue;
                     }
 
-                    await using var content = await entry.OpenAsync(ct).ConfigureAwait(false);
-                    var value = await ReadMemberAsync(content, MaximumImportBytes - total, ct).ConfigureAwait(false);
+                    await using var content = await entry
+                        .OpenAsync(ct)
+                        .ConfigureAwait(false);
+                    var value = await ReadMemberAsync(content, MaximumImportBytes - total, ct)
+                        .ConfigureAwait(false);
                     total += value.Length;
                     members.Add(new(path, value));
                 }
@@ -214,7 +235,9 @@ public sealed partial class ReferenceEnvironmentBackend
                 using var compressed = bytes.Length >= 2 && bytes[0] == 0x1F && bytes[1] == 0x8B ? new GZipStream(source, CompressionMode.Decompress, true) : null;
                 await using var archive = new TarReader(compressed is null ? source : compressed, true);
 
-                while (await archive.GetNextEntryAsync(false, ct).ConfigureAwait(false) is { } entry)
+                while (await archive
+                    .GetNextEntryAsync(false, ct)
+                    .ConfigureAwait(false) is { } entry)
                 {
                     var path = entry.Name.TrimEnd('/');
 
@@ -224,7 +247,8 @@ public sealed partial class ReferenceEnvironmentBackend
                         continue;
                     }
 
-                    var value = entry.EntryType == TarEntryType.Directory ? null : await ReadMemberAsync(entry.DataStream ?? Stream.Null, MaximumImportBytes - total, ct).ConfigureAwait(false);
+                    var value = entry.EntryType == TarEntryType.Directory ? null : await ReadMemberAsync(entry.DataStream ?? Stream.Null, MaximumImportBytes - total, ct)
+                        .ConfigureAwait(false);
                     total += value?.Length ?? 0;
                     members.Add(new(path, value));
                 }
@@ -247,7 +271,9 @@ public sealed partial class ReferenceEnvironmentBackend
         {
             int read;
 
-            while ((read = await content.ReadAsync(scratch, ct).ConfigureAwait(false)) > 0)
+            while ((read = await content
+                .ReadAsync(scratch, ct)
+                .ConfigureAwait(false)) > 0)
             {
                 if (buffer.Length + read > maximum)
                 {
@@ -257,7 +283,9 @@ public sealed partial class ReferenceEnvironmentBackend
                     }));
                 }
 
-                await buffer.WriteAsync(scratch.AsMemory(0, read), ct).ConfigureAwait(false);
+                await buffer
+                    .WriteAsync(scratch.AsMemory(0, read), ct)
+                    .ConfigureAwait(false);
             }
 
             return buffer.ToArray();
@@ -300,6 +328,8 @@ public sealed partial class ReferenceEnvironmentBackend
     }
 
     private static string SourcePath(string path) => IsSourcePath(path) ? path : throw Invalid("A file path must stay inside its environment.");
-    private static bool IsSourcePath(string path) => !string.IsNullOrWhiteSpace(path) && !Path.IsPathRooted(path) && !path.Contains('\\') && !path.Contains('\0') && !path.Split('/').Any(part => part is "" or "." or "..");
+    private static bool IsSourcePath(string path) => !string.IsNullOrWhiteSpace(path) && !Path.IsPathRooted(path) && !path.Contains('\\') && !path.Contains('\0') && !path
+        .Split('/')
+        .Any(part => part is "" or "." or "..");
     private static UhpServerException Invalid(string message) => ReferenceBackend.Failure(422, "environment_invalid", message);
 }

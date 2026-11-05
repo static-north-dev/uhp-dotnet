@@ -1,11 +1,18 @@
 <Solution>
-  <Folder Name="/eng/">
-    <Project Path="eng/StaticNorth.Uhp.Conformance/StaticNorth.Uhp.Conformance.csproj" />
-    <Project Path="eng/StaticNorth.Uhp.ConformanceHost/StaticNorth.Uhp.ConformanceHost.csproj" />
-    <Project Path="eng/StaticNorth.Uhp.SchemaGen/StaticNorth.Uhp.SchemaGen.csproj" />
+  <Folder Name="/tools/">
+    <Project Path="tools/StaticNorth.Uhp.Conformance/StaticNorth.Uhp.Conformance.csproj" />
+    <Project Path="tools/StaticNorth.Uhp.ConformanceHost/StaticNorth.Uhp.ConformanceHost.csproj" />
+    <Project Path="tools/StaticNorth.Uhp.SchemaGen/StaticNorth.Uhp.SchemaGen.csproj" />
   </Folder>
   <Folder Name="/samples/">
     <Project Path="samples/StaticNorth.Uhp.Reference/StaticNorth.Uhp.Reference.csproj" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path="Directory.Build.props" />
+    <File Path="global.json" />
+    <File Path="LICENSE" />
+    <File Path="NuGet.Config" />
+    <File Path="README.md" />
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/StaticNorth.Uhp.Client/StaticNorth.Uhp.Client.csproj" />

@@ -89,7 +89,9 @@ public static class UhpJson
         value = value.Clone();
         var wire = Read(value, WireJsonContext.Default.ModelCatalogWire);
 
-        return new UhpModelCatalog(wire.Backends.ToFrozenDictionary(pair => pair.Key, pair => pair.Value is null ? throw new UhpProtocolException("A model backend cannot be null.") : new UhpModelBackend(pair.Value.Default, Array.AsReadOnly(pair.Value.Models.Select(FromModel).ToArray())), StringComparer.Ordinal))
+        return new UhpModelCatalog(wire.Backends.ToFrozenDictionary(pair => pair.Key, pair => pair.Value is null ? throw new UhpProtocolException("A model backend cannot be null.") : new UhpModelBackend(pair.Value.Default, Array.AsReadOnly(pair.Value.Models
+            .Select(FromModel)
+            .ToArray())), StringComparer.Ordinal))
         {
             Raw = value
         };
@@ -100,7 +102,9 @@ public static class UhpJson
         value = value.Clone();
         var wire = Read(value, WireJsonContext.Default.HarnessModelsWire);
 
-        return new UhpHarnessModels(Array.AsReadOnly(wire.Models.Select(FromModel).ToArray()))
+        return new UhpHarnessModels(Array.AsReadOnly(wire.Models
+            .Select(FromModel)
+            .ToArray()))
         {
             HarnessId = wire.HarnessId,
             Backend = wire.Backend,
@@ -125,7 +129,11 @@ public static class UhpJson
         return new UhpResponse(wire.Id, new UhpResponseStatus(wire.Status), wire.Model)
         {
             CreatedAt = wire.CreatedAt,
-            Output = Array.AsReadOnly(value.GetProperty(UhpJsonFields.Output).EnumerateArray().Select(item => new UhpOutputItem(item)).ToArray()),
+            Output = Array.AsReadOnly(value
+                .GetProperty(UhpJsonFields.Output)
+                .EnumerateArray()
+                .Select(item => new UhpOutputItem(item))
+                .ToArray()),
             Metadata = Own(wire.Metadata),
             PreviousResponseId = wire.PreviousResponseId,
             Store = wire.Store,
@@ -138,7 +146,9 @@ public static class UhpJson
                 TotalTokens = wire.Usage.TotalTokens,
                 CacheReadTokens = wire.Usage.CacheReadTokens,
                 CacheWriteTokens = wire.Usage.CacheWriteTokens,
-                Raw = value.GetProperty(UhpJsonFields.Usage).Clone()
+                Raw = value
+                    .GetProperty(UhpJsonFields.Usage)
+                    .Clone()
             },
             Raw = value
         };

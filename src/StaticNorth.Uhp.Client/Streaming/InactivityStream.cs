@@ -15,7 +15,9 @@ internal sealed class InactivityStream(Stream inner, TimeSpan? timeout) : Stream
     {
         if (timeout is null)
         {
-            return await inner.ReadAsync(buffer, cancellationToken).ConfigureAwait(false);
+            return await inner
+                .ReadAsync(buffer, cancellationToken)
+                .ConfigureAwait(false);
         }
 
         cancellationToken.ThrowIfCancellationRequested();
@@ -32,7 +34,9 @@ internal sealed class InactivityStream(Stream inner, TimeSpan? timeout) : Stream
 
         try
         {
-            return await inner.ReadAsync(buffer, deadline.Token).ConfigureAwait(false);
+            return await inner
+                .ReadAsync(buffer, deadline.Token)
+                .ConfigureAwait(false);
         }
         catch (OperationCanceledException exception) when (!cancellationToken.IsCancellationRequested && deadline.IsCancellationRequested)
         {
@@ -57,7 +61,8 @@ internal sealed class InactivityStream(Stream inner, TimeSpan? timeout) : Stream
         base.Dispose(disposing);
     }
 
-    public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken) => ReadAsync(buffer.AsMemory(offset, count), cancellationToken).AsTask();
+    public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken) => ReadAsync(buffer.AsMemory(offset, count), cancellationToken)
+        .AsTask();
     public override int Read(byte[] buffer, int offset, int count) => throw new NotSupportedException();
     public override void Flush() => throw new NotSupportedException();
     public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();

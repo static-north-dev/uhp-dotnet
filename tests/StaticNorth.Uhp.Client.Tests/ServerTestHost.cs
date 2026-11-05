@@ -20,8 +20,12 @@ internal sealed class ServerTestHost(WebApplication app) : IAsyncDisposable
     {
         var builder = WebApplication.CreateSlimBuilder();
         builder.Logging.ClearProviders();
-        builder.WebHost.UseKestrel().UseUrls("http://127.0.0.1:0");
-        builder.Services.AddAuthentication("Fixture").AddScheme<AuthenticationSchemeOptions, FixtureAuthenticationHandler>("Fixture", null);
+        builder.WebHost
+            .UseKestrel()
+            .UseUrls("http://127.0.0.1:0");
+        builder.Services
+            .AddAuthentication("Fixture")
+            .AddScheme<AuthenticationSchemeOptions, FixtureAuthenticationHandler>("Fixture", null);
         builder.Services.AddUhpServer<FixtureBackend>(options =>
         {
             options.AuthenticationScheme = "Fixture";

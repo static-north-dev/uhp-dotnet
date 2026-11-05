@@ -4,7 +4,9 @@ namespace StaticNorth.Uhp.Client.Tests;
 
 internal sealed class PacketStream(string[] packets, int chunkSize = int.MaxValue, int delayMilliseconds = 0, bool blockAtEnd = false, bool failAtEnd = false) : Stream
 {
-    private readonly byte[][] _packets = packets.Select(Encoding.UTF8.GetBytes).ToArray();
+    private readonly byte[][] _packets = packets
+        .Select(Encoding.UTF8.GetBytes)
+        .ToArray();
     private int _packet;
     private int _offset;
 
@@ -39,7 +41,9 @@ internal sealed class PacketStream(string[] packets, int chunkSize = int.MaxValu
 
         var packet = _packets[_packet];
         var count = Math.Min(Math.Min(buffer.Length, packet.Length - _offset), chunkSize);
-        packet.AsMemory(_offset, count).CopyTo(buffer);
+        packet
+            .AsMemory(_offset, count)
+            .CopyTo(buffer);
         _offset += count;
 
         if (_offset == packet.Length)
@@ -57,7 +61,8 @@ internal sealed class PacketStream(string[] packets, int chunkSize = int.MaxValu
         base.Dispose(disposing);
     }
 
-    public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken) => ReadAsync(buffer.AsMemory(offset, count), cancellationToken).AsTask();
+    public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken) => ReadAsync(buffer.AsMemory(offset, count), cancellationToken)
+        .AsTask();
     public override int Read(byte[] buffer, int offset, int count) => throw new NotSupportedException();
     public override void Flush() => throw new NotSupportedException();
     public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();

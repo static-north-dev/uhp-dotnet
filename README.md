@@ -16,6 +16,8 @@ The client and Core have no ASP.NET Core or Valiant dependency. Protocol models 
 
 The server package provides transport and backend integration. The host supplies an agent runtime, persistence, and principal isolation. The deterministic fixture is test infrastructure. These packages do not contain a production agent runtime.
 
+See the [harness adapter roadmap](docs/harness-adapters-plan.md) for planned runtime integrations.
+
 ## Client usage
 
 After installing `StaticNorth.Uhp.Client` from a published release or the local package feed:
@@ -100,14 +102,14 @@ The SDK is pinned in `global.json`. Valiant Endpoints and Validation `1.2.1` res
 
 ```sh
 dotnet restore StaticNorth.Uhp.slnx --locked-mode
-dotnet run --project eng/StaticNorth.Uhp.SchemaGen --configuration Release -- --check
+dotnet run --project tools/StaticNorth.Uhp.SchemaGen --configuration Release -- --check
 dotnet build StaticNorth.Uhp.slnx --configuration Release --no-restore
 dotnet run --project tests/StaticNorth.Uhp.Client.Tests --configuration Release --no-build --no-restore -- --minimum-expected-tests 179
 dotnet format StaticNorth.Uhp.slnx --no-restore --verify-no-changes
 dotnet pack src/StaticNorth.Uhp.Core --configuration Release --no-build
 dotnet pack src/StaticNorth.Uhp.Client --configuration Release --no-build
 dotnet pack src/StaticNorth.Uhp.Server --configuration Release --no-build
-python3 eng/package-smoke.py
+python3 tools/package-smoke.py
 ```
 
 The smoke gate checks package metadata/notices/symbols, installs both sample consumers from the local feed with no SDK project references and a fresh package cache, publishes both with Native AOT and reflection-based JSON disabled, and runs the shared lifecycle scenario. It selects the patched .NET runtime/compiler `10.0.14`; override with `--runtime-version` when updating that pin. On an offline workstation with the dependencies cached, pass `--offline-cache /path/to/nuget/packages`. Native AOT requires the platform's native compiler toolchain.
@@ -120,7 +122,7 @@ dotnet run --project samples/StaticNorth.Uhp.Console --configuration Release
 
 The samples' NuGet configuration includes `artifacts/packages`. The packed smoke test uses SDK packages for both consumers; the reference host and fixture share non-packable implementation code.
 
-Read [server integration](docs/server.md), [schema maintenance](eng/README.md), and [interoperability evidence](docs/interoperability.md). The preview has **not been published**. Independent client interoperability with the two pinned servers remains a separate release gate.
+Read [server integration](docs/server.md), [repository tools](tools/README.md), and [interoperability evidence](docs/interoperability.md). The preview has **not been published**. Independent client interoperability with the two pinned servers remains a separate release gate.
 
 The [Codex reference deployment](docs/conformance-deployment.md) passed the unmodified official UHP **Full** suite for `2026-10-19`: **104 checks passed, zero skips, failures, or errors**. See the [verification record](docs/verification.md) for the tested host, report, and commands, and the [review plan](docs/full-conformance-plan.md) for scope and protocol decisions.
 

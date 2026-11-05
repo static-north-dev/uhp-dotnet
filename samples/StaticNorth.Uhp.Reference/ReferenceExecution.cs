@@ -62,11 +62,14 @@ public sealed class ReferenceExecution(string owner, string sessionId, UhpTaskRe
             budget = CancellationTokenSource.CreateLinkedTokenSource(runToken);
             budget.CancelAfter(TimeSpan.FromSeconds(Math.Min(seconds, MaximumTimeoutSeconds)));
             runToken = budget.Token;
-            result = await runtime.RunAsync(accepted, OnTextAsync, runToken).ConfigureAwait(false);
+            result = await runtime
+                .RunAsync(accepted, OnTextAsync, runToken)
+                .ConfigureAwait(false);
 
             if (accepted.CaptureArtifactsAsync is { } capture && (result.Status == UhpResponseStatus.Completed || result.Status == UhpResponseStatus.Incomplete))
             {
-                artifacts = await capture(runToken).ConfigureAwait(false);
+                artifacts = await capture(runToken)
+                    .ConfigureAwait(false);
             }
         }
         catch (OperationCanceledException) when (runToken.IsCancellationRequested)
@@ -247,7 +250,9 @@ public sealed class ReferenceExecution(string owner, string sessionId, UhpTaskRe
                 continue;
             }
 
-            await changed.WaitAsync(ct).ConfigureAwait(false);
+            await changed
+                .WaitAsync(ct)
+                .ConfigureAwait(false);
         }
     }
 }

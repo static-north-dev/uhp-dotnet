@@ -37,7 +37,8 @@ internal static partial class ReferencePlugins
                 }));
             }
 
-            if (!PluginNamePattern().IsMatch(manifest.Name))
+            if (!PluginNamePattern()
+                .IsMatch(manifest.Name))
             {
                 throw ReferenceBackend.Failure(422, "plugin_invalid", "The plugin name does not match its manifest schema.");
             }
@@ -136,7 +137,9 @@ internal static partial class ReferencePlugins
         {
             var file = files[index];
 
-            if (string.IsNullOrWhiteSpace(file.Path) || Path.IsPathRooted(file.Path) || file.Path.Contains('\\') || file.Path.Split('/').Any(part => part is "" or "." or "..") || !names.Add(file.Path) || (file.Content is null) == (file.ContentB64 is null))
+            if (string.IsNullOrWhiteSpace(file.Path) || Path.IsPathRooted(file.Path) || file.Path.Contains('\\') || file.Path
+                .Split('/')
+                .Any(part => part is "" or "." or "..") || !names.Add(file.Path) || (file.Content is null) == (file.ContentB64 is null))
             {
                 throw ReferenceBackend.Failure(422, code, "Invalid or duplicate package member.");
             }

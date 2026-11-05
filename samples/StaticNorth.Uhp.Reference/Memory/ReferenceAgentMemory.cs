@@ -29,9 +29,15 @@ internal sealed class ReferenceAgentMemory(ReferenceMemoryBackend backend, UhpRe
 
             try
             {
-                var memory = await backend.GetMemoryAsync(root.Id, context, ct).ConfigureAwait(false);
-                var children = await backend.ListMemoriesAsync(new() { Parent = root.Id }, context, ct).ConfigureAwait(false);
-                var standing = await backend.PrimeMemoryAsync(root.Id, new() { Budget = budget }, context, ct).ConfigureAwait(false);
+                var memory = await backend
+                    .GetMemoryAsync(root.Id, context, ct)
+                    .ConfigureAwait(false);
+                var children = await backend
+                    .ListMemoriesAsync(new() { Parent = root.Id }, context, ct)
+                    .ConfigureAwait(false);
+                var standing = await backend
+                    .PrimeMemoryAsync(root.Id, new() { Budget = budget }, context, ct)
+                    .ConfigureAwait(false);
                 result.AppendLine(Serialize(memory, Json.Memory));
                 result.AppendLine(Serialize(children, Json.MemoryList));
                 result.AppendLine(Serialize(standing, Json.MemoryPrime));
@@ -54,7 +60,9 @@ internal sealed class ReferenceAgentMemory(ReferenceMemoryBackend backend, UhpRe
 
         if (tool == "memory_list")
         {
-            return Serialize(await backend.ListMemoriesAsync(memory is null ? new() { Granted = true } : new() { Parent = memory }, context, ct).ConfigureAwait(false), Json.MemoryList);
+            return Serialize(await backend
+                .ListMemoriesAsync(memory is null ? new() { Granted = true } : new() { Parent = memory }, context, ct)
+                .ConfigureAwait(false), Json.MemoryList);
         }
 
         if (tool is "memory_remember" or "memory_revise" or "memory_forget" && !CanWrite)
@@ -71,12 +79,24 @@ internal sealed class ReferenceAgentMemory(ReferenceMemoryBackend backend, UhpRe
 
         return tool switch
         {
-            "memory_recall" when text is not null => Serialize(await backend.RecallMemoryAsync(memory, new() { Text = text, Limit = 10 }, context, ct).ConfigureAwait(false), Json.MemoryRecall),
-            "memory_graph" => Serialize(await backend.GraphMemoryAsync(memory, new() { Limit = 30 }, context, ct).ConfigureAwait(false), Json.MemoryGraph),
-            "memory_get" when record is not null => Serialize(await backend.GetMemoryRecordAsync(memory, record, new(), context, ct).ConfigureAwait(false), Json.MemoryRecord),
-            "memory_remember" when text is not null => Serialize(await backend.RememberRecordAsync(memory, new() { Content = Content(text), Title = Text(arguments, "title") }, context, ct).ConfigureAwait(false), Json.MemoryRecord),
-            "memory_revise" when text is not null && record is not null => Serialize(await backend.ReviseMemoryRecordAsync(memory, record, new() { Content = Content(text), Title = Text(arguments, "title") }, context, ct).ConfigureAwait(false), Json.MemoryRecord),
-            "memory_forget" when record is not null => Serialize(await backend.ForgetMemoryRecordAsync(memory, record, context, ct).ConfigureAwait(false), Json.MemoryRecord),
+            "memory_recall" when text is not null => Serialize(await backend
+                .RecallMemoryAsync(memory, new() { Text = text, Limit = 10 }, context, ct)
+                .ConfigureAwait(false), Json.MemoryRecall),
+            "memory_graph" => Serialize(await backend
+                .GraphMemoryAsync(memory, new() { Limit = 30 }, context, ct)
+                .ConfigureAwait(false), Json.MemoryGraph),
+            "memory_get" when record is not null => Serialize(await backend
+                .GetMemoryRecordAsync(memory, record, new(), context, ct)
+                .ConfigureAwait(false), Json.MemoryRecord),
+            "memory_remember" when text is not null => Serialize(await backend
+                .RememberRecordAsync(memory, new() { Content = Content(text), Title = Text(arguments, "title") }, context, ct)
+                .ConfigureAwait(false), Json.MemoryRecord),
+            "memory_revise" when text is not null && record is not null => Serialize(await backend
+                .ReviseMemoryRecordAsync(memory, record, new() { Content = Content(text), Title = Text(arguments, "title") }, context, ct)
+                .ConfigureAwait(false), Json.MemoryRecord),
+            "memory_forget" when record is not null => Serialize(await backend
+                .ForgetMemoryRecordAsync(memory, record, context, ct)
+                .ConfigureAwait(false), Json.MemoryRecord),
             _ => throw ReferenceBackend.Failure(422, "memory_invalid", "The requested tool or arguments are invalid.")
         };
     }

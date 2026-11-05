@@ -70,7 +70,9 @@ public sealed partial class ReferenceEnvironmentBackend
         try
         {
             Directory.CreateDirectory(work);
-            await ReferenceSandboxProcess.PrepareAsync(home, work, ct).ConfigureAwait(false);
+            await ReferenceSandboxProcess
+                .PrepareAsync(home, work, ct)
+                .ConfigureAwait(false);
 
             foreach (var file in files)
             {
@@ -81,7 +83,9 @@ public sealed partial class ReferenceEnvironmentBackend
 
                 var path = Path.Combine(work, file.Key);
                 Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-                await System.IO.File.WriteAllBytesAsync(path, file.Value, ct).ConfigureAwait(false);
+                await System.IO.File
+                    .WriteAllBytesAsync(path, file.Value, ct)
+                    .ConfigureAwait(false);
             }
 
             var packages = new List<Wire.EnvironmentPackage>();
@@ -91,28 +95,34 @@ public sealed partial class ReferenceEnvironmentBackend
             {
                 Stage(node, version, "python packages", log);
                 var python = ReferenceSandboxProcess.FindExecutable("python3");
-                await StepAsync(home, work, python, ["-m", "venv", "--copies", Path.Combine(work, ".venv")], log, ct).ConfigureAwait(false);
+                await StepAsync(home, work, python, ["-m", "venv", "--copies", Path.Combine(work, ".venv")], log, ct)
+                    .ConfigureAwait(false);
                 python = Path.Combine(work, ".venv", "bin", "python");
 
                 if (System.IO.File.Exists(Path.Combine(work, "requirements.txt")))
                 {
-                    await StepAsync(home, work, python, ["-m", "pip", "install", "--disable-pip-version-check", "--no-cache-dir", "-r", "requirements.txt"], log, ct).ConfigureAwait(false);
+                    await StepAsync(home, work, python, ["-m", "pip", "install", "--disable-pip-version-check", "--no-cache-dir", "-r", "requirements.txt"], log, ct)
+                        .ConfigureAwait(false);
                     Stage(node, version, "python packages", log);
                 }
 
                 if (System.IO.File.Exists(Path.Combine(work, "pyproject.toml")))
                 {
-                    await StepAsync(home, work, python, ["-m", "pip", "install", "--disable-pip-version-check", "--no-cache-dir", "."], log, ct).ConfigureAwait(false);
+                    await StepAsync(home, work, python, ["-m", "pip", "install", "--disable-pip-version-check", "--no-cache-dir", "."], log, ct)
+                        .ConfigureAwait(false);
                     Stage(node, version, "python packages", log);
                 }
 
                 foreach (var spec in configuration.Packages?.Pip ?? [])
                 {
-                    await StepAsync(home, work, python, ["-m", "pip", "install", "--disable-pip-version-check", "--no-cache-dir", "--", spec], log, ct).ConfigureAwait(false);
+                    await StepAsync(home, work, python, ["-m", "pip", "install", "--disable-pip-version-check", "--no-cache-dir", "--", spec], log, ct)
+                        .ConfigureAwait(false);
                     Stage(node, version, "python packages", log);
                 }
 
-                var installed = await ReferenceSandboxProcess.RunAsync(home, work, python, ["-m", "pip", "list", "--format=json", "--disable-pip-version-check"], ct).ConfigureAwait(false);
+                var installed = await ReferenceSandboxProcess
+                    .RunAsync(home, work, python, ["-m", "pip", "list", "--format=json", "--disable-pip-version-check"], ct)
+                    .ConfigureAwait(false);
 
                 if (installed.ExitCode != 0)
                 {
@@ -123,7 +133,16 @@ public sealed partial class ReferenceEnvironmentBackend
 
                 foreach (var package in list.RootElement.EnumerateArray())
                 {
-                    packages.Add(new() { Manager = "pip", Name = package.GetProperty("name").GetString()!, Version = package.GetProperty("version").GetString() });
+                    packages.Add(new()
+                    {
+                        Manager = "pip",
+                        Name = package
+                            .GetProperty("name")
+                            .GetString()!,
+                        Version = package
+                            .GetProperty("version")
+                            .GetString()
+                    });
                 }
             }
 
@@ -134,16 +153,20 @@ public sealed partial class ReferenceEnvironmentBackend
 
                 if (System.IO.File.Exists(Path.Combine(work, "package.json")))
                 {
-                    await StepAsync(home, work, npm, [System.IO.File.Exists(Path.Combine(work, "package-lock.json")) ? "ci" : "install", "--no-audit", "--no-fund"], log, ct).ConfigureAwait(false);
+                    await StepAsync(home, work, npm, [System.IO.File.Exists(Path.Combine(work, "package-lock.json")) ? "ci" : "install", "--no-audit", "--no-fund"], log, ct)
+                        .ConfigureAwait(false);
                 }
 
                 foreach (var spec in configuration.Packages?.Npm ?? [])
                 {
-                    await StepAsync(home, work, npm, ["install", "--no-audit", "--no-fund", "--", spec], log, ct).ConfigureAwait(false);
+                    await StepAsync(home, work, npm, ["install", "--no-audit", "--no-fund", "--", spec], log, ct)
+                        .ConfigureAwait(false);
                     Stage(node, version, "node packages", log);
                 }
 
-                var installed = await ReferenceSandboxProcess.RunAsync(home, work, npm, ["list", "--json", "--depth=0"], ct).ConfigureAwait(false);
+                var installed = await ReferenceSandboxProcess
+                    .RunAsync(home, work, npm, ["list", "--json", "--depth=0"], ct)
+                    .ConfigureAwait(false);
                 using var list = JsonDocument.Parse(installed.Output);
 
                 if (list.RootElement.TryGetProperty("dependencies", out var dependencies))
@@ -163,11 +186,13 @@ public sealed partial class ReferenceEnvironmentBackend
             if (System.IO.File.Exists(Path.Combine(work, "setup.sh")))
             {
                 Stage(node, version, "setup.sh", log);
-                await StepAsync(home, work, "/bin/sh", ["setup.sh"], log, ct).ConfigureAwait(false);
+                await StepAsync(home, work, "/bin/sh", ["setup.sh"], log, ct)
+                    .ConfigureAwait(false);
             }
 
             Stage(node, version, "finishing", log);
-            await PublishSnapshotAsync(work, version.Root, ct).ConfigureAwait(false);
+            await PublishSnapshotAsync(work, version.Root, ct)
+                .ConfigureAwait(false);
 
             lock (_gate)
             {
@@ -202,8 +227,12 @@ public sealed partial class ReferenceEnvironmentBackend
 
     private static async Task StepAsync(string home, string cwd, string executable, string[] arguments, StringBuilder log, CancellationToken ct)
     {
-        var result = await ReferenceSandboxProcess.RunAsync(home, cwd, executable, arguments, ct).ConfigureAwait(false);
-        log.AppendLine(result.Output).AppendLine(result.Error);
+        var result = await ReferenceSandboxProcess
+            .RunAsync(home, cwd, executable, arguments, ct)
+            .ConfigureAwait(false);
+        log
+            .AppendLine(result.Output)
+            .AppendLine(result.Error);
 
         if (result.ExitCode != 0)
         {
@@ -227,19 +256,27 @@ public sealed partial class ReferenceEnvironmentBackend
 
             var path = Path.Combine(target, relative);
             Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-            var bytes = await ReferenceFileSystem.ReadAsync(work, relative, MaximumImportBytes, ct).ConfigureAwait(false);
+            var bytes = await ReferenceFileSystem
+                .ReadAsync(work, relative, MaximumImportBytes, ct)
+                .ConfigureAwait(false);
 
             if (bytes is null)
             {
                 throw new IOException("A build output is unsafe or exceeds the snapshot file limit.");
             }
 
-            if (relative.StartsWith(".venv/bin/", StringComparison.Ordinal) && bytes.AsSpan().StartsWith("#!"u8))
+            if (relative.StartsWith(".venv/bin/", StringComparison.Ordinal) && bytes
+                .AsSpan()
+                .StartsWith("#!"u8))
             {
-                bytes = Encoding.UTF8.GetBytes(Encoding.UTF8.GetString(bytes).Replace(work, target, StringComparison.Ordinal));
+                bytes = Encoding.UTF8.GetBytes(Encoding.UTF8
+                    .GetString(bytes)
+                    .Replace(work, target, StringComparison.Ordinal));
             }
 
-            await System.IO.File.WriteAllBytesAsync(path, bytes, ct).ConfigureAwait(false);
+            await System.IO.File
+                .WriteAllBytesAsync(path, bytes, ct)
+                .ConfigureAwait(false);
 
             if (!OperatingSystem.IsWindows())
             {
@@ -259,26 +296,36 @@ public sealed partial class ReferenceEnvironmentBackend
             throw Invalid("Repository imports require an HTTPS URL and a valid ref.");
         }
 
-        var work = Path.Combine(Path.GetFullPath(root), "imports", Guid.NewGuid().ToString("N"));
+        var work = Path.Combine(Path.GetFullPath(root), "imports", Guid
+            .NewGuid()
+            .ToString("N"));
         Directory.CreateDirectory(work);
         var home = work + "-sandbox";
 
         try
         {
-            await ReferenceSandboxProcess.PrepareAsync(home, work, ct).ConfigureAwait(false);
+            await ReferenceSandboxProcess
+                .PrepareAsync(home, work, ct)
+                .ConfigureAwait(false);
             var git = ReferenceSandboxProcess.FindExecutable("git");
             var log = new StringBuilder();
-            await StepAsync(home, work, git, ["clone", "--no-checkout", "--depth=1", "--", url, "repository"], log, ct).ConfigureAwait(false);
+            await StepAsync(home, work, git, ["clone", "--no-checkout", "--depth=1", "--", url, "repository"], log, ct)
+                .ConfigureAwait(false);
 
             if (reference is not null)
             {
-                await StepAsync(home, work, git, ["-C", "repository", "fetch", "--depth=1", "origin", reference], log, ct).ConfigureAwait(false);
+                await StepAsync(home, work, git, ["-C", "repository", "fetch", "--depth=1", "origin", reference], log, ct)
+                    .ConfigureAwait(false);
             }
 
             var archive = Path.Combine(work, "source.tar");
-            await StepAsync(home, work, git, ["-C", "repository", "archive", "--format=tar", "--output=" + archive, reference is null ? "HEAD" : "FETCH_HEAD"], log, ct).ConfigureAwait(false);
-            var bytes = await System.IO.File.ReadAllBytesAsync(archive, ct).ConfigureAwait(false);
-            return (await ReadArchiveAsync(bytes, ct).ConfigureAwait(false)).Members;
+            await StepAsync(home, work, git, ["-C", "repository", "archive", "--format=tar", "--output=" + archive, reference is null ? "HEAD" : "FETCH_HEAD"], log, ct)
+                .ConfigureAwait(false);
+            var bytes = await System.IO.File
+                .ReadAllBytesAsync(archive, ct)
+                .ConfigureAwait(false);
+            return (await ReadArchiveAsync(bytes, ct)
+                .ConfigureAwait(false)).Members;
         }
         finally
         {
@@ -296,15 +343,22 @@ public sealed partial class ReferenceEnvironmentBackend
 
     public async ValueTask DisposeAsync()
     {
-        await _stopping.CancelAsync().ConfigureAwait(false);
+        await _stopping
+            .CancelAsync()
+            .ConfigureAwait(false);
         Task[] builds;
 
         lock (_gate)
         {
-            builds = _retained.SelectMany(node => node.Versions.Values).Select(version => version.Completion).ToArray();
+            builds = _retained
+                .SelectMany(node => node.Versions.Values)
+                .Select(version => version.Completion)
+                .ToArray();
         }
 
-        await Task.WhenAll(builds).ConfigureAwait(false);
+        await Task
+            .WhenAll(builds)
+            .ConfigureAwait(false);
         _registries.Dispose();
         _stopping.Dispose();
     }

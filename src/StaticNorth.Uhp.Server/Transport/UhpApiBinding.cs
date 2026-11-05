@@ -39,7 +39,9 @@ internal static class UhpApiBinding
         try
         {
             using var stream = new LimitedReadStream(http.Request.Body, http.RequestServices.GetRequiredService<UhpServerOptions>().MaximumRequestBodyBytes);
-            var value = await JsonSerializer.DeserializeAsync(stream, metadata, http.RequestAborted).ConfigureAwait(false);
+            var value = await JsonSerializer
+                .DeserializeAsync(stream, metadata, http.RequestAborted)
+                .ConfigureAwait(false);
 
             if (value is null && !optional)
             {
@@ -73,7 +75,9 @@ internal static class UhpApiBinding
 
             try
             {
-                while (await reader.ReadNextSectionAsync(http.RequestAborted).ConfigureAwait(false) is { } section)
+                while (await reader
+                    .ReadNextSectionAsync(http.RequestAborted)
+                    .ConfigureAwait(false) is { } section)
                 {
                     if (ContentDispositionHeaderValue.TryParse(section.ContentDisposition, out var disposition) && (disposition.FileName.HasValue || disposition.FileNameStar.HasValue))
                     {

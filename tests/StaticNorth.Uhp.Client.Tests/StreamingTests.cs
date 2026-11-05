@@ -18,18 +18,37 @@ public sealed class StreamingTests
     public async Task HandlesArbitraryFragmentsCommentsCrLfAndMultilineData(int chunkSize)
     {
         var unknown = "data: {\"type\":\"future.progress\",\ndata: \"sequence_number\":1,\"vendor\":{\"retained\":42}}\n\n";
-        using var bytes = new PacketStream([": keepalive\r\n\r\n" + TestData.Frame(TestData.Created()).Replace("\n", "\r\n", StringComparison.Ordinal) + unknown + TestData.Frame(TestData.Terminal(2))], chunkSize);
+        using var bytes = new PacketStream([": keepalive\r\n\r\n" + TestData
+            .Frame(TestData.Created())
+            .Replace("\n", "\r\n", StringComparison.Ordinal) + unknown + TestData.Frame(TestData.Terminal(2))], chunkSize);
         using var handler = Handler(bytes);
         using var http = Http(handler);
         var client = await UhpClient.ConnectAsync(http, new());
         var updates = await CollectAsync(client.StreamAsync(new UhpTaskRequest("Hello")));
-        await Assert.That(updates.Count).IsEqualTo(3);
-        await Assert.That(updates[0]).IsAssignableTo<UhpResponseCreated>();
-        await Assert.That(updates[1]).IsAssignableTo<UhpUnknownEvent>();
-        await Assert.That(updates[1].Raw.GetProperty("vendor").GetProperty("retained").GetInt32()).IsEqualTo(42);
-        await Assert.That(updates[2]).IsAssignableTo<UhpResponseCompleted>();
-        await Assert.That(handler.Posts).IsEqualTo(1);
-        await Assert.That(bytes.WasDisposed).IsTrue();
+        await Assert
+            .That(updates.Count)
+            .IsEqualTo(3);
+        await Assert
+            .That(updates[0])
+            .IsAssignableTo<UhpResponseCreated>();
+        await Assert
+            .That(updates[1])
+            .IsAssignableTo<UhpUnknownEvent>();
+        await Assert
+            .That(updates[1].Raw
+                .GetProperty("vendor")
+                .GetProperty("retained")
+                .GetInt32())
+            .IsEqualTo(42);
+        await Assert
+            .That(updates[2])
+            .IsAssignableTo<UhpResponseCompleted>();
+        await Assert
+            .That(handler.Posts)
+            .IsEqualTo(1);
+        await Assert
+            .That(bytes.WasDisposed)
+            .IsTrue();
     }
 
     [Test]
@@ -41,12 +60,27 @@ public sealed class StreamingTests
         using var handler = Handler(bytes);
         using var http = Http(handler);
         var client = await UhpClient.ConnectAsync(http, new());
-        var error = (await Assert.That((Func<Task>)(() => CollectAsync(client.StreamAsync(new UhpTaskRequest("Hello") { IdempotencyKey = "original" })))).ThrowsExactly<UhpStreamException>())!;
-        await Assert.That(error.ResponseId).IsEqualTo("resp_test");
-        await Assert.That(error.LastSequenceNumber).IsEqualTo(0L);
-        await Assert.That(error.IdempotencyKey).IsEqualTo("original");
-        await Assert.That(error.InnerException).IsAssignableTo<UhpProtocolException>();
-        await Assert.That(handler.Posts).IsEqualTo(1);
+        var error = (await Assert
+            .That((Func<Task>)(() => CollectAsync(client.StreamAsync(new UhpTaskRequest("Hello") { IdempotencyKey = "original" }))))
+            .ThrowsExactly<UhpStreamException>())!;
+        await Assert
+            .That(error.ResponseId)
+            .IsEqualTo("resp_test");
+        await Assert
+            .That(error.LastSequenceNumber)
+            .IsEqualTo(0L);
+        await Assert
+            .That(error.IdempotencyKey)
+            .IsEqualTo("original");
+        await Assert
+            .That(error.ExecutionOutcomeUnknown)
+            .IsTrue();
+        await Assert
+            .That(error.InnerException)
+            .IsAssignableTo<UhpProtocolException>();
+        await Assert
+            .That(handler.Posts)
+            .IsEqualTo(1);
     }
 
     [Test]
@@ -58,13 +92,25 @@ public sealed class StreamingTests
         using var handler = Handler(bytes);
         using var http = Http(handler);
         var client = await UhpClient.ConnectAsync(http, new());
-        var error = (await Assert.That((Func<Task>)(() => CollectAsync(client.StreamAsync(new UhpTaskRequest("Hello"))))).ThrowsExactly<UhpStreamException>())!;
-        await Assert.That(error.ResponseId).IsEqualTo("resp_test");
-        await Assert.That(error.LastSequenceNumber).IsEqualTo(0L);
+        var error = (await Assert
+            .That((Func<Task>)(() => CollectAsync(client.StreamAsync(new UhpTaskRequest("Hello")))))
+            .ThrowsExactly<UhpStreamException>())!;
+        await Assert
+            .That(error.ResponseId)
+            .IsEqualTo("resp_test");
+        await Assert
+            .That(error.LastSequenceNumber)
+            .IsEqualTo(0L);
         var recovered = await client.GetResponseAsync(error.ResponseId!);
-        await Assert.That(recovered.Status).IsEqualTo(UhpResponseStatus.Completed);
-        await Assert.That(handler.Posts).IsEqualTo(1);
-        await Assert.That(handler.Requests).IsEqualTo(3);
+        await Assert
+            .That(recovered.Status)
+            .IsEqualTo(UhpResponseStatus.Completed);
+        await Assert
+            .That(handler.Posts)
+            .IsEqualTo(1);
+        await Assert
+            .That(handler.Requests)
+            .IsEqualTo(3);
     }
 
     [Test]
@@ -77,10 +123,21 @@ public sealed class StreamingTests
         using var handler = Handler(bytes);
         using var http = Http(handler);
         var client = await UhpClient.ConnectAsync(http, new());
-        var error = (await Assert.That((Func<Task>)(() => CollectAsync(client.StreamAsync(new UhpTaskRequest("Hello") { IdempotencyKey = "recover-me" })))).ThrowsExactly<UhpStreamException>())!;
-        await Assert.That(error.ResponseId).IsNull();
-        await Assert.That(error.LastSequenceNumber).IsNull();
-        await Assert.That(error.IdempotencyKey).IsEqualTo("recover-me");
+        var error = (await Assert
+            .That((Func<Task>)(() => CollectAsync(client.StreamAsync(new UhpTaskRequest("Hello") { IdempotencyKey = "recover-me" }))))
+            .ThrowsExactly<UhpStreamException>())!;
+        await Assert
+            .That(error.ResponseId)
+            .IsNull();
+        await Assert
+            .That(error.LastSequenceNumber)
+            .IsNull();
+        await Assert
+            .That(error.IdempotencyKey)
+            .IsEqualTo("recover-me");
+        await Assert
+            .That(error.ExecutionOutcomeUnknown)
+            .IsTrue();
     }
 
     [Test]
@@ -92,8 +149,12 @@ public sealed class StreamingTests
         using var http = Http(handler);
         var client = await UhpClient.ConnectAsync(http, new());
         var updates = await CollectAsync(client.StreamAsync(new UhpTaskRequest("Hello")));
-        await Assert.That(updates[1]).IsAssignableTo<UhpErrorEvent>();
-        await Assert.That(((UhpResponseFailed)updates[2]).Response.Status).IsEqualTo(UhpResponseStatus.Cancelled);
+        await Assert
+            .That(updates[1])
+            .IsAssignableTo<UhpErrorEvent>();
+        await Assert
+            .That(((UhpResponseFailed)updates[2]).Response.Status)
+            .IsEqualTo(UhpResponseStatus.Cancelled);
     }
 
     [Test]
@@ -105,8 +166,14 @@ public sealed class StreamingTests
         var client = await UhpClient.ConnectAsync(http, new());
         var updates = await CollectAsync(client.StreamAsync(new UhpTaskRequest("Hello")));
         var terminal = (UhpResponseFailed)updates[1];
-        await Assert.That(terminal.Response.Status.Value).IsEqualTo("vendor_terminal");
-        await Assert.That(terminal.Response.Raw.GetProperty("status").GetString()).IsEqualTo("vendor_terminal");
+        await Assert
+            .That(terminal.Response.Status.Value)
+            .IsEqualTo("vendor_terminal");
+        await Assert
+            .That(terminal.Response.Raw
+                .GetProperty("status")
+                .GetString())
+            .IsEqualTo("vendor_terminal");
     }
 
     [Test]
@@ -119,13 +186,23 @@ public sealed class StreamingTests
         var stream = client.StreamAsync(new UhpTaskRequest("Hello"));
         await using (var reader = stream.GetAsyncEnumerator())
         {
-            await Assert.That(() => stream.GetAsyncEnumerator()).ThrowsExactly<InvalidOperationException>();
-            await Assert.That(await reader.MoveNextAsync()).IsTrue();
+            await Assert
+                .That(() => stream.GetAsyncEnumerator())
+                .ThrowsExactly<InvalidOperationException>();
+            await Assert
+                .That(await reader.MoveNextAsync())
+                .IsTrue();
         }
 
-        await Assert.That(() => stream.GetAsyncEnumerator()).ThrowsExactly<InvalidOperationException>();
-        await Assert.That(handler.Posts).IsEqualTo(1);
-        await Assert.That(bytes.WasDisposed).IsTrue();
+        await Assert
+            .That(() => stream.GetAsyncEnumerator())
+            .ThrowsExactly<InvalidOperationException>();
+        await Assert
+            .That(handler.Posts)
+            .IsEqualTo(1);
+        await Assert
+            .That(bytes.WasDisposed)
+            .IsTrue();
     }
 
     [Test]
@@ -136,11 +213,19 @@ public sealed class StreamingTests
         using var http = Http(handler);
         var client = await UhpClient.ConnectAsync(http, new());
         using var cancellation = new CancellationTokenSource();
-        await using var reader = client.StreamAsync(new UhpTaskRequest("Hello")).GetAsyncEnumerator(cancellation.Token);
-        await Assert.That(await reader.MoveNextAsync()).IsTrue();
+        await using var reader = client
+            .StreamAsync(new UhpTaskRequest("Hello"))
+            .GetAsyncEnumerator(cancellation.Token);
+        await Assert
+            .That(await reader.MoveNextAsync())
+            .IsTrue();
         cancellation.Cancel();
-        await Assert.That((Func<Task>)(async () => await reader.MoveNextAsync())).Throws<OperationCanceledException>();
-        await Assert.That(handler.Posts).IsEqualTo(1);
+        await Assert
+            .That((Func<Task>)(async () => await reader.MoveNextAsync()))
+            .Throws<OperationCanceledException>();
+        await Assert
+            .That(handler.Posts)
+            .IsEqualTo(1);
     }
 
     [Test]
@@ -152,8 +237,12 @@ public sealed class StreamingTests
         var client = await UhpClient.ConnectAsync(http, new());
         using var cancellation = new CancellationTokenSource();
         cancellation.Cancel();
-        await Assert.That((Func<Task>)(() => CollectAsync(client.StreamAsync(new UhpTaskRequest("Hello"), cancellation.Token)))).Throws<OperationCanceledException>();
-        await Assert.That(handler.Posts).IsEqualTo(0);
+        await Assert
+            .That((Func<Task>)(() => CollectAsync(client.StreamAsync(new UhpTaskRequest("Hello"), cancellation.Token))))
+            .Throws<OperationCanceledException>();
+        await Assert
+            .That(handler.Posts)
+            .IsEqualTo(0);
     }
 
     [Test]
@@ -165,7 +254,9 @@ public sealed class StreamingTests
         using var http = Http(handler);
         var client = await UhpClient.ConnectAsync(http, new() { StreamInactivityTimeout = TimeSpan.FromMilliseconds(150) });
         var updates = await CollectAsync(client.StreamAsync(new UhpTaskRequest("Hello")));
-        await Assert.That(updates.Count).IsEqualTo(2);
+        await Assert
+            .That(updates.Count)
+            .IsEqualTo(2);
     }
 
     [Test]
@@ -176,10 +267,18 @@ public sealed class StreamingTests
         using var handler = Handler(bytes);
         using var http = Http(handler);
         var client = await UhpClient.ConnectAsync(http, new() { StreamInactivityTimeout = TimeSpan.FromMilliseconds(50) });
-        var error = (await Assert.That((Func<Task>)(() => CollectAsync(client.StreamAsync(new UhpTaskRequest("Hello"))))).ThrowsExactly<UhpStreamException>())!;
-        await Assert.That(error.InnerException).IsAssignableTo<TimeoutException>();
-        await Assert.That(error.ResponseId).IsEqualTo("resp_test");
-        await Assert.That(handler.Posts).IsEqualTo(1);
+        var error = (await Assert
+            .That((Func<Task>)(() => CollectAsync(client.StreamAsync(new UhpTaskRequest("Hello")))))
+            .ThrowsExactly<UhpStreamException>())!;
+        await Assert
+            .That(error.InnerException)
+            .IsAssignableTo<TimeoutException>();
+        await Assert
+            .That(error.ResponseId)
+            .IsEqualTo("resp_test");
+        await Assert
+            .That(handler.Posts)
+            .IsEqualTo(1);
     }
 
     [Test]
@@ -192,9 +291,15 @@ public sealed class StreamingTests
         foreach (var update in events)
         {
             var parsed = UhpEventJson.Parse(UhpEventJson.Serialize(update));
-            await Assert.That(parsed.GetType()).IsEqualTo(update.GetType());
-            await Assert.That(parsed.Type).IsEqualTo(update.Type);
-            await Assert.That(parsed.SequenceNumber).IsEqualTo(update.SequenceNumber);
+            await Assert
+                .That(parsed.GetType())
+                .IsEqualTo(update.GetType());
+            await Assert
+                .That(parsed.Type)
+                .IsEqualTo(update.Type);
+            await Assert
+                .That(parsed.SequenceNumber)
+                .IsEqualTo(update.SequenceNumber);
         }
     }
 

@@ -21,32 +21,44 @@ internal sealed class SchemaGenerator(string root)
 
     public async Task RefreshAsync(CancellationToken ct = default)
     {
-        var manifest = await ReadManifestAsync(ct).ConfigureAwait(false);
+        var manifest = await ReadManifestAsync(ct)
+            .ConfigureAwait(false);
         using var http = new HttpClient();
 
         foreach (var file in manifest["files"]!.AsArray())
         {
             var url = $"https://raw.githubusercontent.com/HarnessRouter/harnessrouter/{manifest["commit"]}/{file!["upstreamPath"]}";
-            var bytes = await http.GetByteArrayAsync(url, ct).ConfigureAwait(false);
+            var bytes = await http
+                .GetByteArrayAsync(url, ct)
+                .ConfigureAwait(false);
             VerifyHash(bytes, file["sha256"]!.GetValue<string>());
-            await File.WriteAllBytesAsync(Path.Combine(root, "spec/upstream", file["path"]!.GetValue<string>()), bytes, ct).ConfigureAwait(false);
+            await File
+                .WriteAllBytesAsync(Path.Combine(root, "spec/upstream", file["path"]!.GetValue<string>()), bytes, ct)
+                .ConfigureAwait(false);
         }
     }
 
     public async Task GenerateAsync(bool check, CancellationToken ct = default)
     {
-        var manifest = await ReadManifestAsync(ct).ConfigureAwait(false);
+        var manifest = await ReadManifestAsync(ct)
+            .ConfigureAwait(false);
 
         foreach (var file in manifest["files"]!.AsArray())
         {
-            var bytes = await File.ReadAllBytesAsync(Path.Combine(root, "spec/upstream", file!["path"]!.GetValue<string>()), ct).ConfigureAwait(false);
+            var bytes = await File
+                .ReadAllBytesAsync(Path.Combine(root, "spec/upstream", file!["path"]!.GetValue<string>()), ct)
+                .ConfigureAwait(false);
             VerifyHash(bytes, file["sha256"]!.GetValue<string>());
         }
 
-        _definitions = JsonNode.Parse(await File.ReadAllTextAsync(Path.Combine(root, "spec/upstream/uhp-2026-10-19.schema.json"), ct).ConfigureAwait(false))!["$defs"]!.AsObject();
+        _definitions = JsonNode.Parse(await File
+            .ReadAllTextAsync(Path.Combine(root, "spec/upstream/uhp-2026-10-19.schema.json"), ct)
+            .ConfigureAwait(false))!["$defs"]!.AsObject();
 
         // Plugins §3 accepts an installation containing files only; Plugin is the derived read shape.
-        var installation = _definitions["Plugin"]!.DeepClone().AsObject();
+        var installation = _definitions["Plugin"]!
+            .DeepClone()
+            .AsObject();
         installation["required"] = new JsonArray();
         _definitions["PluginInstall"] = installation;
         _definitions["HarnessCreate"]!["properties"]!["plugins"]!["items"] = new JsonObject { ["$ref"] = "#/$defs/PluginInstall" };
@@ -79,7 +91,10 @@ internal sealed class SchemaGenerator(string root)
 
         var output = Path.Combine(root, "src/StaticNorth.Uhp.Core/Serialization/Generated");
         Directory.CreateDirectory(output);
-        var unexpected = Directory.GetFiles(output, "*.g.cs").Where(path => !_files.ContainsKey(Path.GetFileName(path))).ToArray();
+        var unexpected = Directory
+            .GetFiles(output, "*.g.cs")
+            .Where(path => !_files.ContainsKey(Path.GetFileName(path)))
+            .ToArray();
 
         if (check && unexpected.Length > 0)
         {
@@ -98,23 +113,33 @@ internal sealed class SchemaGenerator(string root)
 
             if (check)
             {
-                if (!File.Exists(path) || await File.ReadAllTextAsync(path, ct).ConfigureAwait(false) != normalized)
+                if (!File.Exists(path) || await File
+                    .ReadAllTextAsync(path, ct)
+                    .ConfigureAwait(false) != normalized)
                 {
                     throw new InvalidOperationException($"Generated schema output differs: {name}");
                 }
             }
             else
             {
-                await File.WriteAllTextAsync(path, normalized, Utf8WithoutBom, ct).ConfigureAwait(false);
+                await File
+                    .WriteAllTextAsync(path, normalized, Utf8WithoutBom, ct)
+                    .ConfigureAwait(false);
             }
         }
 
         Console.WriteLine($"{(check ? "Verified" : "Generated")} {_files.Count} files from pinned UHP schema; all input hashes verified.");
         var contracts = new ContractGenerator(root, _definitions);
         var api = new ApiGenerator(root, contracts);
-        await api.PrepareAsync(ct).ConfigureAwait(false);
-        await contracts.GenerateAsync(check, ct).ConfigureAwait(false);
-        await api.GenerateAsync(check, ct).ConfigureAwait(false);
+        await api
+            .PrepareAsync(ct)
+            .ConfigureAwait(false);
+        await contracts
+            .GenerateAsync(check, ct)
+            .ConfigureAwait(false);
+        await api
+            .GenerateAsync(check, ct)
+            .ConfigureAwait(false);
     }
 
     private void EmitObject(string name, JsonObject schema)
@@ -124,7 +149,9 @@ internal sealed class SchemaGenerator(string root)
             return;
         }
 
-        var required = schema["required"]?.AsArray().Select(value => value!.GetValue<string>()).ToHashSet(StringComparer.Ordinal) ?? [];
+        var required = schema["required"]?.AsArray()
+            .Select(value => value!.GetValue<string>())
+            .ToHashSet(StringComparer.Ordinal) ?? [];
         var source = new StringBuilder(Header);
 
         if (name == "OutputItem")
@@ -169,7 +196,9 @@ internal sealed class SchemaGenerator(string root)
 
         if (schema["$ref"] is JsonValue reference)
         {
-            var target = reference.GetValue<string>().Split('/')[^1];
+            var target = reference
+                .GetValue<string>()
+                .Split('/')[^1];
 
             if (target is "McpServer" or "Skill" or "Plugin")
             {
@@ -189,7 +218,9 @@ internal sealed class SchemaGenerator(string root)
 
         if (schema["oneOf"] is JsonArray union)
         {
-            var variants = union.Where(node => node!["type"]?.ToString() != "null").ToArray();
+            var variants = union
+                .Where(node => node!["type"]?.ToString() != "null")
+                .ToArray();
             return variants.Length == 1 ? GetType(name, variants[0]!.AsObject(), path) : "JsonElement";
         }
 
@@ -232,17 +263,23 @@ internal sealed class SchemaGenerator(string root)
             schema["oneOf"] is JsonArray variants && variants.Any(node => node!["type"]?.ToString() == "null");
     }
 
-    private async Task<JsonObject> ReadManifestAsync(CancellationToken ct) => JsonNode.Parse(await File.ReadAllTextAsync(Path.Combine(root, "spec/upstream/manifest.json"), ct).ConfigureAwait(false))!.AsObject();
+    private async Task<JsonObject> ReadManifestAsync(CancellationToken ct) => JsonNode.Parse(await File
+        .ReadAllTextAsync(Path.Combine(root, "spec/upstream/manifest.json"), ct)
+        .ConfigureAwait(false))!.AsObject();
 
     private static void VerifyHash(byte[] bytes, string expected)
     {
-        if (!Convert.ToHexStringLower(SHA256.HashData(bytes)).Equals(expected, StringComparison.Ordinal))
+        if (!Convert
+            .ToHexStringLower(SHA256.HashData(bytes))
+            .Equals(expected, StringComparison.Ordinal))
         {
             throw new InvalidOperationException("Pinned upstream input failed SHA-256 verification.");
         }
     }
 
-    private static string Pascal(string value) => string.Concat(value.Split('_').Select(part => char.ToUpperInvariant(part[0]) + part[1..]));
+    private static string Pascal(string value) => string.Concat(value
+        .Split('_')
+        .Select(part => char.ToUpperInvariant(part[0]) + part[1..]));
 
-    private const string Header = "// <auto-generated />\n// UHP 2026-10-19 at 80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6. Run eng/StaticNorth.Uhp.SchemaGen to regenerate.\n#nullable enable\nusing System.Text.Json;\nusing System.Text.Json.Serialization;\n\nnamespace StaticNorth.Uhp.Core.Serialization;\n\n";
+    private const string Header = "// <auto-generated />\n// UHP 2026-10-19 at 80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6. Run tools/StaticNorth.Uhp.SchemaGen to regenerate.\n#nullable enable\nusing System.Text.Json;\nusing System.Text.Json.Serialization;\n\nnamespace StaticNorth.Uhp.Core.Serialization;\n\n";
 }

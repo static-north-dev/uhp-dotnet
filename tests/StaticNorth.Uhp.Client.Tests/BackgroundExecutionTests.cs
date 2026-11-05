@@ -18,8 +18,12 @@ public sealed class BackgroundExecutionTests
         using var http = server.CreateHttp();
         var client = await ServerTestHost.ConnectAsync(http);
         var accepted = await client.SubmitBackgroundAsync(new("hold"));
-        await Assert.That(accepted.Status).IsEqualTo(UhpResponseStatus.InProgress);
-        await Assert.That((await client.GetResponseAsync(accepted.Id)).Status).IsEqualTo(UhpResponseStatus.InProgress);
+        await Assert
+            .That(accepted.Status)
+            .IsEqualTo(UhpResponseStatus.InProgress);
+        await Assert
+            .That((await client.GetResponseAsync(accepted.Id)).Status)
+            .IsEqualTo(UhpResponseStatus.InProgress);
         await client.CancelResponseAsync(accepted.Id);
         using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(5));
 
@@ -28,7 +32,9 @@ public sealed class BackgroundExecutionTests
             await Task.Delay(10, timeout.Token);
         }
 
-        await Assert.That((await client.GetResponseAsync(accepted.Id)).Status).IsEqualTo(UhpResponseStatus.Cancelled);
+        await Assert
+            .That((await client.GetResponseAsync(accepted.Id)).Status)
+            .IsEqualTo(UhpResponseStatus.Cancelled);
     }
 
     [Test]
@@ -41,12 +47,20 @@ public sealed class BackgroundExecutionTests
         var first = await client.SubmitBackgroundAsync(request);
         var replay = client.SubmitBackgroundAsync(request);
         await Task.Delay(50);
-        await Assert.That(replay.IsCompleted).IsFalse();
+        await Assert
+            .That(replay.IsCompleted)
+            .IsFalse();
         await client.CancelResponseAsync(first.Id);
         var final = await replay.WaitAsync(TimeSpan.FromSeconds(5));
-        await Assert.That(final.Id).IsEqualTo(first.Id);
-        await Assert.That(final.Status).IsEqualTo(UhpResponseStatus.Cancelled);
-        await Assert.That(server.Backend.SubmissionCount).IsEqualTo(1);
+        await Assert
+            .That(final.Id)
+            .IsEqualTo(first.Id);
+        await Assert
+            .That(final.Status)
+            .IsEqualTo(UhpResponseStatus.Cancelled);
+        await Assert
+            .That(server.Backend.SubmissionCount)
+            .IsEqualTo(1);
     }
 
     [Test]
@@ -56,9 +70,15 @@ public sealed class BackgroundExecutionTests
         using var http = server.CreateHttp();
         var client = await ServerTestHost.ConnectAsync(http);
         var accepted = await client.SubmitBackgroundAsync(new("hold") { Store = false });
-        await Assert.That(accepted.Status).IsEqualTo(UhpResponseStatus.InProgress);
-        var error = (await Assert.That((Func<Task>)(async () => await client.GetResponseAsync(accepted.Id))).ThrowsExactly<UhpApiException>())!;
-        await Assert.That(error.Code).IsEqualTo("response_not_found");
+        await Assert
+            .That(accepted.Status)
+            .IsEqualTo(UhpResponseStatus.InProgress);
+        var error = (await Assert
+            .That((Func<Task>)(async () => await client.GetResponseAsync(accepted.Id)))
+            .ThrowsExactly<UhpApiException>())!;
+        await Assert
+            .That(error.Code)
+            .IsEqualTo("response_not_found");
         await client.CancelResponseAsync(accepted.Id);
     }
 
@@ -73,12 +93,22 @@ public sealed class BackgroundExecutionTests
         };
         request.Headers.Authorization = new("Bearer", "fixture-alice");
         using var response = await http.SendAsync(request);
-        await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
+        await Assert
+            .That(response.StatusCode)
+            .IsEqualTo(HttpStatusCode.OK);
         using var document = await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync());
-        var ignored = document.RootElement.GetProperty("metadata").GetProperty("ignored_fields");
-        await Assert.That(ignored.GetArrayLength()).IsEqualTo(2);
-        await Assert.That(ignored[0].GetString()).IsEqualTo("vendor_setting");
-        await Assert.That(ignored[1].GetString()).IsEqualTo("another_setting");
+        var ignored = document.RootElement
+            .GetProperty("metadata")
+            .GetProperty("ignored_fields");
+        await Assert
+            .That(ignored.GetArrayLength())
+            .IsEqualTo(2);
+        await Assert
+            .That(ignored[0].GetString())
+            .IsEqualTo("vendor_setting");
+        await Assert
+            .That(ignored[1].GetString())
+            .IsEqualTo("another_setting");
     }
 
     [Test]
@@ -95,7 +125,11 @@ public sealed class BackgroundExecutionTests
         };
         request.Headers.Authorization = new("Bearer", "fixture-alice");
         using var response = await http.SendAsync(request);
-        await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.BadRequest);
-        await Assert.That(server.Backend.SubmissionCount).IsEqualTo(0);
+        await Assert
+            .That(response.StatusCode)
+            .IsEqualTo(HttpStatusCode.BadRequest);
+        await Assert
+            .That(server.Backend.SubmissionCount)
+            .IsEqualTo(0);
     }
 }

@@ -47,7 +47,13 @@ public sealed partial class ReferenceEnvironmentBackend(string root) : IUhpEnvir
 
         lock (_gate)
         {
-            return Task.FromResult(new Wire.EnvironmentList { Environments = _environments.Values.Where(node => node.Owner == Owner(context)).Select(View).ToArray() });
+            return Task.FromResult(new Wire.EnvironmentList
+            {
+                Environments = _environments.Values
+                    .Where(node => node.Owner == Owner(context))
+                    .Select(View)
+                    .ToArray()
+            });
         }
     }
 
@@ -127,7 +133,9 @@ public sealed partial class ReferenceEnvironmentBackend(string root) : IUhpEnvir
 
         try
         {
-            await node.ExecutionGate.WaitAsync(ct).ConfigureAwait(false);
+            await node.ExecutionGate
+                .WaitAsync(ct)
+                .ConfigureAwait(false);
         }
         catch
         {
@@ -175,7 +183,14 @@ public sealed partial class ReferenceEnvironmentBackend(string root) : IUhpEnvir
         lock (_gate)
         {
             var node = Find(environmentId, Owner(context));
-            return Task.FromResult(new Wire.ListEnvironmentVersionsResponse { Id = environmentId, Active = node.Value.Version, Versions = node.Versions.Values.Select(VersionView).ToArray() });
+            return Task.FromResult(new Wire.ListEnvironmentVersionsResponse
+            {
+                Id = environmentId,
+                Active = node.Value.Version,
+                Versions = node.Versions.Values
+                    .Select(VersionView)
+                    .ToArray()
+            });
         }
     }
 
@@ -200,7 +215,9 @@ public sealed partial class ReferenceEnvironmentBackend(string root) : IUhpEnvir
     public async Task<Wire.ListEnvironmentHarnessesResponse> ListEnvironmentHarnessesAsync(string environmentId, UhpRequestContext context, CancellationToken ct)
     {
         ValidateReference(environmentId, Owner(context));
-        var harnesses = await (_harnesses ?? throw new InvalidOperationException("Harness catalog is not connected.")).ListHarnessesAsync(context, ct).ConfigureAwait(false);
+        var harnesses = await (_harnesses ?? throw new InvalidOperationException("Harness catalog is not connected."))
+            .ListHarnessesAsync(context, ct)
+            .ConfigureAwait(false);
         var result = new List<Wire.ListEnvironmentHarnessesResponseHarnessesItem>();
 
         for (var index = 0; index < harnesses.Count; index++)
@@ -223,10 +240,17 @@ public sealed partial class ReferenceEnvironmentBackend(string root) : IUhpEnvir
     private static Wire.Environment View(ReferenceEnvironmentNode node) => node.Value with
     {
         Files = new() { Count = node.Files.Count, Bytes = node.Files.Values.Sum(bytes => (long)bytes.Length) },
-        Versions = node.Versions.Values.Select(VersionView).ToArray(),
+        Versions = node.Versions.Values
+            .Select(VersionView)
+            .ToArray(),
         LatestVersion = node.Versions.Count == 0 ? null : node.Versions.Keys.Last(),
         Packages = node.Value.Version is { } active ? node.Versions[active].Build.Packages : [],
-        Declared = new() { Pip = (node.Configuration.Packages?.Pip ?? []).Select(spec => new Wire.DeclaredPackage { Spec = spec }).ToArray() }
+        Declared = new()
+        {
+            Pip = (node.Configuration.Packages?.Pip ?? [])
+                .Select(spec => new Wire.DeclaredPackage { Spec = spec })
+                .ToArray()
+        }
     };
     private static Wire.EnvironmentVersion VersionView(ReferenceEnvironmentVersion version) => new()
     {

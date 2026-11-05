@@ -27,9 +27,9 @@ jobs:
         with:
           version: '0.13.7'
           python-version: '3.13'
-      - run: dotnet restore eng/StaticNorth.Uhp.Conformance --locked-mode
-      - run: dotnet run --project eng/StaticNorth.Uhp.Conformance --configuration Release --no-restore -- verify-suite . artifacts/conformance/upstream
-      - run: uv sync --locked --project eng/conformance
+      - run: dotnet restore tools/StaticNorth.Uhp.Conformance --locked-mode
+      - run: dotnet run --project tools/StaticNorth.Uhp.Conformance --configuration Release --no-restore -- verify-suite . artifacts/conformance/upstream
+      - run: uv sync --locked --project tools/conformance
       - name: Check required deployment configuration
         shell: bash
         run: |
@@ -40,17 +40,17 @@ jobs:
           test -n "$UHP_PLUGIN_MCP_URL"
       - name: Run unmodified official suite
         run: >-
-          uv run --frozen --project eng/conformance uhp-conformance
+          uv run --frozen --project tools/conformance uhp-conformance
           --base-url "$UHP_BASE_URL" --harness-id "$UHP_HARNESS_ID" --model "$UHP_MODEL"
           --plugin-mcp-url "$UHP_PLUGIN_MCP_URL" --class full
           --json artifacts/conformance/full.json --plain
       - name: Validate strict Full evidence
-        run: dotnet run --project eng/StaticNorth.Uhp.Conformance --configuration Release --no-build -- validate . artifacts/conformance/full.json
+        run: dotnet run --project tools/StaticNorth.Uhp.Conformance --configuration Release --no-build -- validate . artifacts/conformance/full.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: official-conformance
           path: |
             artifacts/conformance/full.json
-            eng/conformance/manifest.json
-            eng/conformance/uv.lock
+            tools/conformance/manifest.json
+            tools/conformance/uv.lock

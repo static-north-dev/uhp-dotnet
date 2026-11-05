@@ -3,7 +3,7 @@ using StaticNorth.Uhp.Conformance;
 
 try
 {
-    if (args.Length != 3 || args[0] is not ("verify-suite" or "validate"))
+    if (args is not [("verify-suite" or "validate"), _, _])
     {
         throw new InvalidOperationException("Usage: <verify-suite|validate> <repository-root> <upstream-checkout|report.json>");
     }
@@ -16,7 +16,7 @@ try
     };
 
     var ct = cancellation.Token;
-    using var manifest = JsonDocument.Parse(await File.ReadAllBytesAsync(Path.Combine(args[1], "eng/conformance/manifest.json"), ct));
+    using var manifest = JsonDocument.Parse(await File.ReadAllBytesAsync(Path.Combine(args[1], "tools/conformance/manifest.json"), ct));
     using var inventory = JsonDocument.Parse(await File.ReadAllBytesAsync(Path.Combine(args[1], "docs/conformance-checks.json"), ct));
     SuiteVerifier.VerifyInventory(manifest.RootElement, inventory.RootElement);
 

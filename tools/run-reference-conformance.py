@@ -32,7 +32,7 @@ def main():
     environment = dict(os.environ, UHP_HOST_TOKEN=secrets.token_urlsafe(32))
     environment["UHP_API_KEY"] = environment["UHP_HOST_TOKEN"]
     host_command = ([str(args.host_executable.resolve())] if args.host_executable else
-                    ["dotnet", "run", "--project", "eng/StaticNorth.Uhp.ConformanceHost",
+                    ["dotnet", "run", "--project", "tools/StaticNorth.Uhp.ConformanceHost",
                      "-c", "Release", "--no-build", "--"])
     with (run_root / "host.log").open("w") as log:
         host = subprocess.Popen(host_command + ["--urls", address, "--state-root", str(run_root)],
@@ -51,9 +51,9 @@ def main():
             else:
                 raise TimeoutError("Reference host did not become ready")
             if args.probe_runtime:
-                subprocess.run(["python3", "eng/probe-reference-runtime.py", address], cwd=ROOT, env=environment, check=True)
+                subprocess.run(["python3", "tools/probe-reference-runtime.py", address], cwd=ROOT, env=environment, check=True)
             command = ["uv", "--cache-dir", "artifacts/conformance/uv-cache", "run", "--frozen",
-                       "--project", "eng/conformance", "uhp-conformance", "--base-url", address,
+                       "--project", "tools/conformance", "uhp-conformance", "--base-url", address,
                        "--class", args.profile, "--json", args.report, "--plain",
                        "--label", "StaticNorth.Uhp Codex reference host"]
             if args.only:

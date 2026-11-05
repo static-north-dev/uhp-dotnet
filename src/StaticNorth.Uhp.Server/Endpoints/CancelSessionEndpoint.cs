@@ -20,7 +20,9 @@ internal sealed class CancelSessionEndpoint : IEndpoint
 
     private static async Task<Ok<UhpSessionCancelResult>> HandleAsync([FromRoute(Name = UhpProtocol.SessionId)] string sessionId, [FromServices] IUhpServerBackend backend, HttpContext http, CancellationToken ct)
     {
-        var result = await backend.CancelSessionAsync(sessionId, UhpHttp.GetContext(http), ct).ConfigureAwait(false);
+        var result = await backend
+            .CancelSessionAsync(sessionId, UhpHttp.GetContext(http), ct)
+            .ConfigureAwait(false);
         return TypedResults.Ok(result);
     }
 }

@@ -21,15 +21,29 @@ public sealed class ClientTests
         {
             if (message.RequestUri!.AbsolutePath.EndsWith("/uhp", StringComparison.Ordinal))
             {
-                await Assert.That(message.Headers.Authorization).IsNull();
-                await Assert.That(message.Headers.Contains("UHP-Version")).IsFalse();
-                await Assert.That(tokens).IsEqualTo(0);
-                await Assert.That(message.RequestUri.AbsoluteUri).IsEqualTo("https://example.test/api/harness/v1/uhp");
+                await Assert
+                    .That(message.Headers.Authorization)
+                    .IsNull();
+                await Assert
+                    .That(message.Headers.Contains("UHP-Version"))
+                    .IsFalse();
+                await Assert
+                    .That(tokens)
+                    .IsEqualTo(0);
+                await Assert
+                    .That(message.RequestUri.AbsoluteUri)
+                    .IsEqualTo("https://example.test/api/harness/v1/uhp");
                 return ScriptedHandler.Json(TestData.Discovery(version), version);
             }
 
-            await Assert.That(message.Headers.Authorization!.Parameter).IsEqualTo("token-1");
-            await Assert.That(message.Headers.GetValues("UHP-Version").Single()).IsEqualTo(version);
+            await Assert
+                .That(message.Headers.Authorization!.Parameter)
+                .IsEqualTo("token-1");
+            await Assert
+                .That(message.Headers
+                    .GetValues("UHP-Version")
+                    .Single())
+                .IsEqualTo(version);
             return ScriptedHandler.Json(TestData.Response, version);
         });
         using var http = new HttpClient(handler)
@@ -37,11 +51,19 @@ public sealed class ClientTests
             BaseAddress = new Uri("https://example.test/api/harness")
         };
         var client = await UhpClient.ConnectAsync(http, new UhpClientOptions { GetBearerTokenAsync = _ => ValueTask.FromResult<string>("token-" + ++tokens) });
-        await Assert.That(client.ProtocolVersion).IsEqualTo(version);
+        await Assert
+            .That(client.ProtocolVersion)
+            .IsEqualTo(version);
         var result = await client.RunAsync(new UhpTaskRequest("Hello"));
-        await Assert.That(result.Id).IsEqualTo("resp_test");
-        await Assert.That(tokens).IsEqualTo(1);
-        await Assert.That(http.DefaultRequestHeaders.Authorization).IsNull();
+        await Assert
+            .That(result.Id)
+            .IsEqualTo("resp_test");
+        await Assert
+            .That(tokens)
+            .IsEqualTo(1);
+        await Assert
+            .That(http.DefaultRequestHeaders.Authorization)
+            .IsNull();
     }
 
     [Test]
@@ -51,9 +73,15 @@ public sealed class ClientTests
         using var handler = new ScriptedHandler(async (message, _) =>
         {
             calls++;
-            await Assert.That(message.Headers.Authorization).IsNull();
-            await Assert.That(!message.Headers.Contains("UHP-Version")).IsEqualTo(calls == 1);
-            var json = TestData.Discovery("2026-09-12", calls == 2).Replace("[\"2026-09-12\"]", "[\"2026-09-12\",\"2026-10-19\"]", StringComparison.Ordinal);
+            await Assert
+                .That(message.Headers.Authorization)
+                .IsNull();
+            await Assert
+                .That(!message.Headers.Contains("UHP-Version"))
+                .IsEqualTo(calls == 1);
+            var json = TestData
+                .Discovery("2026-09-12", calls == 2)
+                .Replace("[\"2026-09-12\"]", "[\"2026-09-12\",\"2026-10-19\"]", StringComparison.Ordinal);
             return ScriptedHandler.Json(json, calls == 1 ? "2026-09-12" : "2026-10-19");
         });
         using var http = new HttpClient(handler)
@@ -61,9 +89,15 @@ public sealed class ClientTests
             BaseAddress = new Uri("http://localhost/api/harness/")
         };
         var client = await UhpClient.ConnectAsync(http, new UhpClientOptions { GetBearerTokenAsync = _ => throw new InvalidOperationException("Discovery resolved credentials.") });
-        await Assert.That(client.ProtocolVersion).IsEqualTo("2026-10-19");
-        await Assert.That(client.Discovery.Capabilities.Idempotency).IsTrue();
-        await Assert.That(calls).IsEqualTo(2);
+        await Assert
+            .That(client.ProtocolVersion)
+            .IsEqualTo("2026-10-19");
+        await Assert
+            .That(client.Discovery.Capabilities.Idempotency)
+            .IsTrue();
+        await Assert
+            .That(calls)
+            .IsEqualTo(2);
     }
 
     [Test]
@@ -76,8 +110,12 @@ public sealed class ClientTests
         {
             BaseAddress = new Uri("https://example.test")
         };
-        await Assert.That((Func<Task>)(() => UhpClient.ConnectAsync(http, new UhpClientOptions { ProtocolVersion = pinned }))).ThrowsExactly<UhpProtocolException>();
-        await Assert.That(handler.Posts).IsEqualTo(0);
+        await Assert
+            .That((Func<Task>)(() => UhpClient.ConnectAsync(http, new UhpClientOptions { ProtocolVersion = pinned })))
+            .ThrowsExactly<UhpProtocolException>();
+        await Assert
+            .That(handler.Posts)
+            .IsEqualTo(0);
     }
 
     [Test]
@@ -92,8 +130,12 @@ public sealed class ClientTests
         {
             BaseAddress = new Uri(address)
         };
-        await Assert.That((Func<Task>)(() => UhpClient.ConnectAsync(http, new UhpClientOptions()))).ThrowsExactly<ArgumentException>();
-        await Assert.That(handler.Requests).IsEqualTo(0);
+        await Assert
+            .That((Func<Task>)(() => UhpClient.ConnectAsync(http, new UhpClientOptions())))
+            .ThrowsExactly<ArgumentException>();
+        await Assert
+            .That(handler.Requests)
+            .IsEqualTo(0);
     }
 
     [Test]
@@ -105,10 +147,16 @@ public sealed class ClientTests
             BaseAddress = new Uri("https://example.test")
         };
         http.DefaultRequestHeaders.Authorization = new("Bearer", "secret");
-        await Assert.That((Func<Task>)(() => UhpClient.ConnectAsync(http, new UhpClientOptions()))).ThrowsExactly<ArgumentException>();
+        await Assert
+            .That((Func<Task>)(() => UhpClient.ConnectAsync(http, new UhpClientOptions())))
+            .ThrowsExactly<ArgumentException>();
         http.DefaultRequestHeaders.Authorization = null;
-        await Assert.That((Func<Task>)(() => UhpClient.ConnectAsync(http, new UhpClientOptions { ProtocolVersion = "2026-10-04" }))).ThrowsExactly<ArgumentException>();
-        await Assert.That(handler.Requests).IsEqualTo(0);
+        await Assert
+            .That((Func<Task>)(() => UhpClient.ConnectAsync(http, new UhpClientOptions { ProtocolVersion = "2026-10-04" })))
+            .ThrowsExactly<ArgumentException>();
+        await Assert
+            .That(handler.Requests)
+            .IsEqualTo(0);
     }
 
     [Test]
@@ -123,7 +171,9 @@ public sealed class ClientTests
                 return ScriptedHandler.Json(TestData.Discovery());
             }
 
-            await Assert.That(message.RequestUri.AbsoluteUri).IsEqualTo("https://example.test/api/harness/v1/responses/id%2F%25%3F%23");
+            await Assert
+                .That(message.RequestUri.AbsoluteUri)
+                .IsEqualTo("https://example.test/api/harness/v1/responses/id%2F%25%3F%23");
             return ScriptedHandler.Json(TestData.Response);
         });
         using var http = new HttpClient(handler)
@@ -146,18 +196,58 @@ public sealed class ClientTests
 
             using var document = JsonDocument.Parse(await message.Content!.ReadAsStringAsync());
             var body = document.RootElement;
-            await Assert.That(body.GetProperty("stream").GetBoolean()).IsFalse();
-            await Assert.That(body.GetProperty("store").GetBoolean()).IsFalse();
-            await Assert.That(body.GetProperty("max_step").GetInt64()).IsEqualTo(0L);
-            await Assert.That(body.GetProperty("previous_response_id").GetString()).IsEqualTo("resp_previous");
-            await Assert.That(body.GetProperty("metadata").GetProperty("harness_id").GetString()).IsEqualTo("chrn_configured");
-            await Assert.That(body.GetProperty("metadata").GetProperty("trace").GetString()).IsEqualTo("custom");
-            await Assert.That(body.TryGetProperty("model", out _)).IsFalse();
-            await Assert.That(body.TryGetProperty("max_output_tokens", out _)).IsFalse();
-            await Assert.That(body.TryGetProperty("tools", out _)).IsFalse();
-            await Assert.That(body.TryGetProperty("include", out _)).IsFalse();
-            await Assert.That(message.Headers.GetValues("Idempotency-Key").Single()).IsEqualTo("unique-key");
-            await Assert.That(body.TryGetProperty("idempotency_key", out _)).IsFalse();
+            await Assert
+                .That(body
+                    .GetProperty("stream")
+                    .GetBoolean())
+                .IsFalse();
+            await Assert
+                .That(body
+                    .GetProperty("store")
+                    .GetBoolean())
+                .IsFalse();
+            await Assert
+                .That(body
+                    .GetProperty("max_step")
+                    .GetInt64())
+                .IsEqualTo(0L);
+            await Assert
+                .That(body
+                    .GetProperty("previous_response_id")
+                    .GetString())
+                .IsEqualTo("resp_previous");
+            await Assert
+                .That(body
+                    .GetProperty("metadata")
+                    .GetProperty("harness_id")
+                    .GetString())
+                .IsEqualTo("chrn_configured");
+            await Assert
+                .That(body
+                    .GetProperty("metadata")
+                    .GetProperty("trace")
+                    .GetString())
+                .IsEqualTo("custom");
+            await Assert
+                .That(body.TryGetProperty("model", out _))
+                .IsFalse();
+            await Assert
+                .That(body.TryGetProperty("max_output_tokens", out _))
+                .IsFalse();
+            await Assert
+                .That(body.TryGetProperty("tools", out _))
+                .IsFalse();
+            await Assert
+                .That(body.TryGetProperty("include", out _))
+                .IsFalse();
+            await Assert
+                .That(message.Headers
+                    .GetValues("Idempotency-Key")
+                    .Single())
+                .IsEqualTo("unique-key");
+            await Assert
+                .That(body.TryGetProperty("idempotency_key", out _))
+                .IsFalse();
             return ScriptedHandler.Json(TestData.Response);
         });
         using var http = new HttpClient(handler)
@@ -177,9 +267,15 @@ public sealed class ClientTests
             BaseAddress = new Uri("https://example.test")
         };
         var client = await UhpClient.ConnectAsync(http, new());
-        await Assert.That((Func<Task>)(() => client.RunAsync(new UhpTaskRequest("Hello") { HarnessId = "typed", Metadata = new Dictionary<string, JsonElement> { ["harness_id"] = TestData.Element("\"raw\"") } }))).ThrowsExactly<ArgumentException>();
-        await Assert.That((Func<Task>)(() => client.RunAsync(new UhpTaskRequest("Hello") { IdempotencyKey = "key" }))).ThrowsExactly<InvalidOperationException>();
-        await Assert.That(handler.Posts).IsEqualTo(0);
+        await Assert
+            .That((Func<Task>)(() => client.RunAsync(new UhpTaskRequest("Hello") { HarnessId = "typed", Metadata = new Dictionary<string, JsonElement> { ["harness_id"] = TestData.Element("\"raw\"") } })))
+            .ThrowsExactly<ArgumentException>();
+        await Assert
+            .That((Func<Task>)(() => client.RunAsync(new UhpTaskRequest("Hello") { IdempotencyKey = "key" })))
+            .ThrowsExactly<InvalidOperationException>();
+        await Assert
+            .That(handler.Posts)
+            .IsEqualTo(0);
     }
 
     [Test]
@@ -197,11 +293,21 @@ public sealed class ClientTests
             BaseAddress = new Uri("https://example.test")
         };
         client = await UhpClient.ConnectAsync(driftHttp, new());
-        var error = (await Assert.That((Func<Task>)(() => client.GetResponseAsync("resp_test"))).ThrowsExactly<UhpApiException>())!;
-        await Assert.That(error.Code).IsEqualTo("unsupported_protocol_version");
-        await Assert.That(error.StatusCode).IsEqualTo(HttpStatusCode.BadRequest);
-        await Assert.That(error.HasVersionMismatch).IsTrue();
-        await Assert.That(error.Detail!.Value.GetProperty("supported")[0].GetString()).IsEqualTo("2026-09-12");
+        var error = (await Assert
+            .That((Func<Task>)(() => client.GetResponseAsync("resp_test")))
+            .ThrowsExactly<UhpApiException>())!;
+        await Assert
+            .That(error.Code)
+            .IsEqualTo("unsupported_protocol_version");
+        await Assert
+            .That(error.StatusCode)
+            .IsEqualTo(HttpStatusCode.BadRequest);
+        await Assert
+            .That(error.HasVersionMismatch)
+            .IsTrue();
+        await Assert
+            .That(error.Detail!.Value.GetProperty("supported")[0].GetString())
+            .IsEqualTo("2026-09-12");
     }
 
     [Test]
@@ -226,11 +332,21 @@ public sealed class ClientTests
             BaseAddress = new Uri("https://example.test")
         };
         var client = await UhpClient.ConnectAsync(http, new());
-        var error = (await Assert.That((Func<Task>)(() => client.RunAsync(new UhpTaskRequest("Hello")))).ThrowsExactly<UhpApiException>())!;
-        await Assert.That(error.Code).IsEqualTo(code);
-        await Assert.That(error.RetryAfter).IsEqualTo("2");
-        await Assert.That(error.Param).IsEqualTo("input");
-        await Assert.That(handler.Posts).IsEqualTo(1);
+        var error = (await Assert
+            .That((Func<Task>)(() => client.RunAsync(new UhpTaskRequest("Hello"))))
+            .ThrowsExactly<UhpApiException>())!;
+        await Assert
+            .That(error.Code)
+            .IsEqualTo(code);
+        await Assert
+            .That(error.RetryAfter)
+            .IsEqualTo("2");
+        await Assert
+            .That(error.Param)
+            .IsEqualTo("input");
+        await Assert
+            .That(handler.Posts)
+            .IsEqualTo(1);
     }
 
     [Test]
@@ -243,9 +359,17 @@ public sealed class ClientTests
             BaseAddress = new Uri("https://example.test")
         };
         var client = await UhpClient.ConnectAsync(http, new());
-        var error = (await Assert.That((Func<Task>)(() => client.RunAsync(new UhpTaskRequest("Hello")))).ThrowsExactly<UhpApiException>())!;
-        await Assert.That(error.StatusCode).IsEqualTo(HttpStatusCode.BadGateway);
-        await Assert.That(error.ToString().Contains(secret, StringComparison.Ordinal)).IsFalse();
+        var error = (await Assert
+            .That((Func<Task>)(() => client.RunAsync(new UhpTaskRequest("Hello"))))
+            .ThrowsExactly<UhpApiException>())!;
+        await Assert
+            .That(error.StatusCode)
+            .IsEqualTo(HttpStatusCode.BadGateway);
+        await Assert
+            .That(error
+                .ToString()
+                .Contains(secret, StringComparison.Ordinal))
+            .IsFalse();
     }
 
     [Test]
@@ -257,7 +381,9 @@ public sealed class ClientTests
             BaseAddress = new Uri("https://example.test")
         };
         var client = await UhpClient.ConnectAsync(http, new());
-        await Assert.That((Func<Task>)(() => client.GetResponseAsync("resp_test"))).ThrowsExactly<UhpProtocolException>();
+        await Assert
+            .That((Func<Task>)(() => client.GetResponseAsync("resp_test")))
+            .ThrowsExactly<UhpProtocolException>();
     }
 
     [Test]
@@ -270,11 +396,21 @@ public sealed class ClientTests
             BaseAddress = new Uri("https://example.test")
         };
         var client = await UhpClient.ConnectAsync(http, new());
-        var error = (await Assert.That((Func<Task>)(() => client.RunAsync(new UhpTaskRequest("Hello") { IdempotencyKey = "original-key" }))).ThrowsExactly<UhpSubmissionException>())!;
-        await Assert.That(error.InnerException).IsSameReferenceAs(cause);
-        await Assert.That(error.IdempotencyKey).IsEqualTo("original-key");
-        await Assert.That(error.ExecutionOutcomeUnknown).IsTrue();
-        await Assert.That(handler.Posts).IsEqualTo(1);
+        var error = (await Assert
+            .That((Func<Task>)(() => client.RunAsync(new UhpTaskRequest("Hello") { IdempotencyKey = "original-key" })))
+            .ThrowsExactly<UhpSubmissionException>())!;
+        await Assert
+            .That(error.InnerException)
+            .IsSameReferenceAs(cause);
+        await Assert
+            .That(error.IdempotencyKey)
+            .IsEqualTo("original-key");
+        await Assert
+            .That(error.ExecutionOutcomeUnknown)
+            .IsTrue();
+        await Assert
+            .That(handler.Posts)
+            .IsEqualTo(1);
     }
 
     [Test]
@@ -287,10 +423,18 @@ public sealed class ClientTests
             BaseAddress = new Uri("https://example.test")
         };
         var client = await UhpClient.ConnectAsync(http, new() { GetBearerTokenAsync = _ => throw cause });
-        var error = (await Assert.That((Func<Task>)(() => client.RunAsync(new UhpTaskRequest("Hello")))).ThrowsExactly<InvalidOperationException>())!;
-        await Assert.That(error).IsSameReferenceAs(cause);
-        await Assert.That(handler.Posts).IsEqualTo(0);
+        var error = (await Assert
+            .That((Func<Task>)(() => client.RunAsync(new UhpTaskRequest("Hello"))))
+            .ThrowsExactly<InvalidOperationException>())!;
+        await Assert
+            .That(error)
+            .IsSameReferenceAs(cause);
+        await Assert
+            .That(handler.Posts)
+            .IsEqualTo(0);
         using var stillUsable = await http.GetAsync("v1/uhp");
-        await Assert.That(stillUsable.IsSuccessStatusCode).IsTrue();
+        await Assert
+            .That(stillUsable.IsSuccessStatusCode)
+            .IsTrue();
     }
 }

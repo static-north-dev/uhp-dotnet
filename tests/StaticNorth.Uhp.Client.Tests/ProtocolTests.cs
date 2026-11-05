@@ -16,7 +16,9 @@ public sealed class ProtocolTests
     [Arguments(null, false)]
     public async Task IdempotencyKeysRequirePrintableAscii(string? key, bool valid)
     {
-        await Assert.That(UhpProtocol.IsValidIdempotencyKey(key)).IsEqualTo(valid);
+        await Assert
+            .That(UhpProtocol.IsValidIdempotencyKey(key))
+            .IsEqualTo(valid);
     }
 
     [Test]
@@ -27,7 +29,9 @@ public sealed class ProtocolTests
     [Arguments(null, false)]
     public async Task JsonContentTypesAreParsedWithoutSubstringMatching(string? contentType, bool valid)
     {
-        await Assert.That(UhpProtocol.IsJsonContentType(contentType)).IsEqualTo(valid);
+        await Assert
+            .That(UhpProtocol.IsJsonContentType(contentType))
+            .IsEqualTo(valid);
     }
 
     [Test]
@@ -41,7 +45,17 @@ public sealed class ProtocolTests
         var json = UhpJson.SerializeRequest(request, false);
         metadata.Clear();
 
-        await Assert.That(json.GetProperty("metadata").GetProperty("harness_id").GetString()).IsEqualTo("typed");
-        await Assert.That(json.GetProperty("metadata").GetProperty("Harness_Id").GetString()).IsEqualTo("vendor");
+        await Assert
+            .That(json
+                .GetProperty("metadata")
+                .GetProperty("harness_id")
+                .GetString())
+            .IsEqualTo("typed");
+        await Assert
+            .That(json
+                .GetProperty("metadata")
+                .GetProperty("Harness_Id")
+                .GetString())
+            .IsEqualTo("vendor");
     }
 }

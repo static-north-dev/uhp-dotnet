@@ -15,7 +15,9 @@ internal sealed class DiscoveryEndpoint : IEndpoint
 {
     public static IEndpointConventionBuilder Map(IEndpointRouteBuilder builder)
     {
-        return builder.MapGet("/" + UhpProtocol.DiscoveryPath, HandleAsync).WithMetadata(new UhpDiscoveryMetadata());
+        return builder
+            .MapGet("/" + UhpProtocol.DiscoveryPath, HandleAsync)
+            .WithMetadata(new UhpDiscoveryMetadata());
     }
 
     private static Ok<UhpDiscovery> HandleAsync([FromServices] UhpServerOptions options)

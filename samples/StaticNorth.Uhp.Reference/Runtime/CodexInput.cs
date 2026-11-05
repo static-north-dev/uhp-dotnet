@@ -13,16 +13,26 @@ internal static class CodexInput
 
         if (prime is not null)
         {
-            text.AppendLine(prime).AppendLine("End of untrusted memory data. The actual task follows.");
+            text
+                .AppendLine(prime)
+                .AppendLine("End of untrusted memory data. The actual task follows.");
         }
 
         if (request.Answer is { } answer)
         {
-            text.Append("The person's answer to ").Append(answer.RequestId).Append(" (\"").Append(answer.Prompt).AppendLine("\"):");
+            text
+                .Append("The person's answer to ")
+                .Append(answer.RequestId)
+                .Append(" (\"")
+                .Append(answer.Prompt)
+                .AppendLine("\"):");
 
             if (secretReference is not null)
             {
-                text.Append("The secret is held by the harness as ").Append(secretReference).AppendLine(". Its value is outside the conversation. Use the reference with a secure harness tool if needed.");
+                text
+                    .Append("The secret is held by the harness as ")
+                    .Append(secretReference)
+                    .AppendLine(". Its value is outside the conversation. Use the reference with a secure harness tool if needed.");
             }
             else
             {
@@ -66,7 +76,9 @@ internal static class CodexInput
                         continue;
                     }
 
-                    var isImage = part.GetProperty("type").ValueEquals("input_image");
+                    var isImage = part
+                        .GetProperty("type")
+                        .ValueEquals("input_image");
 
                     if (isImage && part.TryGetProperty("image_url", out var imageUrl) && imageUrl.ValueKind == JsonValueKind.String)
                     {
@@ -90,10 +102,14 @@ internal static class CodexInput
                     }
                     else
                     {
-                        var data = part.GetProperty("file_data").GetString()!;
+                        var data = part
+                            .GetProperty("file_data")
+                            .GetString()!;
                         var comma = data.IndexOf(',');
 
-                        if (!data.StartsWith("data:", StringComparison.Ordinal) || comma < 0 || !data.AsSpan(0, comma).EndsWith(";base64", StringComparison.Ordinal))
+                        if (!data.StartsWith("data:", StringComparison.Ordinal) || comma < 0 || !data
+                            .AsSpan(0, comma)
+                            .EndsWith(";base64", StringComparison.Ordinal))
                         {
                             throw ReferenceBackend.Failure(400, "invalid_input", "An inline file requires a base64 data URL.");
                         }
@@ -104,7 +120,9 @@ internal static class CodexInput
 
                     var path = Path.Combine(request.Workspace, $".uhp-input-{Guid.NewGuid():N}-" + Path.GetFileName(name));
                     await using var file = new FileStream(path, FileMode.CreateNew, FileAccess.Write, FileShare.None, 16_384, FileOptions.Asynchronous);
-                    await file.WriteAsync(bytes, ct).ConfigureAwait(false);
+                    await file
+                        .WriteAsync(bytes, ct)
+                        .ConfigureAwait(false);
 
                     if (isImage)
                     {
@@ -113,7 +131,9 @@ internal static class CodexInput
                     }
                     else
                     {
-                        text.Append("Attached input file: ").AppendLine(path);
+                        text
+                            .Append("Attached input file: ")
+                            .AppendLine(path);
                     }
                 }
             }

@@ -32,16 +32,24 @@ public sealed class FixtureSubscriptionTests
 
         foreach (var history in readers.Append(late))
         {
-            await Assert.That(history.Count).IsEqualTo(5);
+            await Assert
+                .That(history.Count)
+                .IsEqualTo(5);
 
             for (var index = 0; index < history.Count; index++)
             {
-                await Assert.That(history[index].SequenceNumber).IsEqualTo((long)index);
+                await Assert
+                    .That(history[index].SequenceNumber)
+                    .IsEqualTo((long)index);
             }
 
             var final = (UhpResponseEvent)history[^1];
-            await Assert.That(final.Response.Status).IsEqualTo(terminal.Status);
-            await Assert.That(final.Response.Status.IsTerminal).IsTrue();
+            await Assert
+                .That(final.Response.Status)
+                .IsEqualTo(terminal.Status);
+            await Assert
+                .That(final.Response.Status.IsTerminal)
+                .IsTrue();
         }
     }
 

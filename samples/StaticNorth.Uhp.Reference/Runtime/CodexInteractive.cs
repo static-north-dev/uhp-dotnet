@@ -25,8 +25,12 @@ internal static class CodexInteractive
     public static CodexInputQuestion Read(JsonElement parameters)
     {
         var arguments = parameters.GetProperty("arguments");
-        var kind = arguments.GetProperty("kind").GetString()!;
-        var prompt = arguments.GetProperty("prompt").GetString()!;
+        var kind = arguments
+            .GetProperty("kind")
+            .GetString()!;
+        var prompt = arguments
+            .GetProperty("prompt")
+            .GetString()!;
 
         if (kind is not ("choice" or "confirm" or "free_text" or "secret") || string.IsNullOrWhiteSpace(prompt) ||
             kind == "choice" && (!arguments.TryGetProperty("options", out var options) || options.ValueKind != JsonValueKind.Array || options.GetArrayLength() < 2))
@@ -38,7 +42,9 @@ internal static class CodexInteractive
         var call = new UhpOutputItem(UhpJson.CreateElement(writer =>
         {
             writer.WriteStartObject(); writer.WriteString("type", "function_call"); writer.WriteString("id", $"fc_{Guid.NewGuid():N}");
-            writer.WriteString("call_id", parameters.GetProperty("callId").GetString()); writer.WriteString("name", "ask_user");
+            writer.WriteString("call_id", parameters
+                .GetProperty("callId")
+                .GetString()); writer.WriteString("name", "ask_user");
             writer.WriteString("arguments", arguments.GetRawText()); writer.WriteString("status", "completed"); writer.WriteEndObject();
         }));
         var question = new UhpOutputItem(UhpJson.CreateElement(writer =>

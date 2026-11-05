@@ -6,6 +6,37 @@ namespace StaticNorth.Uhp.Client.Tests;
 public sealed class MemoryApiTests
 {
     [Test]
+    [Arguments(true, "?parent=a%2Fb&granted=true")]
+    [Arguments(false, "?parent=a%2Fb&granted=false")]
+    [Arguments(null, "?parent=a%2Fb")]
+    public async Task ListMemoriesSerializesBooleanQuery(bool? granted, string expectedQuery)
+    {
+        using var handler = new ScriptedHandler(async (request, _) =>
+        {
+            if (request.RequestUri!.AbsolutePath.EndsWith("/uhp", StringComparison.Ordinal))
+            {
+                var discovery = TestData
+                    .Discovery()
+                    .Replace("\"capabilities\":{", "\"capabilities\":{\"memories\":true,", StringComparison.Ordinal);
+                return ScriptedHandler.Json(discovery);
+            }
+
+            await Assert
+                .That(request.RequestUri.Query)
+                .IsEqualTo(expectedQuery);
+            return ScriptedHandler.Json("""{"object":"list","data":[]}""");
+        });
+        using var http = new HttpClient(handler) { BaseAddress = new Uri("http://localhost/") };
+        var client = await UhpClient.ConnectAsync(http, new());
+
+        await client.ListMemoriesAsync(new() { Parent = "a/b", Granted = granted });
+
+        await Assert
+            .That(handler.Requests)
+            .IsEqualTo(2);
+    }
+
+    [Test]
     public async Task GrantedWriterIsStampedWithoutChangingTheStorageOwner()
     {
         await using var server = await ServerTestHost.StartAsync(memories: true);
@@ -15,11 +46,21 @@ public sealed class MemoryApiTests
         var root = await alice.CreateMemoryAsync(new() { Name = "shared", Provider = "in-memory" });
         await alice.CreateMemoryGrantAsync(root.Id, new() { Principal = "member:bob", Privileges = ["read", "write"] });
         var record = await bob.RememberRecordAsync(root.Id, new() { Content = Text("written by Bob") });
-        await Assert.That(record.WrittenBy!.Id).IsEqualTo("bob");
-        await Assert.That((await alice.GetMemoryRecordAsync(root.Id, record.Id)).WrittenBy!.Id).IsEqualTo("bob");
-        await Assert.That((await bob.GetMemoryAsync(root.Id)).Privileges.Contains("delete")).IsFalse();
-        var error = (await Assert.That((Func<Task>)(async () => await bob.DeleteMemoryAsync(root.Id))).ThrowsExactly<UhpApiException>())!;
-        await Assert.That(error.StatusCode).IsEqualTo(HttpStatusCode.Forbidden);
+        await Assert
+            .That(record.WrittenBy!.Id)
+            .IsEqualTo("bob");
+        await Assert
+            .That((await alice.GetMemoryRecordAsync(root.Id, record.Id)).WrittenBy!.Id)
+            .IsEqualTo("bob");
+        await Assert
+            .That((await bob.GetMemoryAsync(root.Id)).Privileges.Contains("delete"))
+            .IsFalse();
+        var error = (await Assert
+            .That((Func<Task>)(async () => await bob.DeleteMemoryAsync(root.Id)))
+            .ThrowsExactly<UhpApiException>())!;
+        await Assert
+            .That(error.StatusCode)
+            .IsEqualTo(HttpStatusCode.Forbidden);
     }
 
     [Test]
@@ -34,9 +75,15 @@ public sealed class MemoryApiTests
         await alice.CreateMemoryGrantAsync(root.Id, new() { Principal = "member:bob", Privileges = ["read"] });
         await alice.RememberRecordAsync(child.Id, new() { Content = Text("private-marker") });
         var recalled = await bob.RecallMemoryAsync(root.Id, new() { Text = "private-marker" });
-        await Assert.That(recalled.Results.Length).IsEqualTo(0);
-        await Assert.That(recalled.Children!.Length).IsEqualTo(0);
-        await Assert.That((Func<Task>)(async () => await bob.GetMemoryAsync(child.Id))).ThrowsExactly<UhpApiException>();
+        await Assert
+            .That(recalled.Results.Length)
+            .IsEqualTo(0);
+        await Assert
+            .That(recalled.Children!.Length)
+            .IsEqualTo(0);
+        await Assert
+            .That((Func<Task>)(async () => await bob.GetMemoryAsync(child.Id)))
+            .ThrowsExactly<UhpApiException>();
     }
 
     [Test]
@@ -56,17 +103,31 @@ public sealed class MemoryApiTests
         });
         await alice.CreateMemoryGrantAsync(child.Id, new() { Principal = "member:bob", Privileges = ["read", "write"] });
         var visible = await bob.GetMemoryAsync(child.Id);
-        await Assert.That(visible.ParentId).IsNull();
-        await Assert.That(visible.Ancestors!.Length).IsEqualTo(0);
+        await Assert
+            .That(visible.ParentId)
+            .IsNull();
+        await Assert
+            .That(visible.Ancestors!.Length)
+            .IsEqualTo(0);
         var result = await bob.GetMemoryRecordAsync(child.Id, source.Id);
         var reference = result.References![0];
-        await Assert.That(reference.RecordId).IsEqualTo(target.Id);
-        await Assert.That(reference.MemoryId).IsNull();
-        await Assert.That(reference.Rel).IsNull();
-        await Assert.That(reference.Available ?? true).IsFalse();
+        await Assert
+            .That(reference.RecordId)
+            .IsEqualTo(target.Id);
+        await Assert
+            .That(reference.MemoryId)
+            .IsNull();
+        await Assert
+            .That(reference.Rel)
+            .IsNull();
+        await Assert
+            .That(reference.Available ?? true)
+            .IsFalse();
         await bob.ReviseMemoryRecordAsync(child.Id, source.Id, new() { Title = "edited", References = result.References });
         var revised = await alice.GetMemoryRecordAsync(child.Id, source.Id);
-        await Assert.That(revised.References![0].MemoryId).IsEqualTo(root.Id);
+        await Assert
+            .That(revised.References![0].MemoryId)
+            .IsEqualTo(root.Id);
     }
 
     [Test]
@@ -77,12 +138,20 @@ public sealed class MemoryApiTests
         var client = await ServerTestHost.ConnectAsync(http);
         var memory = await client.CreateMemoryAsync(new() { Name = "notes" });
         var record = await client.RememberRecordAsync(memory.Id, new() { Title = "A title without content" });
-        await Assert.That(record.Content!.Length).IsEqualTo(0);
+        await Assert
+            .That(record.Content!.Length)
+            .IsEqualTo(0);
         await client.ForgetMemoryRecordAsync(memory.Id, record.Id);
-        await Assert.That((await client.GetMemoryRecordAsync(memory.Id, record.Id)).Status).IsEqualTo("forgotten");
-        await Assert.That((await client.ListMemoryRecordsAsync(memory.Id)).Data!.Length).IsEqualTo(0);
+        await Assert
+            .That((await client.GetMemoryRecordAsync(memory.Id, record.Id)).Status)
+            .IsEqualTo("forgotten");
+        await Assert
+            .That((await client.ListMemoryRecordsAsync(memory.Id)).Data!.Length)
+            .IsEqualTo(0);
         await client.EraseMemoryRecordsAsync(memory.Id, new() { RecordIds = [record.Id] });
-        await Assert.That((Func<Task>)(async () => await client.GetMemoryRecordAsync(memory.Id, record.Id))).ThrowsExactly<UhpApiException>();
+        await Assert
+            .That((Func<Task>)(async () => await client.GetMemoryRecordAsync(memory.Id, record.Id)))
+            .ThrowsExactly<UhpApiException>();
     }
 
     [Test]
@@ -94,9 +163,15 @@ public sealed class MemoryApiTests
         var first = await client.CreateMemoryAsync(new() { Name = "first" });
         var second = await client.CreateMemoryAsync(new() { Name = "second" });
         var record = await client.RememberRecordAsync(first.Id, new() { Content = Text("original") });
-        var error = (await Assert.That((Func<Task>)(async () => await client.ReviseMemoryRecordAsync(second.Id, record.Id, new() { Content = Text("changed") }))).ThrowsExactly<UhpApiException>())!;
-        await Assert.That(error.Code).IsEqualTo("memory_record_not_found");
-        await Assert.That((await client.GetMemoryRecordAsync(first.Id, record.Id)).Content![0].Text).IsEqualTo("original");
+        var error = (await Assert
+            .That((Func<Task>)(async () => await client.ReviseMemoryRecordAsync(second.Id, record.Id, new() { Content = Text("changed") })))
+            .ThrowsExactly<UhpApiException>())!;
+        await Assert
+            .That(error.Code)
+            .IsEqualTo("memory_record_not_found");
+        await Assert
+            .That((await client.GetMemoryRecordAsync(first.Id, record.Id)).Content![0].Text)
+            .IsEqualTo("original");
     }
 
     private static JsonElement Text(string value)

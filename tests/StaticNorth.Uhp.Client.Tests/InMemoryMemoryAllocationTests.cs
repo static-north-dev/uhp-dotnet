@@ -27,7 +27,9 @@ public sealed class InMemoryMemoryAllocationTests
         }
 
         var allocated = GC.GetAllocatedBytesForCurrentThread() - before;
-        await Assert.That(allocated).IsEqualTo(0L);
+        await Assert
+            .That(allocated)
+            .IsEqualTo(0L);
     }
 
     [Test]
@@ -52,7 +54,11 @@ public sealed class InMemoryMemoryAllocationTests
 
         var bytesPerWrite = (GC.GetAllocatedBytesForCurrentThread() - before) / 1000;
         Console.WriteLine($"Reference memory retained write: {bytesPerWrite} B/write (budget: 2048 B/write).");
-        await Assert.That(bytesPerWrite).IsGreaterThan(0L);
-        await Assert.That(bytesPerWrite).IsLessThanOrEqualTo(2048L);
+        await Assert
+            .That(bytesPerWrite)
+            .IsGreaterThan(0L);
+        await Assert
+            .That(bytesPerWrite)
+            .IsLessThanOrEqualTo(2048L);
     }
 }

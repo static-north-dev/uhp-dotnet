@@ -12,7 +12,9 @@ internal sealed class UhpEndpointGroup : IEndpointGroup
 {
     public static RouteGroupBuilder CreateGroup(IEndpointRouteBuilder builder)
     {
-        var group = builder.MapGroup("").AllowAnonymous();
+        var group = builder
+            .MapGroup("")
+            .AllowAnonymous();
         group.AddEndpointFilter(new UhpProtocolFilter());
 
         return group;

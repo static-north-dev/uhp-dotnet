@@ -7,6 +7,8 @@
 
 ## Coding conventions
 
+- Use `var` for local variables when the compiler can infer the intended type without changing behavior.
+- Format fluent method chains with the receiver on its own line and each chained call on a separate, indented line, including the first call.
 - Always use full braced blocks for conditionals and loops, including single-statement bodies.
 - Add empty lines between logical code blocks.
 - Prioritize clean, readable code and a performance-first approach.

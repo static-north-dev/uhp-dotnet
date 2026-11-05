@@ -15,7 +15,9 @@ internal sealed class FallbackEndpoint : IEndpoint
 {
     public static IEndpointConventionBuilder Map(IEndpointRouteBuilder builder)
     {
-        return builder.MapMethods("/v1/{**path}", ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"], HandleAsync).WithOrder(int.MaxValue);
+        return builder
+            .MapMethods("/v1/{**path}", ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"], HandleAsync)
+            .WithOrder(int.MaxValue);
     }
 
     private static JsonHttpResult<UhpErrorEnvelope> HandleAsync()

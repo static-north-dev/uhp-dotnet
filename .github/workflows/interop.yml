@@ -26,7 +26,7 @@ jobs:
           global-json-file: global.json
       - run: dotnet restore StaticNorth.Uhp.slnx --locked-mode
       - run: dotnet run --project tests/StaticNorth.Uhp.Client.InteropTests --configuration Release --no-restore -- --minimum-expected-tests 2 --report-trx --results-directory artifacts/test-results
-      - run: python3 eng/check-interop.py artifacts/interop
+      - run: python3 tools/check-interop.py artifacts/interop
       - uses: actions/upload-artifact@v4
         if: always()
         with:

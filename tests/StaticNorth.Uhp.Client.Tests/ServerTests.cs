@@ -22,11 +22,21 @@ public sealed class ServerTests
         var output = new List<string>();
         using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(15));
         await Scenario.RunAsync(http, "fixture-alice", "chrn_fixture", null, output.Add, deadline.Token);
-        await Assert.That(output.Contains("continuation: pass")).IsTrue();
-        await Assert.That(output.Contains("cancel-response: pass")).IsTrue();
-        await Assert.That(output.Contains("cancel-session: pass")).IsTrue();
-        await Assert.That(server.Backend.SubmissionCount).IsEqualTo(5);
-        await Assert.That(server.Backend.CancellationCount).IsEqualTo(2);
+        await Assert
+            .That(output.Contains("continuation: pass"))
+            .IsTrue();
+        await Assert
+            .That(output.Contains("cancel-response: pass"))
+            .IsTrue();
+        await Assert
+            .That(output.Contains("cancel-session: pass"))
+            .IsTrue();
+        await Assert
+            .That(server.Backend.SubmissionCount)
+            .IsEqualTo(5);
+        await Assert
+            .That(server.Backend.CancellationCount)
+            .IsEqualTo(2);
     }
 
     [Test]
@@ -43,9 +53,15 @@ public sealed class ServerTests
         }
 
         var terminal = await WaitTerminalAsync(client, id!);
-        await Assert.That(terminal.Status).IsEqualTo(UhpResponseStatus.Completed);
-        await Assert.That(server.Backend.SubmissionCount).IsEqualTo(1);
-        await Assert.That(server.Backend.CancellationCount).IsEqualTo(0);
+        await Assert
+            .That(terminal.Status)
+            .IsEqualTo(UhpResponseStatus.Completed);
+        await Assert
+            .That(server.Backend.SubmissionCount)
+            .IsEqualTo(1);
+        await Assert
+            .That(server.Backend.CancellationCount)
+            .IsEqualTo(0);
     }
 
     [Test]
@@ -61,12 +77,20 @@ public sealed class ServerTests
             await Task.Delay(10);
         }
 
-        await Assert.That(server.Backend.SubmissionCount).IsEqualTo(1);
+        await Assert
+            .That(server.Backend.SubmissionCount)
+            .IsEqualTo(1);
         local.Cancel();
-        await Assert.That((Func<Task>)(() => running)).Throws<OperationCanceledException>();
+        await Assert
+            .That((Func<Task>)(() => running))
+            .Throws<OperationCanceledException>();
         var response = await WaitTerminalAsync(client, server.Backend.LatestResponseId);
-        await Assert.That(response.Status).IsEqualTo(UhpResponseStatus.Completed);
-        await Assert.That(server.Backend.CancellationCount).IsEqualTo(0);
+        await Assert
+            .That(response.Status)
+            .IsEqualTo(UhpResponseStatus.Completed);
+        await Assert
+            .That(server.Backend.CancellationCount)
+            .IsEqualTo(0);
     }
 
     [Test]
@@ -78,10 +102,18 @@ public sealed class ServerTests
         var alice = await ServerTestHost.ConnectAsync(aliceHttp);
         var bob = await ServerTestHost.ConnectAsync(bobHttp, "bob");
         var result = await alice.RunAsync(new UhpTaskRequest("Hello"));
-        var get = (await Assert.That((Func<Task>)(() => bob.GetResponseAsync(result.Id))).ThrowsExactly<UhpApiException>())!;
-        var continuation = (await Assert.That((Func<Task>)(() => bob.RunAsync(new UhpTaskRequest("Continue") { PreviousResponseId = result.Id }))).ThrowsExactly<UhpApiException>())!;
-        var cancel = (await Assert.That((Func<Task>)(() => bob.CancelResponseAsync(result.Id))).ThrowsExactly<UhpApiException>())!;
-        var session = (await Assert.That((Func<Task>)(() => bob.CancelSessionAsync(result.SessionId!))).ThrowsExactly<UhpApiException>())!;
+        var get = (await Assert
+            .That((Func<Task>)(() => bob.GetResponseAsync(result.Id)))
+            .ThrowsExactly<UhpApiException>())!;
+        var continuation = (await Assert
+            .That((Func<Task>)(() => bob.RunAsync(new UhpTaskRequest("Continue") { PreviousResponseId = result.Id })))
+            .ThrowsExactly<UhpApiException>())!;
+        var cancel = (await Assert
+            .That((Func<Task>)(() => bob.CancelResponseAsync(result.Id)))
+            .ThrowsExactly<UhpApiException>())!;
+        var session = (await Assert
+            .That((Func<Task>)(() => bob.CancelSessionAsync(result.SessionId!)))
+            .ThrowsExactly<UhpApiException>())!;
         foreach (var error in new[]
         {
             get,
@@ -92,11 +124,17 @@ public sealed class ServerTests
 
         )
         {
-            await Assert.That(error.StatusCode).IsEqualTo(HttpStatusCode.NotFound);
+            await Assert
+                .That(error.StatusCode)
+                .IsEqualTo(HttpStatusCode.NotFound);
         }
 
-        await Assert.That(server.Backend.SubmissionCount).IsEqualTo(1);
-        await Assert.That(server.Backend.CancellationCount).IsEqualTo(0);
+        await Assert
+            .That(server.Backend.SubmissionCount)
+            .IsEqualTo(1);
+        await Assert
+            .That(server.Backend.CancellationCount)
+            .IsEqualTo(0);
     }
 
     [Test]
@@ -110,15 +148,27 @@ public sealed class ServerTests
             IdempotencyKey = "same-key"
         };
         var results = await Task.WhenAll(client.RunAsync(request), client.RunAsync(request));
-        await Assert.That(results[1].Id).IsEqualTo(results[0].Id);
-        await Assert.That(server.Backend.SubmissionCount).IsEqualTo(1);
-        var reused = (await Assert.That((Func<Task>)(() => client.RunAsync(new UhpTaskRequest("different") { IdempotencyKey = "same-key" }))).ThrowsExactly<UhpApiException>())!;
-        await Assert.That(reused.Code).IsEqualTo("idempotency_key_reused");
+        await Assert
+            .That(results[1].Id)
+            .IsEqualTo(results[0].Id);
+        await Assert
+            .That(server.Backend.SubmissionCount)
+            .IsEqualTo(1);
+        var reused = (await Assert
+            .That((Func<Task>)(() => client.RunAsync(new UhpTaskRequest("different") { IdempotencyKey = "same-key" })))
+            .ThrowsExactly<UhpApiException>())!;
+        await Assert
+            .That(reused.Code)
+            .IsEqualTo("idempotency_key_reused");
         using var bobHttp = server.CreateHttp();
         var bob = await ServerTestHost.ConnectAsync(bobHttp, "bob");
         var independent = await bob.RunAsync(request);
-        await Assert.That(independent.Id).IsNotEqualTo(results[0].Id);
-        await Assert.That(server.Backend.SubmissionCount).IsEqualTo(2);
+        await Assert
+            .That(independent.Id)
+            .IsNotEqualTo(results[0].Id);
+        await Assert
+            .That(server.Backend.SubmissionCount)
+            .IsEqualTo(2);
     }
 
     [Test]
@@ -135,13 +185,21 @@ public sealed class ServerTests
             break;
         }
 
-        var busy = (await Assert.That((Func<Task>)(() => client.RunAsync(new UhpTaskRequest("Another turn") { PreviousResponseId = first.Id }))).ThrowsExactly<UhpApiException>())!;
-        await Assert.That(busy.Code).IsEqualTo("session_busy");
+        var busy = (await Assert
+            .That((Func<Task>)(() => client.RunAsync(new UhpTaskRequest("Another turn") { PreviousResponseId = first.Id })))
+            .ThrowsExactly<UhpApiException>())!;
+        await Assert
+            .That(busy.Code)
+            .IsEqualTo("session_busy");
         await client.CancelResponseAsync(id!);
         await WaitTerminalAsync(client, id!);
         var unstored = await client.RunAsync(new UhpTaskRequest("Hello") { Store = false });
-        var missing = (await Assert.That((Func<Task>)(() => client.GetResponseAsync(unstored.Id))).ThrowsExactly<UhpApiException>())!;
-        await Assert.That(missing.Code).IsEqualTo("response_not_found");
+        var missing = (await Assert
+            .That((Func<Task>)(() => client.GetResponseAsync(unstored.Id)))
+            .ThrowsExactly<UhpApiException>())!;
+        await Assert
+            .That(missing.Code)
+            .IsEqualTo("response_not_found");
     }
 
     [Test]
@@ -159,11 +217,21 @@ public sealed class ServerTests
         };
         message.Headers.Authorization = new("Bearer", "fixture-alice");
         using var response = await http.SendAsync(message);
-        await Assert.That((int)response.StatusCode).IsEqualTo(expected);
-        await Assert.That(response.Headers.GetValues("UHP-Version").Single()).IsEqualTo(UhpProtocolVersions.Current);
+        await Assert
+            .That((int)response.StatusCode)
+            .IsEqualTo(expected);
+        await Assert
+            .That(response.Headers
+                .GetValues("UHP-Version")
+                .Single())
+            .IsEqualTo(UhpProtocolVersions.Current);
         using var document = System.Text.Json.JsonDocument.Parse(await response.Content.ReadAsStringAsync());
-        await Assert.That(UhpJson.ParseError(document.RootElement).Code).IsEqualTo("invalid_input");
-        await Assert.That(server.Backend.SubmissionCount).IsEqualTo(0);
+        await Assert
+            .That(UhpJson.ParseError(document.RootElement).Code)
+            .IsEqualTo("invalid_input");
+        await Assert
+            .That(server.Backend.SubmissionCount)
+            .IsEqualTo(0);
     }
 
     [Test]
@@ -172,14 +240,24 @@ public sealed class ServerTests
         await using var server = await ServerTestHost.StartAsync();
         using var http = server.CreateHttp();
         using var discovery = await http.GetAsync("v1/uhp");
-        await Assert.That(discovery.StatusCode).IsEqualTo(HttpStatusCode.OK);
+        await Assert
+            .That(discovery.StatusCode)
+            .IsEqualTo(HttpStatusCode.OK);
         using var unauthorized = await http.GetAsync("v1/harnesses");
-        await Assert.That(unauthorized.StatusCode).IsEqualTo(HttpStatusCode.Unauthorized);
+        await Assert
+            .That(unauthorized.StatusCode)
+            .IsEqualTo(HttpStatusCode.Unauthorized);
         using var body = System.Text.Json.JsonDocument.Parse(await unauthorized.Content.ReadAsStringAsync());
-        await Assert.That(UhpJson.ParseError(body.RootElement).Type).IsEqualTo("authentication_error");
+        await Assert
+            .That(UhpJson.ParseError(body.RootElement).Type)
+            .IsEqualTo("authentication_error");
         using var health = await http.GetAsync("/health");
-        await Assert.That(await health.Content.ReadAsStringAsync()).IsEqualTo("healthy");
-        await Assert.That(health.Headers.Contains("UHP-Version")).IsFalse();
+        await Assert
+            .That(await health.Content.ReadAsStringAsync())
+            .IsEqualTo("healthy");
+        await Assert
+            .That(health.Headers.Contains("UHP-Version"))
+            .IsFalse();
     }
 
     [Test]
@@ -193,10 +271,14 @@ public sealed class ServerTests
         };
         message.Headers.Authorization = new("Bearer", "fixture-alice");
         using var response = await http.SendAsync(message);
-        await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
+        await Assert
+            .That(response.StatusCode)
+            .IsEqualTo(HttpStatusCode.OK);
         using var document = System.Text.Json.JsonDocument.Parse(await response.Content.ReadAsStringAsync());
         var result = UhpJson.ParseResponse(document.RootElement);
-        await Assert.That(result.Metadata!["ignored_fields"].GetArrayLength()).IsEqualTo(2);
+        await Assert
+            .That(result.Metadata!["ignored_fields"].GetArrayLength())
+            .IsEqualTo(2);
     }
 
     private static async Task<UhpResponse> WaitTerminalAsync(UhpClient client, string id)

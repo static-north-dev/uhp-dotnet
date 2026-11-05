@@ -22,15 +22,15 @@ jobs:
         with:
           python-version: '3.13'
       - run: dotnet restore StaticNorth.Uhp.slnx --locked-mode
-      - run: dotnet run --project eng/StaticNorth.Uhp.SchemaGen --configuration Release --no-restore -- --check
+      - run: dotnet run --project tools/StaticNorth.Uhp.SchemaGen --configuration Release --no-restore -- --check
       - run: dotnet build StaticNorth.Uhp.slnx --configuration Release --no-restore
-      - run: dotnet run --project eng/StaticNorth.Uhp.Conformance --configuration Release --no-build --no-restore -- verify-suite . artifacts/conformance/upstream
+      - run: dotnet run --project tools/StaticNorth.Uhp.Conformance --configuration Release --no-build --no-restore -- verify-suite . artifacts/conformance/upstream
       - run: dotnet run --project tests/StaticNorth.Uhp.Client.Tests --configuration Release --no-build --no-restore -- --minimum-expected-tests 179 --report-trx --results-directory artifacts/test-results
       - run: dotnet format StaticNorth.Uhp.slnx --no-restore --verify-no-changes
       - run: dotnet pack src/StaticNorth.Uhp.Core --configuration Release --no-build --no-restore
       - run: dotnet pack src/StaticNorth.Uhp.Client --configuration Release --no-build --no-restore
       - run: dotnet pack src/StaticNorth.Uhp.Server --configuration Release --no-build --no-restore
-      - run: python3 eng/package-smoke.py --rid linux-x64
+      - run: python3 tools/package-smoke.py --rid linux-x64
       - name: Publish Native AOT TUnit runner
         run: >-
           dotnet publish tests/StaticNorth.Uhp.Client.Tests --configuration Release --runtime linux-x64

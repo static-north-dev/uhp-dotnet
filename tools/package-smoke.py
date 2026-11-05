@@ -62,7 +62,7 @@ def main():
     with tempfile.TemporaryDirectory(prefix="uhp-package-consumer-") as packages:
         projects = [("samples", "StaticNorth.Uhp.Console"), ("samples", "StaticNorth.Uhp.FixtureServer")]
         if args.reference_host:
-            projects.append(("eng", "StaticNorth.Uhp.ConformanceHost"))
+            projects.append(("tools", "StaticNorth.Uhp.ConformanceHost"))
         for directory, name in projects:
             project = ROOT / directory / name
             lock = Path(packages) / (name + ".native.lock.json")

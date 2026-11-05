@@ -16,13 +16,6 @@ public static class UhpEventJson
             throw new UhpProtocolException("Event sequence numbers cannot be negative.");
         }
 
-        UhpResponse Response() => UhpJson.ParseResponse(RequiredObject(value, UhpJsonFields.Response));
-        UhpOutputItem Item() => new(RequiredObject(value, UhpJsonFields.Item));
-        string ItemId() => RequiredText(wire.ItemId, UhpJsonFields.ItemId);
-        long OutputIndex() => RequiredIndex(wire.OutputIndex, UhpJsonFields.OutputIndex);
-        long ContentIndex() => RequiredIndex(wire.ContentIndex, UhpJsonFields.ContentIndex);
-        long SummaryIndex() => RequiredIndex(wire.SummaryIndex, UhpJsonFields.SummaryIndex);
-
         UhpEvent result = wire.Type switch
         {
             UhpEventTypes.ResponseCreated => new UhpResponseCreated(wire.SequenceNumber, Response()),
@@ -47,6 +40,18 @@ public static class UhpEventJson
         };
 
         return result with { Raw = value.Clone() };
+
+        long SummaryIndex() => RequiredIndex(wire.SummaryIndex, UhpJsonFields.SummaryIndex);
+
+        long ContentIndex() => RequiredIndex(wire.ContentIndex, UhpJsonFields.ContentIndex);
+
+        long OutputIndex() => RequiredIndex(wire.OutputIndex, UhpJsonFields.OutputIndex);
+
+        string ItemId() => RequiredText(wire.ItemId, UhpJsonFields.ItemId);
+
+        UhpOutputItem Item() => new(RequiredObject(value, UhpJsonFields.Item));
+
+        UhpResponse Response() => UhpJson.ParseResponse(RequiredObject(value, UhpJsonFields.Response));
     }
 
     public static JsonElement Serialize(UhpEvent update) => JsonSerializer.SerializeToElement(update, UhpJsonContext.Default.UhpEvent);

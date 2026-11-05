@@ -5,7 +5,7 @@
     <JsonSerializerIsReflectionEnabledByDefault>false</JsonSerializerIsReflectionEnabledByDefault>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="TUnit" Version="1.79.0" />
+    <PackageReference Include="TUnit" Version="1.80.0" />
     <ProjectReference Include="../../src/StaticNorth.Uhp.Client/StaticNorth.Uhp.Client.csproj" />
     <Compile Include="../../samples/StaticNorth.Uhp.Console/Scenario.cs" Link="Scenario.cs" />
   </ItemGroup>

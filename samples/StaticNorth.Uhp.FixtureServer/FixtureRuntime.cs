@@ -16,11 +16,14 @@ public sealed class FixtureRuntime : IReferenceRuntime
 
     public async Task<ReferenceRuntimeResult> RunAsync(ReferenceRuntimeRequest request, Func<string, ValueTask> textDelta, CancellationToken ct)
     {
-        await textDelta("Fixture response.").ConfigureAwait(false);
+        await textDelta("Fixture response.")
+            .ConfigureAwait(false);
         var input = request.Task.Input.ToString();
         var hold = input.Contains("hold", StringComparison.OrdinalIgnoreCase);
         var slow = input.Contains("slow", StringComparison.OrdinalIgnoreCase);
-        await Task.Delay(hold ? TimeSpan.FromSeconds(30) : TimeSpan.FromMilliseconds(slow ? 400 : 40), ct).ConfigureAwait(false);
+        await Task
+            .Delay(hold ? TimeSpan.FromSeconds(30) : TimeSpan.FromMilliseconds(slow ? 400 : 40), ct)
+            .ConfigureAwait(false);
         return new(DefaultModel, UhpResponseStatus.Completed);
     }
 }

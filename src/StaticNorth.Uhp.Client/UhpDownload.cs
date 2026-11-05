@@ -24,7 +24,9 @@ public sealed class UhpDownload : IAsyncDisposable
     {
         try
         {
-            await Content.DisposeAsync().ConfigureAwait(false);
+            await Content
+                .DisposeAsync()
+                .ConfigureAwait(false);
         }
         finally
         {

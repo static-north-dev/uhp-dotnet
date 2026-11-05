@@ -86,7 +86,10 @@ public partial class ReferenceBackend : IUhpHarnessManagementBackend, IUhpPlugin
                 throw Failure(409, "invalid_input", "The built-in harness cannot be deleted.");
             }
 
-            var keys = _harnessKeys.Where(entry => entry.Value.Id == harnessId).Select(entry => entry.Key).ToArray();
+            var keys = _harnessKeys
+                .Where(entry => entry.Value.Id == harnessId)
+                .Select(entry => entry.Key)
+                .ToArray();
 
             foreach (var key in keys)
             {
