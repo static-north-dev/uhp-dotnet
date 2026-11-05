@@ -6,7 +6,7 @@
         "type": "Direct",
         "requested": "[10.0.14, )",
         "resolved": "10.0.14",
-        "contentHash": "fsu9CKHwhd0k0xHKtQcBwEgmR03o+NKyiJqvC3rjeP7Io2+9FQhk3I3pm7dEtY5AebpKYyizsPnSA8ZMAW98uw=="
+        "contentHash": "YlTamXppEQls6DYWt7RdUuwWDb0lyw/vXCaGeQpLCpsLmfwGuCkOz/vIGgMTV7ECsJcavkCOkxZXv9s8rdAHkQ=="
       },
       "StaticNorth.Valiant.Endpoints.AspNetCore": {
         "type": "Transitive",
