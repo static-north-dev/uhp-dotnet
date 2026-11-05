@@ -137,6 +137,7 @@
       "staticnorth.uhp.reference": {
         "type": "Project",
         "dependencies": {
+          "StaticNorth.Uhp.Harnesses.ClaudeCode": "[0.1.0-preview.1, )",
           "StaticNorth.Uhp.Harnesses.Codex": "[0.1.0-preview.1, )",
           "StaticNorth.Uhp.Server": "[0.1.0-preview.1, )",
           "StaticNorth.Uhp.TestSupport": "[0.1.0-preview.1, )"

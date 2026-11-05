@@ -7,8 +7,10 @@ using StaticNorth.Uhp.Server;
 namespace StaticNorth.Uhp.Reference;
 
 // In-memory reference infrastructure with an injected execution runtime; not a persistent storage package.
-public partial class ReferenceBackend(IReferenceRuntime runtime, Environments.ReferenceEnvironmentBackend? environments = null) : IUhpServerBackend, IUhpSessionBackend, IUhpResponseStorageBackend, IDisposable
+public partial class ReferenceBackend(IReferenceRuntime runtime, Environments.ReferenceEnvironmentBackend? environments = null, ClaudeCodeRuntime? claude = null) : IUhpServerBackend, IUhpSessionBackend, IUhpResponseStorageBackend, IDisposable
 {
+    private const string DefaultHarnessId = "chrn_fixture";
+    private const string ClaudeHarnessId = "chrn_claude_code";
     private readonly IReferenceRuntime _runtime = runtime;
     private Memory.ReferenceMemoryBackend? _memories;
     private readonly long _createdAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
@@ -35,6 +37,11 @@ public partial class ReferenceBackend(IReferenceRuntime runtime, Environments.Re
         {
             var result = new List<UhpHarness> { Harness };
 
+            if (ClaudeHarness is { } additional)
+            {
+                result.Add(additional);
+            }
+
             foreach (var entry in _harnesses.Values)
             {
                 if (entry.Owner == Owner(context))
@@ -57,13 +64,28 @@ public partial class ReferenceBackend(IReferenceRuntime runtime, Environments.Re
         }
     }
 
-    public Task<UhpModelCatalog> GetModelsAsync(UhpRequestContext context, CancellationToken ct) => _runtime.GetModelsAsync(ct);
+    public async Task<UhpModelCatalog> GetModelsAsync(UhpRequestContext context, CancellationToken ct)
+    {
+        var primary = await _runtime
+            .GetModelsAsync(ct)
+            .ConfigureAwait(false);
+
+        return claude is null ? primary : new(new Dictionary<string, UhpModelBackend>(primary.Backends) { [claude.Base] = claude.Models });
+    }
 
     public Task<UhpHarnessModels> GetHarnessModelsAsync(string harnessId, UhpRequestContext context, CancellationToken ct)
     {
+        ct.ThrowIfCancellationRequested();
+
         lock (_gate)
         {
             var harness = FindHarness(harnessId, Owner(context));
+
+            if (harnessId == ClaudeHarnessId && claude is { } additional)
+            {
+                return Task.FromResult(new UhpHarnessModels(additional.Models.Models) { HarnessId = harnessId, Backend = additional.Base, Default = additional.DefaultModel });
+            }
+
             return Task.FromResult(new UhpHarnessModels([new UhpModel(harness.DefaultModel ?? _runtime.DefaultModel, true)]) { HarnessId = harnessId, Backend = _runtime.Base, Default = harness.DefaultModel ?? _runtime.DefaultModel });
         }
     }
@@ -120,20 +142,19 @@ public partial class ReferenceBackend(IReferenceRuntime runtime, Environments.Re
                 FindHarness(selectedHarness, owner);
                 selectedMemory = requestedMemory?.GetString() ?? prior?.MemoryId;
 
-                if (prior is not null && requestedMemory is not null && selectedMemory != prior.MemoryId)
+                if (selectedHarness != ClaudeHarnessId && prior is not null && requestedMemory is not null && selectedMemory != prior.MemoryId)
                 {
                     throw Failure(409, "memory_mismatch", "A continuation keeps the session's default memory.");
                 }
             }
 
-            memory = await memories
-                .SelectForSessionAsync(selectedHarness, owner, selectedMemory, request.PreviousResponseId is not null,
-                context.ProtocolVersion, serverStopping)
-                .ConfigureAwait(false);
-        }
-        else if (requestedMemory is not null)
-        {
-            throw UhpServerException.NotFound("memory_not_found");
+            if (selectedHarness != ClaudeHarnessId)
+            {
+                memory = await memories
+                    .SelectForSessionAsync(selectedHarness, owner, selectedMemory, request.PreviousResponseId is not null,
+                        context.ProtocolVersion, serverStopping)
+                    .ConfigureAwait(false);
+            }
         }
 
         lock (_gate)
@@ -159,12 +180,19 @@ public partial class ReferenceBackend(IReferenceRuntime runtime, Environments.Re
             var previousState = request.PreviousResponseId is { } priorId ? Find(priorId, owner) : null;
             var harness = SelectHarness(request, previousState);
 
-            if (previousState is not null && harness != previousState.HarnessId)
+            var configuration = FindHarness(harness, owner);
+            var selectedRuntime = _runtime;
+
+            if (harness == ClaudeHarnessId && claude is { } additional)
             {
-                throw Failure(409, "harness_mismatch", "A continuation must keep its harness.");
+                additional.ValidateTask(request);
+                selectedRuntime = additional;
+            }
+            else if (_memories is null && requestedMemory is not null)
+            {
+                throw UhpServerException.NotFound("memory_not_found");
             }
 
-            var configuration = FindHarness(harness, owner);
             var answer = ValidateAnswer(request, previousState);
             var environment = SelectEnvironment(request, configuration, previousState, owner);
 
@@ -173,12 +201,13 @@ public partial class ReferenceBackend(IReferenceRuntime runtime, Environments.Re
                 throw new UhpServerException(409, new("invalid_request_error", "session_busy", "The session already has an active turn."));
             }
 
-            _runtime.ValidateSession(session);
+            selectedRuntime.ValidateSession(session);
             var attachments = Attachments(request, owner);
             var voided = answer is null && _pendingInputs.TryGetValue(session, out var pending) ? pending.Question.Id : null;
 
             var retained = RetainedRequest(request, answer);
-            var runtimeRequest = new ReferenceRuntimeRequest(session, Workspace(session), retained,
+            var workspace = Path.Combine(selectedRuntime.WorkspaceRoot, session);
+            var runtimeRequest = new ReferenceRuntimeRequest(session, workspace, retained,
                 configuration)
             {
                 Attachments = attachments,
@@ -186,7 +215,7 @@ public partial class ReferenceBackend(IReferenceRuntime runtime, Environments.Re
                 Environment = environment,
                 VoidedInputRequestId = voided,
                 Memory = memory,
-                CaptureArtifactsAsync = _runtime.ProducesArtifacts ? ct => CaptureArtifactsAsync(session, owner, ct) : null,
+                CaptureArtifactsAsync = selectedRuntime.ProducesArtifacts ? ct => CaptureArtifactsAsync(workspace, session, owner, ct) : null,
                 ArtifactBaseUrl = ArtifactOrigin is { } origin ? origin.GetLeftPart(UriPartial.Authority) + context.BasePath : null
             };
             var ignored = submission.IgnoredFields;
@@ -208,7 +237,7 @@ public partial class ReferenceBackend(IReferenceRuntime runtime, Environments.Re
                 ignored = unsupported;
             }
 
-            var state = new ReferenceExecution(owner, session, retained, ignored, serverStopping, _runtime, runtimeRequest);
+            var state = new ReferenceExecution(owner, session, retained, ignored, serverStopping, selectedRuntime, runtimeRequest);
             _responses.Add(state.Response.Id, state);
             _active.Add(session, state);
             _pendingInputs.Remove(session);
@@ -236,9 +265,19 @@ public partial class ReferenceBackend(IReferenceRuntime runtime, Environments.Re
         }
     }
 
-    private string SelectHarness(UhpTaskRequest request, ReferenceExecution? previous) => request.HarnessId
-        ?? (request.Metadata?.GetValueOrDefault("harness_id") is { ValueKind: System.Text.Json.JsonValueKind.String } selected ? selected.GetString() : null)
-        ?? previous?.HarnessId ?? Harness.Id;
+    private static string SelectHarness(UhpTaskRequest request, ReferenceExecution? previous)
+    {
+        var harness = request.HarnessId
+            ?? (request.Metadata?.GetValueOrDefault("harness_id") is { ValueKind: System.Text.Json.JsonValueKind.String } selected ? selected.GetString() : null)
+            ?? previous?.HarnessId ?? DefaultHarnessId;
+
+        if (previous is not null && harness != previous.HarnessId)
+        {
+            throw Failure(409, "harness_mismatch", "A continuation must keep its harness.");
+        }
+
+        return harness;
+    }
 
     private UhpExecution? Replay(UhpRequestContext context, string owner, string? hash)
     {
@@ -319,5 +358,7 @@ public partial class ReferenceBackend(IReferenceRuntime runtime, Environments.Re
 
     private static string Owner(UhpRequestContext context) => context.Principal.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new InvalidOperationException("The fixture requires a stable principal ID.");
 
-    private UhpHarness Harness => new("chrn_fixture", "Reference harness", _runtime.Base) { DefaultModel = _runtime.DefaultModel, CreatedAt = _createdAt };
+    private UhpHarness Harness => new(DefaultHarnessId, "Reference harness", _runtime.Base) { DefaultModel = _runtime.DefaultModel, CreatedAt = _createdAt };
+
+    private UhpHarness? ClaudeHarness => claude is null ? null : new(ClaudeHarnessId, "Claude Code", claude.Base) { DefaultModel = claude.DefaultModel, CreatedAt = _createdAt };
 }

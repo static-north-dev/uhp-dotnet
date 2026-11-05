@@ -125,9 +125,21 @@ public partial class ReferenceBackend
             await state.Execution.Completion.ConfigureAwait(false);
         }
 
-        await _runtime
-            .DeleteSessionAsync(sessionId, CancellationToken.None)
-            .ConfigureAwait(false);
+        try
+        {
+            await states[0].Runtime
+                .DeleteSessionAsync(sessionId, CancellationToken.None)
+                .ConfigureAwait(false);
+        }
+        catch
+        {
+            lock (_gate)
+            {
+                _deletingSessions.Remove(sessionId);
+            }
+
+            throw;
+        }
 
         lock (_gate)
         {

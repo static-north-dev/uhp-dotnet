@@ -26,6 +26,7 @@ public sealed class ReferenceExecution(string owner, string sessionId, UhpTaskRe
     public long? CompletedAt { get; private set; }
     public string SessionId { get; } = sessionId;
     public string HarnessId { get; } = runtimeRequest.Harness.Id;
+    internal IReferenceRuntime Runtime => runtime;
     public Environments.ReferenceEnvironmentSelection? Environment { get; } = runtimeRequest.Environment;
     public string? MemoryId { get; } = runtimeRequest.Memory?.DefaultId;
     public CancellationTokenSource Cancellation { get; } = CancellationTokenSource.CreateLinkedTokenSource(stopping);
@@ -130,14 +131,13 @@ public sealed class ReferenceExecution(string owner, string sessionId, UhpTaskRe
             Publish(new UhpOutputItemDone(_sequence++, output[index], index));
         }
 
-        Publish(result.Status == UhpResponseStatus.Completed ? new UhpResponseCompleted(_sequence++, terminal) : result.Status == UhpResponseStatus.Incomplete ? new UhpResponseIncomplete(_sequence++, terminal) : new UhpResponseFailed(_sequence++, terminal));
-
         try
         {
             finished();
         }
         finally
         {
+            Publish(result.Status == UhpResponseStatus.Completed ? new UhpResponseCompleted(_sequence++, terminal) : result.Status == UhpResponseStatus.Incomplete ? new UhpResponseIncomplete(_sequence++, terminal) : new UhpResponseFailed(_sequence++, terminal));
             _completion.TrySetResult(terminal);
         }
     }

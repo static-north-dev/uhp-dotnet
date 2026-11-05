@@ -51,10 +51,8 @@ public partial class ReferenceBackend : IUhpFileBackend
         }
     }
 
-    private async Task<IReadOnlyList<Wire.File>> CaptureArtifactsAsync(string sessionId, string owner, CancellationToken ct)
+    private async Task<IReadOnlyList<Wire.File>> CaptureArtifactsAsync(string workspace, string sessionId, string owner, CancellationToken ct)
     {
-        var workspace = Workspace(sessionId);
-
         if (!Directory.Exists(workspace))
         {
             return [];
@@ -263,6 +261,4 @@ public partial class ReferenceBackend : IUhpFileBackend
             _files.Remove(id);
         }
     }
-
-    private string Workspace(string sessionId) => Path.Combine(_runtime.WorkspaceRoot, sessionId);
 }
