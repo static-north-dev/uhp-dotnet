@@ -1,5 +1,7 @@
 # UHP harness adapter roadmap
 
+This records the original standalone adapter package proposal. Core, Client, and Server are the SDK packages. The three adapters now build with the non-packable reference sample. [Current server integration](server.md#register-harness-providers)
+
 Start with an opt-in Codex NuGet package, then implement Claude Code to test the shared runtime boundary. Evaluate OpenCode next as an HTTP-based harness with support for multiple model providers. Each package represents a specific agent runtime and plugs into a UHP server. Applications connecting to an existing UHP deployment use the client SDK. [UHP harness specification](https://unifiedharnessprotocol.org/spec/2026-10-19/harnesses)
 
 ## Candidate runtimes

@@ -21,28 +21,9 @@
       "staticnorth.uhp.core": {
         "type": "Project"
       },
-      "staticnorth.uhp.harnesses.claudecode": {
-        "type": "Project",
-        "dependencies": {
-          "StaticNorth.Uhp.Core": "[0.1.0-preview.1, )"
-        }
-      },
-      "staticnorth.uhp.harnesses.codex": {
-        "type": "Project",
-        "dependencies": {
-          "StaticNorth.Uhp.Core": "[0.1.0-preview.1, )"
-        }
-      },
-      "staticnorth.uhp.harnesses.opencode": {
-        "type": "Project",
-        "dependencies": {
-          "StaticNorth.Uhp.Core": "[0.1.0-preview.1, )"
-        }
-      },
       "staticnorth.uhp.reference": {
         "type": "Project",
         "dependencies": {
-          "StaticNorth.Uhp.Harnesses.Codex": "[0.1.0-preview.1, )",
           "StaticNorth.Uhp.Server": "[0.1.0-preview.1, )",
           "StaticNorth.Uhp.TestSupport": "[0.1.0-preview.1, )"
         }

@@ -51,7 +51,7 @@ The [Codex reference host](conformance-deployment.md) demonstrates how to supply
 
 ## Register harness providers
 
-Install the packages for the runtimes your server uses. Each registers a singleton `IUhpHarnessProvider` with its own model catalog and native session handling.
+Implement `IUhpHarnessProvider` for each runtime your server uses. The conformance host uses the adapters in the reference sample. Each registers a singleton provider with its own model catalog and native session handling.
 
 ```csharp
 using StaticNorth.Uhp.Harnesses.ClaudeCode;

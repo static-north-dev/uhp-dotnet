@@ -3,20 +3,9 @@
     <JsonSerializerIsReflectionEnabledByDefault>false</JsonSerializerIsReflectionEnabledByDefault>
     <InvariantGlobalization>true</InvariantGlobalization>
     <IsAotCompatible>true</IsAotCompatible>
-    <RestoreAdditionalProjectSources Condition="'$(UseUhpPackages)' == 'true'">$(RestoreAdditionalProjectSources);$(PackageOutputPath)</RestoreAdditionalProjectSources>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../../samples/StaticNorth.Uhp.Reference/StaticNorth.Uhp.Reference.csproj" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(UseUhpPackages)' != 'true'">
-    <ProjectReference Include="../../src/StaticNorth.Uhp.Harnesses.ClaudeCode/StaticNorth.Uhp.Harnesses.ClaudeCode.csproj" />
-    <ProjectReference Include="../../src/StaticNorth.Uhp.Harnesses.OpenCode/StaticNorth.Uhp.Harnesses.OpenCode.csproj" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(UseUhpPackages)' == 'true'">
-    <PackageReference Include="StaticNorth.Uhp.Harnesses.ClaudeCode" Version="$(Version)" />
-    <PackageReference Include="StaticNorth.Uhp.Harnesses.OpenCode" Version="$(Version)" />
-  </ItemGroup>
-  <ItemGroup>
     <PackageReference Include="Microsoft.NET.ILLink.Tasks" Version="10.0.14" PrivateAssets="all" />
   </ItemGroup>
 </Project>

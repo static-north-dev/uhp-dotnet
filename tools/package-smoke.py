@@ -22,7 +22,7 @@ def run(*args):
 
 
 def check_packages(version):
-    for name in ("Core", "Client", "Server", "Harnesses.ClaudeCode", "Harnesses.Codex", "Harnesses.OpenCode"):
+    for name in ("Core", "Client", "Server"):
         package = ROOT / f"artifacts/packages/StaticNorth.Uhp.{name}.{version}.nupkg"
         symbols = package.with_suffix(".snupkg")
         assert symbols.is_file(), f"Missing symbols: {symbols}"
@@ -45,9 +45,6 @@ def check_packages(version):
             if name == "Server":
                 assert "StaticNorth.Valiant.Endpoints.AspNetCore" in dependencies
                 assert "StaticNorth.Valiant.Validation" in dependencies
-            if name.startswith("Harnesses."):
-                assert set(dependencies) == {"StaticNorth.Uhp.Core", "Microsoft.Extensions.DependencyInjection.Abstractions"}, dependencies
-                assert metadata.find(".//n:frameworkReference", ns) is None
 
 
 def main():

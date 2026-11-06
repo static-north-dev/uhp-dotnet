@@ -1,6 +1,6 @@
 # OpenCode provider preview
 
-`StaticNorth.Uhp.Harnesses.OpenCode` registers a UHP runtime with `AddUhpOpenCode`. Build the preview with `dotnet pack StaticNorth.Uhp.slnx -c Release` and install it from `artifacts/packages`. The runtime and its underlying `OpenCodeConnection` use a caller-owned `HttpClient` with an OpenCode base address. Disable automatic redirects and automatic retries for POST requests. [Server registration](server.md#register-harness-providers) · [OpenCode server API](https://opencode.ai/docs/server/)
+The reference sample registers the OpenCode runtime with `AddUhpOpenCode`. The runtime and its underlying `OpenCodeConnection` use a caller-owned `HttpClient` with an OpenCode base address. Disable automatic redirects and automatic retries for POST requests. [Server registration](server.md#register-harness-providers) · [OpenCode server API](https://opencode.ai/docs/server/)
 
 ## Run it alongside Codex and Claude Code
 
