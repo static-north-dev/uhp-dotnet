@@ -1,5 +1,6 @@
 using System.Text.Json;
 using StaticNorth.Uhp.Core;
+using StaticNorth.Uhp.Core.Providers;
 
 namespace StaticNorth.Uhp.Reference;
 
@@ -7,7 +8,7 @@ public partial class ReferenceBackend
 {
     private readonly Dictionary<string, (string Response, UhpOutputItem Question)> _pendingInputs = new(StringComparer.Ordinal);
 
-    private ReferenceInputAnswer? ValidateAnswer(UhpTaskRequest request, ReferenceExecution? previous)
+    private UhpHarnessInputAnswer? ValidateAnswer(UhpTaskRequest request, ReferenceExecution? previous)
     {
         if ((request.InputFeatures & UhpInputFeatures.Interactive) == 0)
         {
@@ -56,7 +57,7 @@ public partial class ReferenceBackend
             .GetString()!);
     }
 
-    private static UhpTaskRequest RetainedRequest(UhpTaskRequest request, ReferenceInputAnswer? answer)
+    private static UhpTaskRequest RetainedRequest(UhpTaskRequest request, UhpHarnessInputAnswer? answer)
     {
         if (answer?.Kind != "secret")
         {

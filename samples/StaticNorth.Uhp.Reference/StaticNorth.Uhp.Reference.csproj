@@ -4,13 +4,16 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <RestoreAdditionalProjectSources Condition="'$(UseUhpPackages)' == 'true'">$(RestoreAdditionalProjectSources);$(PackageOutputPath)</RestoreAdditionalProjectSources>
   </PropertyGroup>
-  <ItemGroup>
-    <ProjectReference Include="../../src/StaticNorth.Uhp.Harnesses.ClaudeCode/StaticNorth.Uhp.Harnesses.ClaudeCode.csproj" />
+  <ItemGroup Condition="'$(UseUhpPackages)' != 'true'">
     <ProjectReference Include="../../src/StaticNorth.Uhp.Harnesses.Codex/StaticNorth.Uhp.Harnesses.Codex.csproj" />
-    <ProjectReference Include="../../src/StaticNorth.Uhp.Harnesses.OpenCode/StaticNorth.Uhp.Harnesses.OpenCode.csproj" />
-    <ProjectReference Include="../../src/StaticNorth.Uhp.Server/StaticNorth.Uhp.Server.csproj" Condition="'$(UseUhpPackages)' != 'true'" />
+    <ProjectReference Include="../../src/StaticNorth.Uhp.Server/StaticNorth.Uhp.Server.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(UseUhpPackages)' == 'true'">
+    <PackageReference Include="StaticNorth.Uhp.Harnesses.Codex" Version="$(Version)" />
+    <PackageReference Include="StaticNorth.Uhp.Server" Version="$(Version)" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Microsoft.NET.ILLink.Tasks" Version="10.0.14" PrivateAssets="all" />
-    <PackageReference Include="StaticNorth.Uhp.Server" Version="$(Version)" Condition="'$(UseUhpPackages)' == 'true'" />
     <ProjectReference Include="../../tests/StaticNorth.Uhp.TestSupport/StaticNorth.Uhp.TestSupport.csproj" />
   </ItemGroup>
 </Project>

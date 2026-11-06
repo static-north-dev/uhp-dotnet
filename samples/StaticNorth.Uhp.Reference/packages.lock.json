@@ -8,6 +8,11 @@
         "resolved": "10.0.14",
         "contentHash": "YlTamXppEQls6DYWt7RdUuwWDb0lyw/vXCaGeQpLCpsLmfwGuCkOz/vIGgMTV7ECsJcavkCOkxZXv9s8rdAHkQ=="
       },
+      "Microsoft.Extensions.DependencyInjection.Abstractions": {
+        "type": "Transitive",
+        "resolved": "10.0.14",
+        "contentHash": "QtpQzuSZVyTPCuHW058yCs9Nj0394uUkNyFHS813nOmK9UgUdBdaprJ5PPsBgsQIpxADTsTkbaMMonykem6qdw=="
+      },
       "StaticNorth.Valiant.Endpoints.AspNetCore": {
         "type": "Transitive",
         "resolved": "1.2.1",
@@ -21,14 +26,12 @@
       "staticnorth.uhp.core": {
         "type": "Project"
       },
-      "staticnorth.uhp.harnesses.claudecode": {
-        "type": "Project"
-      },
       "staticnorth.uhp.harnesses.codex": {
-        "type": "Project"
-      },
-      "staticnorth.uhp.harnesses.opencode": {
-        "type": "Project"
+        "type": "Project",
+        "dependencies": {
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "[10.0.14, )",
+          "StaticNorth.Uhp.Core": "[0.1.0-preview.1, )"
+        }
       },
       "staticnorth.uhp.server": {
         "type": "Project",

@@ -1,8 +1,8 @@
 # Codex provider preview
 
-`StaticNorth.Uhp.Harnesses.Codex` provides the stdio connection to [Codex App Server](https://developers.openai.com/codex/app-server). The [reference host](conformance-deployment.md) uses it for model discovery and native turns. The host still owns UHP task and session handling, workspace and credential preparation, permissions, and the translation between Codex events and UHP responses.
+`StaticNorth.Uhp.Harnesses.Codex` registers a UHP runtime with `AddUhpCodex`. It uses Codex App Server over stdio for model discovery, turns, continuation, and interruption. Hosts that need raw App Server calls can still use `CodexAppServerConnection` directly. [Server registration](server.md#register-harness-providers) · [Codex App Server](https://developers.openai.com/codex/app-server)
 
-Build a local package with `dotnet pack src/StaticNorth.Uhp.Harnesses.Codex --configuration Release`. Install `StaticNorth.Uhp.Harnesses.Codex` version `0.1.0-preview.1` from `artifacts/packages` in a .NET 10 consumer. The deployment supplies a trusted Codex executable, an isolated `CODEX_HOME`, and a working directory. Model-backed turns require credentials configured in that Codex home. The reference deployment pins Codex CLI `0.166.0` and the connection enables the experimental App Server API it uses.
+Build the preview with `dotnet pack StaticNorth.Uhp.slnx --configuration Release`. Install `StaticNorth.Uhp.Harnesses.Codex` from `artifacts/packages` in a .NET 10 consumer. The deployment supplies a trusted Codex executable, an isolated `CODEX_HOME`, and a working directory. Model-backed turns require credentials configured in that Codex home. The reference deployment pins Codex CLI `0.166.0` and the connection enables the experimental App Server API it uses.
 
 ```csharp
 using System.Text.Json;

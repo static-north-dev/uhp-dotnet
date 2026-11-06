@@ -28,10 +28,8 @@ jobs:
       - run: dotnet run --project tools/StaticNorth.Uhp.Conformance --configuration Release --no-build --no-restore -- verify-suite . artifacts/conformance/upstream
       - run: dotnet run --project tests/StaticNorth.Uhp.Client.Tests --configuration Release --no-build --no-restore -- --minimum-expected-tests 179 --report-trx --results-directory artifacts/test-results
       - run: dotnet format StaticNorth.Uhp.slnx --no-restore --verify-no-changes
-      - run: dotnet pack src/StaticNorth.Uhp.Core --configuration Release --no-build --no-restore
-      - run: dotnet pack src/StaticNorth.Uhp.Client --configuration Release --no-build --no-restore
-      - run: dotnet pack src/StaticNorth.Uhp.Server --configuration Release --no-build --no-restore
-      - run: python3 tools/package-smoke.py --rid linux-x64
+      - run: dotnet pack StaticNorth.Uhp.slnx --configuration Release --no-build --no-restore --disable-build-servers
+      - run: python3 tools/package-smoke.py --rid linux-x64 --reference-host
       - name: Publish Native AOT TUnit runner
         run: >-
           dotnet publish tests/StaticNorth.Uhp.Client.Tests --configuration Release --runtime linux-x64

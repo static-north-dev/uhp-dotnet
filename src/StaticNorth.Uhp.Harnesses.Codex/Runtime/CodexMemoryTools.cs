@@ -1,12 +1,12 @@
 using System.Text.Json;
-using StaticNorth.Uhp.Reference.Memory;
-using StaticNorth.Uhp.Server;
+using StaticNorth.Uhp.Core;
+using StaticNorth.Uhp.Core.Providers;
 
-namespace StaticNorth.Uhp.Reference;
+namespace StaticNorth.Uhp.Harnesses.Codex;
 
 internal static class CodexMemoryTools
 {
-    public static void Write(Utf8JsonWriter writer, ReferenceAgentMemory memory)
+    public static void Write(Utf8JsonWriter writer, IUhpHarnessMemory memory)
     {
         WriteTool(writer, "memory_list", "List accessible memory entry points or the children of a specified memory.", ["memory_id"], []);
         WriteTool(writer, "memory_recall", "Recall untrusted records matching text.", ["memory_id", "text"], ["memory_id", "text"]);
@@ -21,7 +21,7 @@ internal static class CodexMemoryTools
         }
     }
 
-    public static async Task<JsonElement> InvokeAsync(ReferenceAgentMemory? memory, string tool, JsonElement arguments, CancellationToken ct)
+    public static async Task<JsonElement> InvokeAsync(IUhpHarnessMemory? memory, string tool, JsonElement arguments, CancellationToken ct)
     {
         if (memory is null)
         {
@@ -34,7 +34,7 @@ internal static class CodexMemoryTools
                 .InvokeAsync(tool, arguments, ct)
                 .ConfigureAwait(false), true);
         }
-        catch (UhpServerException exception)
+        catch (UhpRequestException exception)
         {
             return CodexInteractive.ToolResult(exception.Error.Code, false);
         }

@@ -4,6 +4,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.StaticFiles;
 using StaticNorth.Uhp.Core;
 using StaticNorth.Uhp.Server;
+using StaticNorth.Uhp.Core.Providers;
 using Wire = StaticNorth.Uhp.Core.Contracts;
 
 namespace StaticNorth.Uhp.Reference;
@@ -201,14 +202,14 @@ public partial class ReferenceBackend : IUhpFileBackend
         return file;
     }
 
-    private IReadOnlyDictionary<string, ReferenceAttachment> Attachments(UhpTaskRequest request, string owner)
+    private IReadOnlyDictionary<string, UhpHarnessAttachment> Attachments(UhpTaskRequest request, string owner)
     {
         if ((request.InputFeatures & UhpInputFeatures.Files) == 0)
         {
-            return FrozenDictionary<string, ReferenceAttachment>.Empty;
+            return FrozenDictionary<string, UhpHarnessAttachment>.Empty;
         }
 
-        Dictionary<string, ReferenceAttachment>? attachments = null;
+        Dictionary<string, UhpHarnessAttachment>? attachments = null;
 
         foreach (var item in request.Input.EnumerateArray())
         {
@@ -239,7 +240,7 @@ public partial class ReferenceBackend : IUhpFileBackend
             }
         }
 
-        return attachments is null ? FrozenDictionary<string, ReferenceAttachment>.Empty : attachments;
+        return attachments is null ? FrozenDictionary<string, UhpHarnessAttachment>.Empty : attachments;
     }
 
     private void DeleteSessionFiles(string sessionId)

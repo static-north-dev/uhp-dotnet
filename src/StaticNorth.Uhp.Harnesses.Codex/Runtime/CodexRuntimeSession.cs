@@ -1,6 +1,6 @@
-using StaticNorth.Uhp.Harnesses.Codex;
+using StaticNorth.Uhp.Core.Providers;
 
-namespace StaticNorth.Uhp.Reference;
+namespace StaticNorth.Uhp.Harnesses.Codex;
 
 internal sealed class CodexRuntimeSession(CodexAppServerConnection connection, string threadId, string model, string home, List<CodexMcpBinding> bindings)
 {
@@ -12,5 +12,5 @@ internal sealed class CodexRuntimeSession(CodexAppServerConnection connection, s
     public CodexSecretStore Secrets { get; } = new();
     public bool Executing { get; set; }
     public bool MemoryPrimed { get; set; }
-    public Environments.ReferenceEnvironmentSelection? Environment { get; set; }
+    public IUhpHarnessEnvironment? Environment { get; set; }
 }

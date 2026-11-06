@@ -2,9 +2,14 @@
   <PropertyGroup>
     <IsPackable>true</IsPackable>
     <IsAotCompatible>true</IsAotCompatible>
-    <Description>Native AOT-compatible Claude Code headless transport for UHP hosts.</Description>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>StaticNorth.Uhp.Harnesses.ClaudeCode</RootNamespace>
+    <Description>Native AOT-compatible Claude Code provider for UHP hosts.</Description>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="../StaticNorth.Uhp.Core/StaticNorth.Uhp.Core.csproj" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.14" />
     <PackageReference Include="Microsoft.NET.ILLink.Tasks" Version="10.0.14" PrivateAssets="all" />
   </ItemGroup>
 </Project>

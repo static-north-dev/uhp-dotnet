@@ -1,7 +1,9 @@
+using Microsoft.Extensions.DependencyInjection;
 using StaticNorth.Uhp.Client;
 using StaticNorth.Uhp.Core;
 using StaticNorth.Uhp.Harnesses.OpenCode;
 using StaticNorth.Uhp.Reference;
+using StaticNorth.Uhp.Core.Providers;
 using StaticNorth.Uhp.FixtureServer;
 
 namespace StaticNorth.Uhp.Client.Tests;
@@ -26,13 +28,21 @@ public sealed class OpenCodeRuntimeTests
             await Assert
                 .That(await connection.HasModelAsync(directory.FullName, "fixture", "missing", ct))
                 .IsFalse();
-            var runtime = new OpenCodeRuntime(connection, directory.FullName, "fixture", "demo");
-            using var backend = new ReferenceBackend(new FixtureRuntime(), openCode: runtime);
+            await using var services = new ServiceCollection()
+                .AddSingleton<IUhpHarnessProvider, FixtureRuntime>()
+                .AddUhpOpenCode(upstream, directory.FullName, "fixture", "demo")
+                .BuildServiceProvider();
+            var providers = new UhpHarnessProviderRegistry(services.GetServices<IUhpHarnessProvider>());
+            await providers.InitializeAsync(ct);
+            using var backend = new ReferenceBackend(providers, "fixture");
             await using var host = await ServerTestHost.StartAsync(sessions: true, backend: backend);
             using var http = host.CreateHttp();
             var client = await ServerTestHost.ConnectAsync(http);
             var harnesses = await client.ListHarnessesAsync(ct);
             var openCode = harnesses.Single(harness => harness.Base == "opencode");
+            await Assert
+                .That(openCode.Id)
+                .IsEqualTo("chrn_opencode");
             var models = await client.GetHarnessModelsAsync(openCode.Id, ct);
             await Assert
                 .That(models.Default)

@@ -1,16 +1,32 @@
 using System.Collections.Concurrent;
 using StaticNorth.Uhp.Core;
-using StaticNorth.Uhp.Harnesses.OpenCode;
+using StaticNorth.Uhp.Core.Providers;
 
-namespace StaticNorth.Uhp.Reference;
+namespace StaticNorth.Uhp.Harnesses.OpenCode;
 
-public sealed class OpenCodeRuntime(OpenCodeConnection connection, string stateRoot, string provider, string model) : IReferenceRuntime
+public sealed class OpenCodeRuntime(OpenCodeConnection connection, string stateRoot, string provider, string model) : IUhpHarnessProvider
 {
     private readonly ConcurrentDictionary<string, (string? Id, bool Ready)> _sessions = new(StringComparer.Ordinal);
 
     public string Base => "opencode";
+    public string DisplayName => "OpenCode";
     public string DefaultModel { get; } = provider + "/" + model;
     public string WorkspaceRoot { get; } = Path.Combine(stateRoot, "workspaces");
+
+    public async Task InitializeAsync(CancellationToken ct)
+    {
+        ct.ThrowIfCancellationRequested();
+        var root = Directory.CreateDirectory(stateRoot).FullName;
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        timeout.CancelAfter(TimeSpan.FromSeconds(10));
+
+        if (!await connection
+            .HasModelAsync(root, provider, model, timeout.Token)
+            .ConfigureAwait(false))
+        {
+            throw new InvalidOperationException("The configured model is not listed under a connected OpenCode provider.");
+        }
+    }
     public bool SupportsMemory => false;
 
     public Task<UhpModelCatalog> GetModelsAsync(CancellationToken ct)
@@ -24,21 +40,21 @@ public sealed class OpenCodeRuntime(OpenCodeConnection connection, string stateR
     {
         if (task.Model is { } requested && requested != DefaultModel)
         {
-            throw ReferenceBackend.Failure(422, "model_unavailable", "The OpenCode harness cannot serve the requested model.");
+            throw UhpRequestException.InvalidRequest(422, "model_unavailable", "The OpenCode harness cannot serve the requested model.");
         }
 
-        ReferenceTextInput.Validate(task, "OpenCode");
+        UhpHarnessTextInput.Validate(task, "OpenCode");
     }
 
     public void ValidateSession(string sessionId)
     {
         if (_sessions.TryGetValue(sessionId, out var session) && !session.Ready)
         {
-            throw ReferenceBackend.Failure(409, "staticnorth_session_runtime_unavailable", "The native session could not be recovered after a runtime failure.");
+            throw UhpRequestException.InvalidRequest(409, "staticnorth_session_runtime_unavailable", "The native session could not be recovered after a runtime failure.");
         }
     }
 
-    public async Task<ReferenceRuntimeResult> RunAsync(ReferenceRuntimeRequest request, Func<string, ValueTask> textDelta, CancellationToken ct)
+    public async Task<UhpHarnessRunResult> RunAsync(UhpHarnessRunRequest request, Func<string, ValueTask> textDelta, CancellationToken ct)
     {
         ct.ThrowIfCancellationRequested();
         var session = _sessions.GetValueOrDefault(request.SessionId).Id;
@@ -64,7 +80,7 @@ public sealed class OpenCodeRuntime(OpenCodeConnection connection, string stateR
 
         _sessions[request.SessionId] = (session, false);
         var completed = await connection
-            .RunTurnAsync(request.Workspace, session, provider, model, ReferenceTextInput.Prompt(request.Task.Input), request.Task.Instructions, textDelta, ct)
+            .RunTurnAsync(request.Workspace, session, provider, model, UhpHarnessTextInput.Prompt(request.Task.Input), request.Task.Instructions, textDelta, ct)
             .ConfigureAwait(false);
         _sessions[request.SessionId] = (session, true);
 

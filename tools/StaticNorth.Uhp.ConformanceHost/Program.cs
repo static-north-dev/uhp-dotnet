@@ -6,11 +6,13 @@ using Microsoft.AspNetCore.Authentication;
 using StaticNorth.Uhp.ConformanceHost;
 using StaticNorth.Uhp.Core;
 using StaticNorth.Uhp.Harnesses.ClaudeCode;
+using StaticNorth.Uhp.Harnesses.Codex;
 using StaticNorth.Uhp.Harnesses.OpenCode;
 using StaticNorth.Uhp.Reference;
 using StaticNorth.Uhp.Reference.Memory;
 using StaticNorth.Uhp.Reference.Environments;
 using StaticNorth.Uhp.Server;
+using StaticNorth.Uhp.Core.Providers;
 using StaticNorth.Uhp.TestSupport.Memory;
 
 ArgumentException.ThrowIfNullOrWhiteSpace(Environment.GetEnvironmentVariable("UHP_HOST_TOKEN"));
@@ -31,21 +33,13 @@ builder.Services.AddSingleton(new HostCredential(Environment.GetEnvironmentVaria
 var root = Path.GetFullPath(builder.Configuration["state-root"] ?? "artifacts/conformance/host");
 var authenticationHome = Environment.GetEnvironmentVariable("CODEX_HOME") ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".codex");
 await using var environments = new ReferenceEnvironmentBackend(Path.Combine(root, "environments"));
-await using var runtime = new CodexRuntime(root, authenticationHome);
-await runtime.InitializeAsync(CancellationToken.None);
-var claude = await ConfigureClaudeAsync(builder.Configuration, root, claudeAuth);
+builder.Services.AddUhpCodex(root, authenticationHome);
+var hasClaude = await ConfigureClaudeAsync(builder, root, claudeAuth);
 using var openCodeHttp = ConfigureOpenCodeHttp(builder.Configuration);
-var openCode = openCodeHttp is null ? null : await ConfigureOpenCodeAsync(openCodeHttp, builder.Configuration, root);
-builder.Services.AddSingleton<IReferenceRuntime>(runtime);
 
-if (claude is not null)
+if (openCodeHttp is not null)
 {
-    builder.Services.AddSingleton(claude);
-}
-
-if (openCode is not null)
-{
-    builder.Services.AddSingleton(openCode);
+    ConfigureOpenCode(builder, openCodeHttp, root);
 }
 
 builder.Services.AddSingleton(environments);
@@ -53,6 +47,7 @@ builder.Services.AddSingleton<IUhpEnvironmentBackend>(environments);
 builder.Services
     .AddAuthentication("Host")
     .AddScheme<AuthenticationSchemeOptions, HostAuthenticationHandler>("Host", null);
+builder.Services.AddSingleton<IUhpServerBackend>(CreateBackend);
 builder.Services.AddUhpServer<ReferenceBackend>(options =>
 {
     options.AuthenticationScheme = "Host";
@@ -65,7 +60,7 @@ builder.Services.AddUhpServer<ReferenceBackend>(options =>
         ["sessions"] = true,
         ["cancellation"] = true,
         ["idempotency"] = true,
-        ["files_input"] = claude is null && openCode is null,
+        ["files_input"] = !hasClaude && openCodeHttp is null,
         ["files_output"] = true,
         ["session_listing"] = true,
         ["harness_management"] = true,
@@ -86,7 +81,10 @@ builder.Services.AddSingleton<IUhpSharingBackend>(GetBackend);
 builder.Services.AddSingleton<IUhpSharedViewBackend>(GetBackend);
 builder.Services.AddSingleton<IReferenceMemoryProvider, InMemoryMemoryProvider>();
 builder.Services.AddSingleton<IUhpMemoryBackend, ReferenceMemoryBackend>();
-var app = builder.Build();
+await using var app = builder.Build();
+await app.Services
+    .GetRequiredService<UhpHarnessProviderRegistry>()
+    .InitializeAsync(app.Lifetime.ApplicationStopping);
 var backend = GetBackend(app.Services);
 environments.ConnectHarnesses(backend);
 backend.ConnectMemories((ReferenceMemoryBackend)app.Services.GetRequiredService<IUhpMemoryBackend>());
@@ -101,6 +99,9 @@ app.MapUhp();
 await app.RunAsync();
 
 static ReferenceBackend GetBackend(IServiceProvider services) => (ReferenceBackend)services.GetRequiredService<IUhpServerBackend>();
+
+static ReferenceBackend CreateBackend(IServiceProvider services) => new(
+    services.GetRequiredService<UhpHarnessProviderRegistry>(), "codex", services.GetRequiredService<ReferenceEnvironmentBackend>());
 
 static HttpClient? ConfigureOpenCodeHttp(IConfiguration configuration)
 {
@@ -132,9 +133,9 @@ static HttpClient? ConfigureOpenCodeHttp(IConfiguration configuration)
     return http;
 }
 
-static async Task<OpenCodeRuntime> ConfigureOpenCodeAsync(HttpClient http, IConfiguration configuration, string stateRoot)
+static void ConfigureOpenCode(WebApplicationBuilder builder, HttpClient http, string stateRoot)
 {
-    var selected = configuration["opencode-model"];
+    var selected = builder.Configuration["opencode-model"];
     var separator = selected?.IndexOf('/') ?? -1;
 
     if (separator <= 0 || separator == selected!.Length - 1)
@@ -144,16 +145,7 @@ static async Task<OpenCodeRuntime> ConfigureOpenCodeAsync(HttpClient http, IConf
 
     var provider = selected[..separator];
     var model = selected[(separator + 1)..];
-    var connection = new OpenCodeConnection(http);
-    var root = Directory.CreateDirectory(Path.Combine(stateRoot, "opencode")).FullName;
-    using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-
-    if (!await connection.HasModelAsync(root, provider, model, timeout.Token))
-    {
-        throw new InvalidOperationException("The configured model is not listed under a connected OpenCode provider.");
-    }
-
-    return new OpenCodeRuntime(connection, root, provider, model);
+    builder.Services.AddUhpOpenCode(http, Path.Combine(stateRoot, "opencode"), provider, model);
 }
 
 static void ConfigureSubscriptionListener(WebApplicationBuilder builder)
@@ -174,8 +166,10 @@ static void ConfigureSubscriptionListener(WebApplicationBuilder builder)
     });
 }
 
-static async Task<ClaudeCodeRuntime?> ConfigureClaudeAsync(IConfiguration configuration, string stateRoot, string authentication)
+static async Task<bool> ConfigureClaudeAsync(WebApplicationBuilder builder, string stateRoot, string authentication)
 {
+    var configuration = builder.Configuration;
+
     if (configuration["claude-executable"] is not { } executable)
     {
         if (authentication == "subscription")
@@ -183,7 +177,7 @@ static async Task<ClaudeCodeRuntime?> ConfigureClaudeAsync(IConfiguration config
             throw new InvalidOperationException("Claude subscription mode requires --claude-executable.");
         }
 
-        return null;
+        return false;
     }
 
     var path = Path.GetFullPath(executable);
@@ -208,7 +202,8 @@ static async Task<ClaudeCodeRuntime?> ConfigureClaudeAsync(IConfiguration config
             throw new InvalidOperationException("Claude subscription mode requires a saved Claude Code login. Run claude auth login --claudeai first.");
         }
 
-        return new ClaudeCodeRuntime(path, claudeRoot, null, model, profile, config);
+        builder.Services.AddUhpClaudeCode(path, claudeRoot, null, model, profile, config);
+        return true;
     }
 
     var key = Environment.GetEnvironmentVariable("ANTHROPIC_API_KEY");
@@ -232,5 +227,6 @@ static async Task<ClaudeCodeRuntime?> ConfigureClaudeAsync(IConfiguration config
         throw new InvalidOperationException("Use the canonical Claude model ID returned by the Anthropic Models API.");
     }
 
-    return new ClaudeCodeRuntime(path, claudeRoot, key, model);
+    builder.Services.AddUhpClaudeCode(path, claudeRoot, key, model);
+    return true;
 }

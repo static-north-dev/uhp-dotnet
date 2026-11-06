@@ -1,6 +1,6 @@
 # OpenCode provider preview
 
-`StaticNorth.Uhp.Harnesses.OpenCode` is the HTTP transport for hosts that run OpenCode. Build the preview with `dotnet pack src/StaticNorth.Uhp.Harnesses.OpenCode -c Release` and install it from `artifacts/packages`. `OpenCodeConnection` uses a caller-owned `HttpClient` with an OpenCode base address. Disable automatic redirects and automatic retries for POST requests. [OpenCode server API](https://opencode.ai/docs/server/)
+`StaticNorth.Uhp.Harnesses.OpenCode` registers a UHP runtime with `AddUhpOpenCode`. Build the preview with `dotnet pack StaticNorth.Uhp.slnx -c Release` and install it from `artifacts/packages`. The runtime and its underlying `OpenCodeConnection` use a caller-owned `HttpClient` with an OpenCode base address. Disable automatic redirects and automatic retries for POST requests. [Server registration](server.md#register-harness-providers) · [OpenCode server API](https://opencode.ai/docs/server/)
 
 ## Run it alongside Codex and Claude Code
 

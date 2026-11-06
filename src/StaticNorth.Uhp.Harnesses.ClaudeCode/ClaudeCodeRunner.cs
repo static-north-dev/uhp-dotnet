@@ -107,7 +107,7 @@ public sealed class ClaudeCodeRunner(string executablePath, string? configuratio
 
         if ((resumeSessionId ?? newSessionId) is { } sessionId)
         {
-            ArgumentOutOfRangeException.ThrowIfEqual(sessionId, Guid.Empty, nameof(sessionId));
+            ArgumentOutOfRangeException.ThrowIfEqual(sessionId, Guid.Empty);
             start.ArgumentList.Add(resumeSessionId.HasValue ? "--resume" : "--session-id");
             start.ArgumentList.Add(sessionId.ToString("D"));
         }

@@ -3,17 +3,17 @@ using System.Security.Cryptography;
 using System.Text;
 using StaticNorth.Uhp.Core;
 using StaticNorth.Uhp.Server;
+using StaticNorth.Uhp.Core.Providers;
 
 namespace StaticNorth.Uhp.Reference;
 
 // In-memory reference infrastructure with an injected execution runtime; not a persistent storage package.
-public partial class ReferenceBackend(IReferenceRuntime runtime, Environments.ReferenceEnvironmentBackend? environments = null, ClaudeCodeRuntime? claude = null,
-    OpenCodeRuntime? openCode = null) : IUhpServerBackend, IUhpSessionBackend, IUhpResponseStorageBackend, IDisposable
+public partial class ReferenceBackend(UhpHarnessProviderRegistry providers, string defaultBase, Environments.ReferenceEnvironmentBackend? environments = null)
+    : IUhpServerBackend, IUhpSessionBackend, IUhpResponseStorageBackend, IDisposable
 {
     private const string DefaultHarnessId = "chrn_fixture";
-    private const string ClaudeHarnessId = "chrn_claude_code";
-    private const string OpenCodeHarnessId = "chrn_opencode";
-    private readonly IReferenceRuntime _runtime = runtime;
+    private readonly IUhpHarnessProvider _runtime = providers.ByBase[defaultBase];
+    private readonly Dictionary<string, IUhpHarnessProvider> _builtInProviders = BuildHarnessCatalog(providers, defaultBase);
     private Memory.ReferenceMemoryBackend? _memories;
     private readonly long _createdAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
     private readonly object _gate = new();
@@ -26,6 +26,10 @@ public partial class ReferenceBackend(IReferenceRuntime runtime, Environments.Re
     private int _cancellations;
     private int _disposed;
 
+    public ReferenceBackend(IUhpHarnessProvider provider) : this(new([provider]), provider.Base)
+    {
+    }
+
     public int SubmissionCount => Volatile.Read(ref _submissions);
     public int CancellationCount => Volatile.Read(ref _cancellations);
     public Uri? ArtifactOrigin { private get; set; }
@@ -37,16 +41,11 @@ public partial class ReferenceBackend(IReferenceRuntime runtime, Environments.Re
 
         lock (_gate)
         {
-            var result = new List<UhpHarness> { Harness };
+            var result = new List<UhpHarness>(_builtInProviders.Count);
 
-            if (ClaudeHarness is { } additional)
+            foreach (var (id, provider) in _builtInProviders)
             {
-                result.Add(additional);
-            }
-
-            if (OpenCodeHarness is { } openCodeHarness)
-            {
-                result.Add(openCodeHarness);
+                result.Add(BuiltInHarness(id, provider));
             }
 
             foreach (var entry in _harnesses.Values)
@@ -77,21 +76,21 @@ public partial class ReferenceBackend(IReferenceRuntime runtime, Environments.Re
             .GetModelsAsync(ct)
             .ConfigureAwait(false);
 
-        if (claude is null && openCode is null)
+        if (_builtInProviders.Count == 1)
         {
             return primary;
         }
 
         var backends = new Dictionary<string, UhpModelBackend>(primary.Backends);
 
-        if (claude is not null)
+        foreach (var (id, provider) in _builtInProviders)
         {
-            backends.Add(claude.Base, await GetRuntimeModelsAsync(claude, ct).ConfigureAwait(false));
-        }
-
-        if (openCode is not null)
-        {
-            backends.Add(openCode.Base, await GetRuntimeModelsAsync(openCode, ct).ConfigureAwait(false));
+            if (id != DefaultHarnessId)
+            {
+                var catalog = await GetRuntimeModelsAsync(provider, ct)
+                    .ConfigureAwait(false);
+                backends.Add(provider.Base, catalog);
+            }
         }
 
         return new(backends);
@@ -101,14 +100,14 @@ public partial class ReferenceBackend(IReferenceRuntime runtime, Environments.Re
     {
         ct.ThrowIfCancellationRequested();
         string model;
+        IUhpHarnessProvider selected;
 
         lock (_gate)
         {
             var harness = FindHarness(harnessId, Owner(context));
-            model = harness.DefaultModel ?? _runtime.DefaultModel;
+            selected = providers.ByBase[harness.Base];
+            model = harness.DefaultModel ?? selected.DefaultModel;
         }
-
-        var selected = SelectRuntime(harnessId);
 
         if (ReferenceEquals(selected, _runtime))
         {
@@ -119,7 +118,7 @@ public partial class ReferenceBackend(IReferenceRuntime runtime, Environments.Re
         return new(catalog.Models) { HarnessId = harnessId, Backend = selected.Base, Default = catalog.Default };
     }
 
-    private static async Task<UhpModelBackend> GetRuntimeModelsAsync(IReferenceRuntime selected, CancellationToken ct)
+    private static async Task<UhpModelBackend> GetRuntimeModelsAsync(IUhpHarnessProvider selected, CancellationToken ct)
     {
         var catalog = await selected.GetModelsAsync(ct).ConfigureAwait(false);
         return catalog.Backends[selected.Base];
@@ -175,9 +174,9 @@ public partial class ReferenceBackend(IReferenceRuntime runtime, Environments.Re
 
                 var prior = request.PreviousResponseId is { } previous ? Find(previous, owner) : null;
                 selectedHarness = SelectHarness(request, prior);
-                FindHarness(selectedHarness, owner);
+                var configuration = FindHarness(selectedHarness, owner);
                 selectedMemory = requestedMemory?.GetString() ?? prior?.MemoryId;
-                supportsMemory = SelectRuntime(selectedHarness).SupportsMemory;
+                supportsMemory = providers.ByBase[configuration.Base].SupportsMemory;
 
                 if (supportsMemory && prior is not null && requestedMemory is not null && selectedMemory != prior.MemoryId)
                 {
@@ -218,7 +217,7 @@ public partial class ReferenceBackend(IReferenceRuntime runtime, Environments.Re
             var harness = SelectHarness(request, previousState);
 
             var configuration = FindHarness(harness, owner);
-            var selectedRuntime = SelectRuntime(harness);
+            var selectedRuntime = providers.ByBase[configuration.Base];
             selectedRuntime.ValidateTask(request);
 
             if (_memories is null && requestedMemory is not null)
@@ -248,6 +247,7 @@ public partial class ReferenceBackend(IReferenceRuntime runtime, Environments.Re
                 Environment = environment,
                 VoidedInputRequestId = voided,
                 Memory = memory,
+                MemoryId = memory?.DefaultId,
                 CaptureArtifactsAsync = selectedRuntime.ProducesArtifacts ? ct => CaptureArtifactsAsync(workspace, session, owner, ct) : null,
                 ArtifactBaseUrl = ArtifactOrigin is { } origin ? origin.GetLeftPart(UriPartial.Authority) + context.BasePath : null
             };
@@ -391,16 +391,26 @@ public partial class ReferenceBackend(IReferenceRuntime runtime, Environments.Re
 
     private static string Owner(UhpRequestContext context) => context.Principal.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new InvalidOperationException("The fixture requires a stable principal ID.");
 
-    private UhpHarness Harness => new(DefaultHarnessId, "Reference harness", _runtime.Base) { DefaultModel = _runtime.DefaultModel, CreatedAt = _createdAt };
-
-    private UhpHarness? ClaudeHarness => claude is null ? null : new(ClaudeHarnessId, "Claude Code", claude.Base) { DefaultModel = claude.DefaultModel, CreatedAt = _createdAt };
-
-    private UhpHarness? OpenCodeHarness => openCode is null ? null : new(OpenCodeHarnessId, "OpenCode", openCode.Base) { DefaultModel = openCode.DefaultModel, CreatedAt = _createdAt };
-
-    private IReferenceRuntime SelectRuntime(string harnessId) => harnessId switch
+    private UhpHarness BuiltInHarness(string id, IUhpHarnessProvider provider) => new(id, BuiltInHarnessName(id, provider), provider.Base)
     {
-        ClaudeHarnessId when claude is not null => claude,
-        OpenCodeHarnessId when openCode is not null => openCode,
-        _ => _runtime
+        DefaultModel = provider.DefaultModel,
+        CreatedAt = _createdAt
     };
+
+    private static string BuiltInHarnessName(string id, IUhpHarnessProvider provider) => id == DefaultHarnessId ? "Reference harness" : provider.DisplayName;
+
+    private static Dictionary<string, IUhpHarnessProvider> BuildHarnessCatalog(UhpHarnessProviderRegistry providers, string defaultBase)
+    {
+        var catalog = new Dictionary<string, IUhpHarnessProvider>(StringComparer.Ordinal) { [DefaultHarnessId] = providers.ByBase[defaultBase] };
+
+        foreach (var (name, provider) in providers.ByBase)
+        {
+            if (name != defaultBase && !catalog.TryAdd("chrn_" + name.Replace('-', '_'), provider))
+            {
+                throw new InvalidOperationException($"The provider base '{name}' conflicts with a built-in harness ID.");
+            }
+        }
+
+        return catalog;
+    }
 }

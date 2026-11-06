@@ -1,6 +1,6 @@
-namespace StaticNorth.Uhp.Reference;
+namespace StaticNorth.Uhp.Harnesses.Codex;
 
-internal static class ReferenceCodexExecutable
+public static class CodexExecutable
 {
     public static string ExecutablePath { get; } = FindExecutable();
 
