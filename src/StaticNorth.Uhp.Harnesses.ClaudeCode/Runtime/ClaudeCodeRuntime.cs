@@ -1,16 +1,17 @@
 using System.Collections.Concurrent;
 using System.Text.Json;
 using StaticNorth.Uhp.Core;
-using StaticNorth.Uhp.Harnesses.ClaudeCode;
+using StaticNorth.Uhp.Core.Providers;
 
-namespace StaticNorth.Uhp.Reference;
+namespace StaticNorth.Uhp.Harnesses.ClaudeCode;
 
 public sealed class ClaudeCodeRuntime(string executablePath, string stateRoot, string? apiKey, string model,
-    string? subscriptionProfileDirectory = null, string? cliConfigurationDirectory = null) : IReferenceRuntime
+    string? subscriptionProfileDirectory = null, string? cliConfigurationDirectory = null) : IUhpHarnessProvider
 {
     private readonly ConcurrentDictionary<string, (Guid Id, bool Ready)> _sessions = new(StringComparer.Ordinal);
 
     public string Base => "claude-code";
+    public string DisplayName => "Claude Code";
     public string DefaultModel => model;
     public string WorkspaceRoot { get; } = Path.Combine(stateRoot, "workspaces");
     public bool SupportsMemory => false;
@@ -26,21 +27,21 @@ public sealed class ClaudeCodeRuntime(string executablePath, string stateRoot, s
     {
         if ((task.Model is { } requested && requested != model) || !File.Exists(executablePath))
         {
-            throw ReferenceBackend.Failure(422, "model_unavailable", "The Claude Code harness cannot serve the requested model.");
+            throw UhpRequestException.InvalidRequest(422, "model_unavailable", "The Claude Code harness cannot serve the requested model.");
         }
 
-        ReferenceTextInput.Validate(task, "Claude Code");
+        UhpHarnessTextInput.Validate(task, "Claude Code");
     }
 
     public void ValidateSession(string sessionId)
     {
         if (_sessions.TryGetValue(sessionId, out var nativeSession) && !nativeSession.Ready)
         {
-            throw ReferenceBackend.Failure(409, "staticnorth_session_runtime_unavailable", "The native session could not be recovered after a runtime failure.");
+            throw UhpRequestException.InvalidRequest(409, "staticnorth_session_runtime_unavailable", "The native session could not be recovered after a runtime failure.");
         }
     }
 
-    public async Task<ReferenceRuntimeResult> RunAsync(ReferenceRuntimeRequest request, Func<string, ValueTask> textDelta, CancellationToken ct)
+    public async Task<UhpHarnessRunResult> RunAsync(UhpHarnessRunRequest request, Func<string, ValueTask> textDelta, CancellationToken ct)
     {
         var prior = _sessions.GetValueOrDefault(request.SessionId);
         var nativeId = subscriptionProfileDirectory is not null && prior.Id == Guid.Empty ? Guid.NewGuid() : prior.Id;
@@ -63,7 +64,7 @@ public sealed class ClaudeCodeRuntime(string executablePath, string stateRoot, s
                     .ConfigureAwait(false);
             }
 
-            var prompt = ReferenceTextInput.Prompt(request.Task.Input);
+            var prompt = UhpHarnessTextInput.Prompt(request.Task.Input);
             var messages = subscriptionProfileDirectory is null
                 ? runner.RunAsync(prompt, request.Workspace, apiKey!, prior.Ready ? prior.Id : null, model, instructions, ct)
                 : runner.RunWithSubscriptionAsync(prompt, request.Workspace, nativeId, prior.Ready, model, instructions, ct);

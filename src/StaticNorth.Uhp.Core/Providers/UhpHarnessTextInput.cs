@@ -1,17 +1,16 @@
 using System.Text;
 using System.Text.Json;
-using StaticNorth.Uhp.Core;
 
-namespace StaticNorth.Uhp.Reference;
+namespace StaticNorth.Uhp.Core.Providers;
 
-internal static class ReferenceTextInput
+public static class UhpHarnessTextInput
 {
     public static void Validate(UhpTaskRequest task, string harness)
     {
         if (task.InputFeatures != UhpInputFeatures.None || task.Metadata?.ContainsKey("environment") == true ||
             task.Metadata?.ContainsKey("memory") == true)
         {
-            throw ReferenceBackend.Failure(422, "invalid_input", $"The {harness} preview accepts text without files, interactive answers, environments, or memories.");
+            throw UhpRequestException.InvalidRequest(422, "invalid_input", $"The {harness} preview accepts text without files, interactive answers, environments, or memories.");
         }
 
         if (task.Input.ValueKind == JsonValueKind.Array)
@@ -22,7 +21,7 @@ internal static class ReferenceTextInput
             {
                 if (!item.GetProperty("role"u8).ValueEquals("user"u8))
                 {
-                    throw ReferenceBackend.Failure(422, "invalid_input", $"The {harness} preview accepts user messages only.");
+                    throw UhpRequestException.InvalidRequest(422, "invalid_input", $"The {harness} preview accepts user messages only.");
                 }
 
                 if (!hasText)
@@ -33,7 +32,7 @@ internal static class ReferenceTextInput
 
             if (!hasText)
             {
-                throw ReferenceBackend.Failure(422, "invalid_input", $"{harness} requires a nonempty user prompt.");
+                throw UhpRequestException.InvalidRequest(422, "invalid_input", $"{harness} requires a nonempty user prompt.");
             }
         }
     }

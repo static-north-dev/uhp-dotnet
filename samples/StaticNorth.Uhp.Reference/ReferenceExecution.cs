@@ -1,11 +1,12 @@
 using System.Runtime.CompilerServices;
 using StaticNorth.Uhp.Core;
 using StaticNorth.Uhp.Server;
+using StaticNorth.Uhp.Core.Providers;
 using Wire = StaticNorth.Uhp.Core.Contracts;
 
 namespace StaticNorth.Uhp.Reference;
 
-public sealed class ReferenceExecution(string owner, string sessionId, UhpTaskRequest request, IReadOnlyList<string> ignored, CancellationToken stopping, IReferenceRuntime runtime, ReferenceRuntimeRequest runtimeRequest) : IDisposable
+public sealed class ReferenceExecution(string owner, string sessionId, UhpTaskRequest request, IReadOnlyList<string> ignored, CancellationToken stopping, IUhpHarnessProvider runtime, ReferenceRuntimeRequest runtimeRequest) : IDisposable
 {
     internal const long MaximumTimeoutSeconds = (uint.MaxValue - 1L) / 1000;
     private const long DefaultTimeoutSeconds = 300;
@@ -26,9 +27,9 @@ public sealed class ReferenceExecution(string owner, string sessionId, UhpTaskRe
     public long? CompletedAt { get; private set; }
     public string SessionId { get; } = sessionId;
     public string HarnessId { get; } = runtimeRequest.Harness.Id;
-    internal IReferenceRuntime Runtime => runtime;
-    public Environments.ReferenceEnvironmentSelection? Environment { get; } = runtimeRequest.Environment;
-    public string? MemoryId { get; } = runtimeRequest.Memory?.DefaultId;
+    internal IUhpHarnessProvider Runtime => runtime;
+    public Environments.ReferenceEnvironmentSelection? Environment { get; } = runtimeRequest.Environment as Environments.ReferenceEnvironmentSelection;
+    public string? MemoryId { get; } = runtimeRequest.MemoryId;
     public CancellationTokenSource Cancellation { get; } = CancellationTokenSource.CreateLinkedTokenSource(stopping);
     public UhpResponse Response { get { lock (_gate) { return _response; } } }
     public UhpExecution Execution { get; private set; } = null!;
@@ -52,7 +53,7 @@ public sealed class ReferenceExecution(string owner, string sessionId, UhpTaskRe
     private async Task CompleteAsync(Action finished, ReferenceRuntimeRequest accepted)
     {
         Publish(new UhpOutputItemAdded(_sequence++, UhpOutputItem.TextMessage(_itemId, ""), 0));
-        ReferenceRuntimeResult result;
+        UhpHarnessRunResult result;
         IReadOnlyList<Wire.File> artifacts = [];
         CancellationTokenSource? budget = null;
         var runToken = Cancellation.Token;
@@ -63,9 +64,14 @@ public sealed class ReferenceExecution(string owner, string sessionId, UhpTaskRe
             budget = CancellationTokenSource.CreateLinkedTokenSource(runToken);
             budget.CancelAfter(TimeSpan.FromSeconds(Math.Min(seconds, MaximumTimeoutSeconds)));
             runToken = budget.Token;
-            result = await runtime
-                .RunAsync(accepted, OnTextAsync, runToken)
-                .ConfigureAwait(false);
+            using (var lease = Environment is { } selected ? await selected
+                .AcquireAsync(runToken)
+                .ConfigureAwait(false) : default)
+            {
+                result = await runtime
+                    .RunAsync(accepted, OnTextAsync, runToken)
+                    .ConfigureAwait(false);
+            }
 
             if (accepted.CaptureArtifactsAsync is { } capture && (result.Status == UhpResponseStatus.Completed || result.Status == UhpResponseStatus.Incomplete))
             {

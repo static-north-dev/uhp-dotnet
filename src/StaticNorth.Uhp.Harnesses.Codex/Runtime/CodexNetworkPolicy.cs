@@ -1,13 +1,13 @@
 using System.Text;
 using System.Text.Json;
 
-namespace StaticNorth.Uhp.Reference;
+namespace StaticNorth.Uhp.Harnesses.Codex;
 
-internal static class ReferenceNetworkPolicy
+public static class CodexNetworkPolicy
 {
     private static readonly string[] Domains = ["pypi.org", "files.pythonhosted.org", "registry.npmjs.org", "nodejs.org", "github.com", "codeload.github.com", "objects.githubusercontent.com", "raw.githubusercontent.com"];
 
-    public static void Write(Utf8JsonWriter writer)
+    internal static void Write(Utf8JsonWriter writer)
     {
         writer.WriteStartObject("network"); writer.WriteBoolean("enabled", true); writer.WriteStartObject("domains");
 

@@ -20,11 +20,11 @@ Demand and support for unattended deployments determine the order for later cand
 
 - Each adapter translates runtime configuration, sessions, and events and invokes native continuation and interruption. The deployment supplies the runtime executable or service and its credentials.
 - The UHP backend owns task acceptance, idempotency, replay, durable state, and principal isolation. The host supplies scoped workspaces and authorizes access to files, secrets, and tools. [Server backend contract](server.md#backend-contract)
-- The existing reference runtime interface is the starting point. It currently takes reference environment and memory types. Extract the runtime-specific code and use both Codex and Claude Code to settle the public interface before marking it stable. [Reference runtime request](../samples/StaticNorth.Uhp.Reference/Runtime/ReferenceRuntimeRequest.cs)
+- `IUhpHarnessProvider` supplies the preview runtime boundary. The host passes its authorized turn data and grants access to environments and memories through the provider contract. [Provider registration](server.md#register-harness-providers)
 
 ## Implementation and release gates
 
-1. **Extract Codex.** The [preview package](codex-provider.md) contains the stdio connection and the reference host uses it. Move the reusable turn and event translation behind the adapter as the runtime boundary takes shape. Keep the reference state and authentication setup in the host. Rerun the official UHP Full suite for the named Codex deployment.
+1. **Extract Codex.** The [preview package](codex-provider.md) includes the stdio connection, turn execution, and event translation. The reference host registers it and retains storage and authentication setup. Rerun the official UHP Full suite for the named Codex deployment.
 2. **Prove Claude Code.** The [reference host preview](claude-code-provider.md#use-claude-code-alongside-codex) serves both runtimes by harness ID. A shared client test with local CLI fixtures verifies submission, streaming, continuation, cancellation, and isolation by harness and principal. A local smoke test verifies live Claude Team subscription streaming and continuation through UHP.
 3. **Validate each package before publishing.** Install it from a local NuGet feed in a fresh host and publish that host with Native AOT. Document tested runtime versions and platforms, authentication requirements, and supported capabilities. Exercise advertised capabilities against the real runtime and report official conformance results per deployment. [UHP conformance suite](https://unifiedharnessprotocol.org/conformance)
 

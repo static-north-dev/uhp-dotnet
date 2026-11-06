@@ -1,7 +1,7 @@
 using System.Text.Json;
 using StaticNorth.Uhp.Core;
 
-namespace StaticNorth.Uhp.Reference;
+namespace StaticNorth.Uhp.Harnesses.Codex;
 
 internal static class CodexInteractive
 {

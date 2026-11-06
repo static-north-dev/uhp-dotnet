@@ -2,11 +2,12 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
 using StaticNorth.Uhp.Server;
+using StaticNorth.Uhp.Core.Providers;
 using Wire = StaticNorth.Uhp.Core.Contracts;
 
 namespace StaticNorth.Uhp.Reference.Memory;
 
-internal sealed class ReferenceAgentMemory(ReferenceMemoryBackend backend, UhpRequestContext context, string? defaultId, Wire.HarnessMemoriesDataItem[] roots, bool canWrite)
+internal sealed class ReferenceAgentMemory(ReferenceMemoryBackend backend, UhpRequestContext context, string? defaultId, Wire.HarnessMemoriesDataItem[] roots, bool canWrite) : IUhpHarnessMemory
 {
     private static readonly Wire.UhpContractJsonContext Json = Wire.UhpContractJsonContext.Default;
 

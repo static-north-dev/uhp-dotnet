@@ -2,6 +2,7 @@ using System.Security.Cryptography;
 using System.Text.Json;
 using StaticNorth.Uhp.Core;
 using StaticNorth.Uhp.Server;
+using StaticNorth.Uhp.Core.Providers;
 using Wire = StaticNorth.Uhp.Core.Contracts;
 
 namespace StaticNorth.Uhp.Reference;
@@ -57,7 +58,7 @@ public partial class ReferenceBackend : IUhpHarnessManagementBackend, IUhpPlugin
             var owner = Owner(context);
             var previous = FindHarness(harnessId, owner);
 
-            if (harnessId is DefaultHarnessId or ClaudeHarnessId or OpenCodeHarnessId || request.Base != previous.Base)
+            if (_builtInProviders.ContainsKey(harnessId) || request.Base != previous.Base)
             {
                 throw Failure(409, "invalid_input", "The harness base is immutable.");
             }
@@ -150,7 +151,7 @@ public partial class ReferenceBackend : IUhpHarnessManagementBackend, IUhpPlugin
         for (var index = 0; index < skills.Length; index++)
         {
             var skill = skills[index];
-            ReferencePlugins.ValidateFiles(skill.Files, "invalid_skill");
+            UhpHarnessPackageFiles.ValidateFiles(skill.Files, "invalid_skill");
 
             if (skill.Files is not null && !Array.Exists(skill.Files, file => file.Path == "SKILL.md"))
             {
@@ -182,17 +183,9 @@ public partial class ReferenceBackend : IUhpHarnessManagementBackend, IUhpPlugin
 
     private Wire.Harness FindHarness(string id, string owner)
     {
-        var builtIn = id switch
+        if (_builtInProviders.TryGetValue(id, out var provider))
         {
-            DefaultHarnessId => Harness,
-            ClaudeHarnessId => ClaudeHarness,
-            OpenCodeHarnessId => OpenCodeHarness,
-            _ => null
-        };
-
-        if (builtIn is not null)
-        {
-            return new Wire.Harness { Id = id, Name = builtIn.Name, Base = builtIn.Base, DefaultModel = builtIn.DefaultModel, CreatedAt = builtIn.CreatedAt };
+            return new Wire.Harness { Id = id, Name = BuiltInHarnessName(id, provider), Base = provider.Base, DefaultModel = provider.DefaultModel, CreatedAt = _createdAt };
         }
 
         return _harnesses.TryGetValue(id, out var entry) && entry.Owner == owner ? entry.Harness : throw UhpServerException.NotFound("harness_not_found");

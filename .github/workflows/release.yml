@@ -7,6 +7,11 @@ on:
 permissions:
   contents: read
 
+env:
+  PACKAGE_COMPONENTS: >-
+    Core Client Server
+    Harnesses.ClaudeCode Harnesses.Codex Harnesses.OpenCode
+
 concurrency:
   group: nuget-release-${{ github.ref }}
   cancel-in-progress: false
@@ -53,8 +58,9 @@ jobs:
       - name: Pack NuGet packages
         shell: bash
         run: |
-          for component in Core Client Server; do
-            dotnet pack "src/StaticNorth.Uhp.$component" --configuration Release --no-build --no-restore \
+          read -r -a components <<< "$PACKAGE_COMPONENTS"
+          for component in "${components[@]}"; do
+            dotnet pack "src/StaticNorth.Uhp.$component" --configuration Release --no-build --no-restore --disable-build-servers \
               -p:Version="$PACKAGE_VERSION" -p:PackageVersion="$PACKAGE_VERSION" \
               --output "$RUNNER_TEMP/uhp-packages"
             test -f "$RUNNER_TEMP/uhp-packages/StaticNorth.Uhp.$component.$PACKAGE_VERSION.nupkg"
@@ -92,7 +98,8 @@ jobs:
           NUGET_API_KEY: ${{ steps.nuget-login.outputs.NUGET_API_KEY }}
           PACKAGE_VERSION: ${{ needs.prepare.outputs.version }}
         run: |
-          for component in Core Client Server; do
+          read -r -a components <<< "$PACKAGE_COMPONENTS"
+          for component in "${components[@]}"; do
             dotnet nuget push "$RUNNER_TEMP/uhp-packages/StaticNorth.Uhp.$component.$PACKAGE_VERSION.nupkg" \
               --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json --skip-duplicate
           done

@@ -7,6 +7,6 @@
     <RestorePackagesWithLockFile>false</RestorePackagesWithLockFile>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="StaticNorth.Uhp.Client" Version="0.1.0-preview.1" />
+    <PackageReference Include="StaticNorth.Uhp.Client" Version="$(Version)" />
   </ItemGroup>
 </Project>

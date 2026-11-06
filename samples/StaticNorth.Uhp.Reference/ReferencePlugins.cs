@@ -1,6 +1,6 @@
-using System.Text;
 using System.Text.Json;
 using StaticNorth.Uhp.Core;
+using StaticNorth.Uhp.Core.Providers;
 using Wire = StaticNorth.Uhp.Core.Contracts;
 
 namespace StaticNorth.Uhp.Reference;
@@ -16,13 +16,13 @@ internal static partial class ReferencePlugins
         {
             var installation = installations[index];
             var files = installation.Files ?? throw ReferenceBackend.Failure(422, "plugin_invalid", "A plugin installation requires its complete files.");
-            ValidateFiles(files, "plugin_invalid");
+            UhpHarnessPackageFiles.ValidateFiles(files, "plugin_invalid");
             var manifestFile = Array.Find(files, file => file.Path == "plugin.json") ?? throw ReferenceBackend.Failure(422, "plugin_invalid", "A plugin requires plugin.json.");
             Wire.PluginManifest manifest;
 
             try
             {
-                manifest = JsonSerializer.Deserialize(Bytes(manifestFile), Wire.UhpContractJsonContext.Default.PluginManifest) ?? throw new JsonException();
+                manifest = JsonSerializer.Deserialize(UhpHarnessPackageFiles.Bytes(manifestFile), Wire.UhpContractJsonContext.Default.PluginManifest) ?? throw new JsonException();
             }
             catch (JsonException)
             {
@@ -56,7 +56,7 @@ internal static partial class ReferencePlugins
             {
                 try
                 {
-                    using var document = JsonDocument.Parse(Bytes(mcpFile));
+                    using var document = JsonDocument.Parse(UhpHarnessPackageFiles.Bytes(mcpFile));
 
                     if (document.RootElement.TryGetProperty("mcpServers", out var entries) && entries.ValueKind == JsonValueKind.Object)
                     {
@@ -122,37 +122,6 @@ internal static partial class ReferencePlugins
         }
 
         return plugins;
-    }
-
-    public static void ValidateFiles(Wire.SkillFile[]? files, string code)
-    {
-        if (files is null)
-        {
-            return;
-        }
-
-        var names = new HashSet<string>(StringComparer.Ordinal);
-
-        for (var index = 0; index < files.Length; index++)
-        {
-            var file = files[index];
-
-            if (string.IsNullOrWhiteSpace(file.Path) || Path.IsPathRooted(file.Path) || file.Path.Contains('\\') || file.Path
-                .Split('/')
-                .Any(part => part is "" or "." or "..") || !names.Add(file.Path) || (file.Content is null) == (file.ContentB64 is null))
-            {
-                throw ReferenceBackend.Failure(422, code, "Invalid or duplicate package member.");
-            }
-
-            try
-            {
-                _ = Bytes(file);
-            }
-            catch (FormatException)
-            {
-                throw ReferenceBackend.Failure(422, code, "Invalid base64 package member.");
-            }
-        }
     }
 
     public static void ValidateNamespace(Wire.McpServer[] directServers, Wire.Skill[] directSkills, Wire.Plugin[] plugins)
@@ -243,7 +212,6 @@ internal static partial class ReferencePlugins
         return installed with { Skipped = skipped.ToArray() };
     }
 
-    internal static byte[] Bytes(Wire.SkillFile file) => file.Content is { } text ? Encoding.UTF8.GetBytes(text) : Convert.FromBase64String(file.ContentB64!);
     [System.Text.RegularExpressions.GeneratedRegex("^(?!.*(--|\\.\\.))[a-z0-9]([a-z0-9.-]*[a-z0-9])?$", System.Text.RegularExpressions.RegexOptions.CultureInvariant)]
     private static partial System.Text.RegularExpressions.Regex PluginNamePattern();
     private static string? Text(JsonElement value, string name) => value.TryGetProperty(name, out var field) && field.ValueKind == JsonValueKind.String ? field.GetString() : null;

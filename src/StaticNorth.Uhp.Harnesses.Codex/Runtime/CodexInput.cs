@@ -1,12 +1,13 @@
 using System.Text;
 using System.Text.Json;
 using StaticNorth.Uhp.Core;
+using StaticNorth.Uhp.Core.Providers;
 
-namespace StaticNorth.Uhp.Reference;
+namespace StaticNorth.Uhp.Harnesses.Codex;
 
 internal static class CodexInput
 {
-    public static async Task<JsonElement> PrepareAsync(ReferenceRuntimeRequest request, string? secretReference, string? prime, CancellationToken ct)
+    public static async Task<JsonElement> PrepareAsync(UhpHarnessRunRequest request, string? secretReference, string? prime, CancellationToken ct)
     {
         var text = new StringBuilder();
         List<(string Type, string Value)>? images = null;
@@ -94,7 +95,7 @@ internal static class CodexInput
                     {
                         if (!request.Attachments.TryGetValue(fileId.GetString()!, out var attachment))
                         {
-                            throw ReferenceBackend.Failure(404, "file_not_found", "The input file is not available to this principal.");
+                            throw UhpRequestException.InvalidRequest(404, "file_not_found", "The input file is not available to this principal.");
                         }
 
                         bytes = attachment.Content;
@@ -111,7 +112,7 @@ internal static class CodexInput
                             .AsSpan(0, comma)
                             .EndsWith(";base64", StringComparison.Ordinal))
                         {
-                            throw ReferenceBackend.Failure(400, "invalid_input", "An inline file requires a base64 data URL.");
+                            throw UhpRequestException.InvalidRequest(400, "invalid_input", "An inline file requires a base64 data URL.");
                         }
 
                         bytes = Convert.FromBase64String(data[(comma + 1)..]);

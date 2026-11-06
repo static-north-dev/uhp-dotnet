@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
+using StaticNorth.Uhp.Harnesses.Codex;
 using Wire = StaticNorth.Uhp.Core.Contracts;
 
 namespace StaticNorth.Uhp.Reference.Environments;
@@ -11,7 +12,7 @@ internal static class ReferenceSandboxProcess
     {
         Directory.CreateDirectory(home);
         var config = new StringBuilder("default_permissions = \"uhp-build\"\napproval_policy = \"never\"\n[features]\nnetwork_proxy = true\n[permissions.uhp-build.filesystem]\n\":minimal\" = \"read\"\n");
-        PathRule(config, ReferenceCodexExecutable.ExecutablePath, "read");
+        PathRule(config, CodexExecutable.ExecutablePath, "read");
         PathRule(config, writableRoot, "write");
 
         if (OperatingSystem.IsMacOS() && Directory.Exists("/opt/homebrew"))
@@ -23,7 +24,7 @@ internal static class ReferenceSandboxProcess
             PathRule(config, "/usr/local", "read");
         }
 
-        ReferenceNetworkPolicy.WriteToml(config, "uhp-build");
+        CodexNetworkPolicy.WriteToml(config, "uhp-build");
         await System.IO.File
             .WriteAllTextAsync(Path.Combine(home, "config.toml"), config.ToString(), ct)
             .ConfigureAwait(false);
@@ -31,7 +32,7 @@ internal static class ReferenceSandboxProcess
 
     public static async Task<ReferenceProcessResult> RunAsync(string home, string cwd, string executable, IReadOnlyList<string> arguments, CancellationToken ct)
     {
-        var start = new ProcessStartInfo(ReferenceCodexExecutable.ExecutablePath)
+        var start = new ProcessStartInfo(CodexExecutable.ExecutablePath)
         {
             UseShellExecute = false,
             RedirectStandardOutput = true,

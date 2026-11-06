@@ -1,6 +1,8 @@
+using StaticNorth.Uhp.Core.Providers;
+
 namespace StaticNorth.Uhp.Reference.Environments;
 
-public sealed class ReferenceEnvironmentSelection
+public sealed class ReferenceEnvironmentSelection : IUhpHarnessEnvironment
 {
     private readonly ReferenceEnvironmentNode _node;
     internal ReferenceEnvironmentSelection(string id, long version, string root, string mount, string? entry, ReferenceEnvironmentNode node)

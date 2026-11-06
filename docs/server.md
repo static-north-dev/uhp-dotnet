@@ -47,4 +47,31 @@ Dates and required Core capabilities are validated during registration. Optional
 
 The sample `StaticNorth.Uhp.FixtureServer` is a deterministic in-memory protocol fixture. Its fixed event histories, retention and testing credentials are not production implementations. Passing its tests does not establish a UHP server conformance class; upstream conformance applies to a running server and its actual backend.
 
-The [Codex reference host](conformance-deployment.md) demonstrates how to supply all backends used by the official Full suite. It uses process-local storage and a non-packable reference runtime.
+The [Codex reference host](conformance-deployment.md) demonstrates how to supply all backends used by the official Full suite. It uses a reference backend with process-local storage.
+
+## Register harness providers
+
+Install the packages for the runtimes your server uses. Each registers a singleton `IUhpHarnessProvider` with its own model catalog and native session handling.
+
+```csharp
+using StaticNorth.Uhp.Harnesses.ClaudeCode;
+using StaticNorth.Uhp.Harnesses.Codex;
+using StaticNorth.Uhp.Harnesses.OpenCode;
+using StaticNorth.Uhp.Core.Providers;
+
+builder.Services
+    .AddUhpCodex(codexStateRoot, codexHome)
+    .AddUhpClaudeCode(claudeExecutable, claudeStateRoot, anthropicApiKey, claudeModel)
+    .AddUhpOpenCode(openCodeHttp, openCodeStateRoot, openCodeProvider, openCodeModel);
+
+// Call AddUhpServer<MyBackend> as shown above before building the app.
+var app = builder.Build();
+await app.Services
+    .GetRequiredService<UhpHarnessProviderRegistry>()
+    .InitializeAsync(app.Lifetime.ApplicationStopping);
+app.MapUhp("/api/harness");
+```
+
+Inject `UhpHarnessProviderRegistry` into your `IUhpServerBackend`. Use `ByBase` to build your harness catalog and to resolve a provider after authorizing the selected harness. Invoke the provider with a host-validated workspace and session, and use the same provider for continuations and session cleanup. The backend still owns authorization, storage, replay, and task acceptance. The conformance host shows this wiring with the in-memory reference backend. [Conformance host](../tools/StaticNorth.Uhp.ConformanceHost/Program.cs) · [Reference routing](../samples/StaticNorth.Uhp.Reference/ReferenceBackend.cs)
+
+Use a separate state directory for each provider. Set up runtime credentials and confirm model access before serving requests. OpenCode uses a caller-owned HTTP client with redirects disabled and no automatic retries for POST requests. Claude Code also supports a signed-in subscription for a local single-operator host. [Codex](codex-provider.md) · [Claude Code](claude-code-provider.md) · [OpenCode](opencode-provider.md)

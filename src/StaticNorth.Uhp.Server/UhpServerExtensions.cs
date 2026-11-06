@@ -8,6 +8,7 @@ using StaticNorth.Valiant.Endpoints.AspNetCore;
 using StaticNorth.Valiant.Validation;
 using StaticNorth.Uhp.Server.Validation;
 using StaticNorth.Uhp.Core;
+using StaticNorth.Uhp.Core.Providers;
 
 namespace StaticNorth.Uhp.Server;
 
@@ -22,6 +23,7 @@ public static class UhpServerExtensions
         configure(options);
         services.AddSingleton(options.Snapshot());
         services.TryAddSingleton<IUhpServerBackend, TBackend>();
+        services.TryAddSingleton<UhpHarnessProviderRegistry>();
         services.AddOptions<ValiantEndpointOptions>();
         services.ConfigureHttpJsonOptions(json => json.SerializerOptions.TypeInfoResolverChain.Insert(0, UhpJsonContext.Default));
         services.ConfigureHttpJsonOptions(json => json.SerializerOptions.TypeInfoResolverChain.Add(Core.Contracts.UhpContractJsonContext.Default));

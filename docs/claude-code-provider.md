@@ -1,6 +1,6 @@
 # Claude Code provider preview
 
-`StaticNorth.Uhp.Harnesses.ClaudeCode` runs one Claude Code process per turn using [headless streaming](https://code.claude.com/docs/en/headless#stream-responses). Build the preview with `dotnet pack src/StaticNorth.Uhp.Harnesses.ClaudeCode -c Release` and install it from the local feed at `artifacts/packages`.
+`StaticNorth.Uhp.Harnesses.ClaudeCode` registers a UHP runtime with `AddUhpClaudeCode`. It runs one Claude Code process per turn. `ClaudeCodeRunner` is also available for direct access to the native event stream. Build the preview with `dotnet pack StaticNorth.Uhp.slnx -c Release` and install it from `artifacts/packages`. [Server registration](server.md#register-harness-providers) · [Claude Code headless streaming](https://code.claude.com/docs/en/headless#stream-responses)
 
 ```csharp
 using StaticNorth.Uhp.Harnesses.ClaudeCode;

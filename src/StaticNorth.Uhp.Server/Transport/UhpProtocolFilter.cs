@@ -104,7 +104,7 @@ internal sealed class UhpProtocolFilter : IEndpointFilter
         {
             return TypedResults.Empty;
         }
-        catch (UhpServerException exception)
+        catch (UhpRequestException exception)
         {
             return Error(http, exception.StatusCode, exception.Error, exception.RetryAfter);
         }

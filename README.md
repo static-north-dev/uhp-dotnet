@@ -10,13 +10,16 @@ The [official Unified Harness Protocol documentation](https://unifiedharnessprot
 
 | Package | Purpose | Dependencies |
 |---|---|---|
-| `StaticNorth.Uhp.Core` | Protocol models, typed events, owned extension JSON, source-generated serialization | .NET runtime |
+| `StaticNorth.Uhp.Core` | Protocol models, typed events, source-generated serialization, and harness provider contracts | .NET runtime |
 | `StaticNorth.Uhp.Client` | Discovery, negotiation, HTTP requests, streaming, recovery and cancellation | Core |
 | `StaticNorth.Uhp.Server` | ASP.NET Core endpoints and a host-owned backend contract | Core, Valiant Endpoints and Validation 1.2.1 |
+| `StaticNorth.Uhp.Harnesses.Codex` | Codex App Server provider | Core, DI abstractions |
+| `StaticNorth.Uhp.Harnesses.ClaudeCode` | Claude Code CLI provider | Core, DI abstractions |
+| `StaticNorth.Uhp.Harnesses.OpenCode` | OpenCode HTTP provider | Core, DI abstractions |
 
 The client and Core have no ASP.NET Core or Valiant dependency. Protocol models live in `StaticNorth.Uhp.Core`; client entry points and transport exceptions live in `StaticNorth.Uhp.Client`. All project, assembly, package, and namespace identities use the `StaticNorth.Uhp` prefix. See [migration notes](docs/migration.md) and [allocation evidence](docs/performance.md).
 
-The server package provides transport and backend integration. The host supplies an agent runtime, persistence, and principal isolation. The deterministic fixture is test infrastructure. These packages do not contain a production agent runtime.
+The server package provides HTTP transport and backend integration. The harness packages connect to the installed agent runtimes. The host supplies persistence and principal isolation. The deterministic fixture is test infrastructure.
 
 See the [Codex provider preview](docs/codex-provider.md), [Claude Code provider preview](docs/claude-code-provider.md), [OpenCode provider preview](docs/opencode-provider.md), and [harness adapter roadmap](docs/harness-adapters-plan.md).
 
@@ -108,13 +111,11 @@ dotnet run --project tools/StaticNorth.Uhp.SchemaGen --configuration Release -- 
 dotnet build StaticNorth.Uhp.slnx --configuration Release --no-restore
 dotnet run --project tests/StaticNorth.Uhp.Client.Tests --configuration Release --no-build --no-restore -- --minimum-expected-tests 179
 dotnet format StaticNorth.Uhp.slnx --no-restore --verify-no-changes
-dotnet pack src/StaticNorth.Uhp.Core --configuration Release --no-build
-dotnet pack src/StaticNorth.Uhp.Client --configuration Release --no-build
-dotnet pack src/StaticNorth.Uhp.Server --configuration Release --no-build
-python3 tools/package-smoke.py
+dotnet pack StaticNorth.Uhp.slnx --configuration Release --no-build --no-restore
+python3 tools/package-smoke.py --reference-host
 ```
 
-The smoke gate checks package metadata/notices/symbols, installs both sample consumers from the local feed with no SDK project references and a fresh package cache, publishes both with Native AOT and reflection-based JSON disabled, and runs the shared lifecycle scenario. It selects the patched .NET runtime/compiler `10.0.14`; override with `--runtime-version` when updating that pin. On an offline workstation with the dependencies cached, pass `--offline-cache /path/to/nuget/packages`. Native AOT requires the platform's native compiler toolchain.
+The smoke gate checks metadata, notices, and symbols for all six packages. It installs the samples from a local feed with a fresh package cache, publishes them with Native AOT and reflection-based JSON disabled, and runs the shared client/server lifecycle scenario. `--reference-host` also compiles the host that registers all three providers from NuGet. Pass `--version` when testing packages built with a release version. On an offline workstation, pass `--offline-cache /path/to/nuget/packages`. The gate selects runtime and compiler `10.0.14`, which you can override with `--runtime-version`.
 
 After packing, run the console sample against a configured server with `UHP_BASE_URL`, `UHP_TOKEN`, and `UHP_HARNESS_ID` in the environment:
 
@@ -132,7 +133,7 @@ The [in-memory reference provider](tests/StaticNorth.Uhp.TestSupport/README.md) 
 
 ## Publish to NuGet.org
 
-To publish to NuGet.org, publish a GitHub Release for a version tag such as `v1.2.0` or `v1.2.0-preview.1`. Use a tag that points to a verified commit containing the [release workflow](.github/workflows/release.yml). The workflow builds and tests that commit, then publishes Core, Client, and Server using the tag version with the leading `v` removed.
+To publish to NuGet.org, publish a GitHub Release for a version tag such as `v1.2.0` or `v1.2.0-preview.1`. Use a tag that points to a verified commit containing the [release workflow](.github/workflows/release.yml). The workflow builds and tests that commit, then publishes Core, Client, Server, and the Claude Code, Codex, and OpenCode harness packages. It uses the tag version with the leading `v` removed.
 
 Before publishing a GitHub Release, set the GitHub Actions variable `NUGET_USER` to the NuGet.org username. On NuGet.org, configure [Trusted Publishing](https://learn.microsoft.com/en-us/nuget/nuget-org/trusted-publishing) for `static-north-dev/uhp-dotnet`, workflow `release.yml`, and environment `production`. Scope the policy to `StaticNorth.Uhp.*` and allow publishing new packages and new versions.
 

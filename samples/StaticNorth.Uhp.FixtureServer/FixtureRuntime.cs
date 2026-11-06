@@ -1,12 +1,13 @@
 using StaticNorth.Uhp.Core;
-using StaticNorth.Uhp.Reference;
+using StaticNorth.Uhp.Core.Providers;
 
 namespace StaticNorth.Uhp.FixtureServer;
 
-public sealed class FixtureRuntime : IReferenceRuntime
+public sealed class FixtureRuntime : IUhpHarnessProvider
 {
     public string Base => "fixture";
     public string DefaultModel => "fixture-model";
+    public bool SupportsMemory => true;
     public string WorkspaceRoot { get; } = Path.Combine(Path.GetTempPath(), "uhp-fixture");
 
     public Task<UhpModelCatalog> GetModelsAsync(CancellationToken ct) => Task.FromResult(new UhpModelCatalog(new Dictionary<string, UhpModelBackend>
@@ -14,7 +15,7 @@ public sealed class FixtureRuntime : IReferenceRuntime
         [Base] = new(DefaultModel, [new UhpModel(DefaultModel, true) { IsDefault = true, Backend = Base }])
     }));
 
-    public async Task<ReferenceRuntimeResult> RunAsync(ReferenceRuntimeRequest request, Func<string, ValueTask> textDelta, CancellationToken ct)
+    public async Task<UhpHarnessRunResult> RunAsync(UhpHarnessRunRequest request, Func<string, ValueTask> textDelta, CancellationToken ct)
     {
         await textDelta("Fixture response.")
             .ConfigureAwait(false);

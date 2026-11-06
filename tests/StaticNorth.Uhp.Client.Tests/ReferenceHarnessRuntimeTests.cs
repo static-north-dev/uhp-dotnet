@@ -1,14 +1,31 @@
 using System.Net;
+using Microsoft.Extensions.DependencyInjection;
 using StaticNorth.Uhp.Client;
 using StaticNorth.Uhp.Core;
 using StaticNorth.Uhp.Harnesses.ClaudeCode;
+using StaticNorth.Uhp.Harnesses.Codex;
 using StaticNorth.Uhp.Reference;
+using StaticNorth.Uhp.Core.Providers;
 using TUnit.Core.Exceptions;
 
 namespace StaticNorth.Uhp.Client.Tests;
 
 public sealed class ReferenceHarnessRuntimeTests
 {
+    [Test]
+    public async Task RejectsTwoRegistrationsForTheSameProviderBase()
+    {
+        var directory = Path.GetTempPath();
+        await using var services = new ServiceCollection()
+            .AddUhpCodex(directory, directory)
+            .AddUhpCodex(directory, directory)
+            .BuildServiceProvider();
+
+        await Assert
+            .That(() => new UhpHarnessProviderRegistry(services.GetServices<IUhpHarnessProvider>()))
+            .ThrowsExactly<ArgumentException>();
+    }
+
     [Test]
     [Arguments(false)]
     [Arguments(true)]
@@ -27,8 +44,6 @@ public sealed class ReferenceHarnessRuntimeTests
         {
             await File.WriteAllTextAsync(Path.Combine(directory.FullName, "auth.json"), "{}", ct);
             var fixtures = Path.Combine(AppContext.BaseDirectory, "Fixtures");
-            await using var codex = new CodexRuntime(Path.Combine(directory.FullName, "codex"), directory.FullName, Path.Combine(fixtures, "reference-codex.sh"));
-            await codex.InitializeAsync(ct);
             var claudeRoot = Path.Combine(directory.FullName, "claude");
             var executable = Path.Combine(fixtures, "reference-claude.sh");
             var profile = Path.Combine(directory.FullName, "profile");
@@ -45,10 +60,15 @@ public sealed class ReferenceHarnessRuntimeTests
                     .IsEqualTo(profile);
             }
 
-            var claude = subscription
-                ? new ClaudeCodeRuntime(executable, claudeRoot, null, "fixture-claude", profile, profile)
-                : new ClaudeCodeRuntime(executable, claudeRoot, "fixture-key", "fixture-claude");
-            using var backend = new ReferenceBackend(codex, claude: claude);
+            await using var services = new ServiceCollection()
+                .AddUhpCodex(Path.Combine(directory.FullName, "codex"), directory.FullName, Path.Combine(fixtures, "reference-codex.sh"))
+                .AddUhpClaudeCode(executable, claudeRoot, subscription ? null : "fixture-key", "fixture-claude",
+                    subscription ? profile : null, subscription ? profile : null)
+                .BuildServiceProvider();
+            var providers = new UhpHarnessProviderRegistry(services.GetServices<IUhpHarnessProvider>());
+            await providers.InitializeAsync(ct);
+            var claude = providers.ByBase["claude-code"];
+            using var backend = new ReferenceBackend(providers, "codex");
             await using var host = await ServerTestHost.StartAsync(sessions: true, harnesses: true, memories: true, backend: backend);
             using var http = host.CreateHttp();
             var alice = await ServerTestHost.ConnectAsync(http);
@@ -59,6 +79,14 @@ public sealed class ReferenceHarnessRuntimeTests
             var models = await alice.GetModelsAsync(ct);
             var claudeModels = await alice.GetHarnessModelsAsync(claudeId, ct);
 
+            await Assert
+                .That(codexId)
+                .IsEqualTo("chrn_fixture");
+            await Assert
+                .That(claudeId)
+                .IsEqualTo("chrn_claude_code");
+            await AssertErrorAsync(() => alice.RunAsync(new("missing provider") { HarnessId = "chrn_opencode" }, ct),
+                HttpStatusCode.NotFound, "harness_not_found");
             await Assert
                 .That(models.Backends["codex"].Default)
                 .IsEqualTo("fixture-codex");
@@ -72,7 +100,7 @@ public sealed class ReferenceHarnessRuntimeTests
                 .That(claudeModels.Default)
                 .IsEqualTo("fixture-claude");
 
-            var codexResponse = await alice.RunAsync(new("codex task") { HarnessId = codexId }, ct);
+            var codexResponse = await alice.RunAsync(new("codex task"), ct);
             await Assert
                 .That(codexResponse.Status)
                 .IsEqualTo(UhpResponseStatus.Completed);

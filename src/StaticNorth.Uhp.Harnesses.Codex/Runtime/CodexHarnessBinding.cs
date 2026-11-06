@@ -1,12 +1,13 @@
 using System.Text;
 using System.Text.Json;
+using StaticNorth.Uhp.Core.Providers;
 using Wire = StaticNorth.Uhp.Core.Contracts;
 
-namespace StaticNorth.Uhp.Reference;
+namespace StaticNorth.Uhp.Harnesses.Codex;
 
 internal static class CodexHarnessBinding
 {
-    public static async Task<List<CodexMcpBinding>> PrepareAsync(ReferenceRuntimeRequest request, string home, string executablePath, CancellationToken ct)
+    public static async Task<List<CodexMcpBinding>> PrepareAsync(UhpHarnessRunRequest request, string home, string executablePath, CancellationToken ct)
     {
         var result = new List<CodexMcpBinding>();
 
@@ -79,7 +80,7 @@ internal static class CodexHarnessBinding
                     .ToArray();
                 var pluginHome = Path.Combine(home, "plugin-sandboxes", SafeFolder(server.Name));
                 Directory.CreateDirectory(pluginHome);
-                await WriteSandboxAsync(pluginHome, root, data, ct)
+                await WriteSandboxAsync(pluginHome, root, data, executablePath, ct)
                     .ConfigureAwait(false);
                 var args = new List<string> { "sandbox", "--", "/usr/bin/env", "-i", "PATH=/usr/bin:/bin:/opt/homebrew/bin", "HOME=" + data };
 
@@ -176,10 +177,10 @@ internal static class CodexHarnessBinding
         writer.WriteEndObject();
     }
 
-    private static async Task WriteSandboxAsync(string home, string root, string data, CancellationToken ct)
+    private static async Task WriteSandboxAsync(string home, string root, string data, string executablePath, CancellationToken ct)
     {
         var config = new StringBuilder("default_permissions = \"uhp-plugin\"\napproval_policy = \"never\"\n[permissions.uhp-plugin.filesystem]\n\":minimal\" = \"read\"\n");
-        AddPath(config, ReferenceCodexExecutable.ExecutablePath, "read");
+        AddPath(config, executablePath, "read");
         AddPath(config, root, "read");
         AddPath(config, data, "write");
 
@@ -207,14 +208,14 @@ internal static class CodexHarnessBinding
     private static async Task MaterializeAsync(string root, Wire.SkillFile[] files, CancellationToken ct)
     {
         Directory.CreateDirectory(root);
-        ReferencePlugins.ValidateFiles(files, "plugin_invalid");
+        UhpHarnessPackageFiles.ValidateFiles(files, "plugin_invalid");
 
         foreach (var file in files)
         {
             var path = Path.Combine(root, file.Path);
             Directory.CreateDirectory(Path.GetDirectoryName(path)!);
             await System.IO.File
-                .WriteAllBytesAsync(path, ReferencePlugins.Bytes(file), ct)
+                .WriteAllBytesAsync(path, UhpHarnessPackageFiles.Bytes(file), ct)
                 .ConfigureAwait(false);
         }
     }

@@ -1,23 +1,25 @@
 using System.Collections.Concurrent;
 using System.Text.Json;
 using StaticNorth.Uhp.Core;
-using StaticNorth.Uhp.Harnesses.Codex;
+using StaticNorth.Uhp.Core.Providers;
 
-namespace StaticNorth.Uhp.Reference;
+namespace StaticNorth.Uhp.Harnesses.Codex;
 
-public sealed class CodexRuntime(string stateRoot, string authenticationHome, string? executablePath = null) : IReferenceRuntime, IAsyncDisposable
+public sealed class CodexRuntime(string stateRoot, string authenticationHome, string? executablePath = null) : IUhpHarnessProvider, IAsyncDisposable
 {
     private readonly ConcurrentDictionary<string, CodexRuntimeSession> _sessions = new(StringComparer.Ordinal);
     private readonly ConcurrentDictionary<string, byte> _lostSessions = new(StringComparer.Ordinal);
     private UhpModelCatalog _models = new(new Dictionary<string, UhpModelBackend>());
     public string Base => "codex";
     public bool ProducesArtifacts => true;
+    public bool SupportsMemory => true;
     public string WorkspaceRoot { get; } = Path.Combine(Path.GetTempPath(), $"uhp-codex-{Guid.NewGuid():N}");
     public string DefaultModel { get; private set; } = "";
-    private string ExecutablePath => executablePath ?? ReferenceCodexExecutable.ExecutablePath;
+    private string ExecutablePath => executablePath ?? CodexExecutable.ExecutablePath;
 
     public async Task InitializeAsync(CancellationToken ct)
     {
+        ct.ThrowIfCancellationRequested();
         var directory = Path.Combine(stateRoot, "catalog");
         Directory.CreateDirectory(directory);
         var home = await PrepareHomeAsync(directory, ct)
@@ -29,6 +31,7 @@ public sealed class CodexRuntime(string stateRoot, string authenticationHome, st
             .CallAsync("model/list", Empty(), ct)
             .ConfigureAwait(false);
         var models = new List<UhpModel>();
+        string? defaultModel = null;
 
         foreach (var model in result
             .GetProperty("data")
@@ -42,16 +45,18 @@ public sealed class CodexRuntime(string stateRoot, string authenticationHome, st
 
             if (isDefault)
             {
-                DefaultModel = id;
+                defaultModel = id;
             }
         }
 
-        if (DefaultModel.Length == 0)
+        if (models.Count == 0)
         {
-            DefaultModel = models[0].Id;
+            throw new InvalidOperationException("Codex App Server returned no models.");
         }
 
-        _models = new(new Dictionary<string, UhpModelBackend> { [Base] = new(DefaultModel, models) });
+        defaultModel ??= models[0].Id;
+        _models = new(new Dictionary<string, UhpModelBackend> { [Base] = new(defaultModel, models) });
+        DefaultModel = defaultModel;
     }
 
     public Task<UhpModelCatalog> GetModelsAsync(CancellationToken ct)
@@ -60,11 +65,8 @@ public sealed class CodexRuntime(string stateRoot, string authenticationHome, st
         return Task.FromResult(_models);
     }
 
-    public async Task<ReferenceRuntimeResult> RunAsync(ReferenceRuntimeRequest request, Func<string, ValueTask> textDelta, CancellationToken ct)
+    public async Task<UhpHarnessRunResult> RunAsync(UhpHarnessRunRequest request, Func<string, ValueTask> textDelta, CancellationToken ct)
     {
-        using var environmentLease = request.Environment is { } selected ? await selected
-            .AcquireAsync(ct)
-            .ConfigureAwait(false) : default(Environments.ReferenceEnvironmentLease);
         try
         {
             return await RunTurnAsync(request, textDelta, ct)
@@ -83,7 +85,7 @@ public sealed class CodexRuntime(string stateRoot, string authenticationHome, st
         }
     }
 
-    private async Task<ReferenceRuntimeResult> RunTurnAsync(ReferenceRuntimeRequest request, Func<string, ValueTask> textDelta, CancellationToken ct)
+    private async Task<UhpHarnessRunResult> RunTurnAsync(UhpHarnessRunRequest request, Func<string, ValueTask> textDelta, CancellationToken ct)
     {
         Directory.CreateDirectory(request.Workspace);
 
@@ -303,7 +305,7 @@ public sealed class CodexRuntime(string stateRoot, string authenticationHome, st
     {
         if (_lostSessions.ContainsKey(sessionId))
         {
-            throw ReferenceBackend.Failure(409, "staticnorth_session_runtime_unavailable", "The native session could not be recovered after a runtime failure.");
+            throw UhpRequestException.InvalidRequest(409, "staticnorth_session_runtime_unavailable", "The native session could not be recovered after a runtime failure.");
         }
     }
 
@@ -351,7 +353,7 @@ public sealed class CodexRuntime(string stateRoot, string authenticationHome, st
             .ConfigureAwait(false);
     }
 
-    private JsonElement StartParameters(ReferenceRuntimeRequest request, string home, List<CodexMcpBinding> bindings) => UhpJson.CreateElement(writer =>
+    private JsonElement StartParameters(UhpHarnessRunRequest request, string home, List<CodexMcpBinding> bindings) => UhpJson.CreateElement(writer =>
     {
         writer.WriteStartObject(); writer.WriteString("cwd", request.Workspace); writer.WriteString("approvalPolicy", "never");
         writer.WriteString("permissions", "uhp-session"); writer.WriteBoolean("ephemeral", true);
@@ -404,7 +406,7 @@ public sealed class CodexRuntime(string stateRoot, string authenticationHome, st
 
         if (request.Environment is not null)
         {
-            ReferenceNetworkPolicy.Write(writer);
+            CodexNetworkPolicy.Write(writer);
         }
         else
         {
