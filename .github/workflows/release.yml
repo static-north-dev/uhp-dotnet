@@ -8,9 +8,7 @@ permissions:
   contents: read
 
 env:
-  PACKAGE_COMPONENTS: >-
-    Core Client Server
-    Harnesses.ClaudeCode Harnesses.Codex Harnesses.OpenCode
+  PACKAGE_COMPONENTS: Core Client Server
 
 concurrency:
   group: nuget-release-${{ github.ref }}

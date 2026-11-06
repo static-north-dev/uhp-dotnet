@@ -5,11 +5,9 @@
     <RestoreAdditionalProjectSources Condition="'$(UseUhpPackages)' == 'true'">$(RestoreAdditionalProjectSources);$(PackageOutputPath)</RestoreAdditionalProjectSources>
   </PropertyGroup>
   <ItemGroup Condition="'$(UseUhpPackages)' != 'true'">
-    <ProjectReference Include="../../src/StaticNorth.Uhp.Harnesses.Codex/StaticNorth.Uhp.Harnesses.Codex.csproj" />
     <ProjectReference Include="../../src/StaticNorth.Uhp.Server/StaticNorth.Uhp.Server.csproj" />
   </ItemGroup>
   <ItemGroup Condition="'$(UseUhpPackages)' == 'true'">
-    <PackageReference Include="StaticNorth.Uhp.Harnesses.Codex" Version="$(Version)" />
     <PackageReference Include="StaticNorth.Uhp.Server" Version="$(Version)" />
   </ItemGroup>
   <ItemGroup>

@@ -1,6 +1,6 @@
 # Claude Code provider preview
 
-`StaticNorth.Uhp.Harnesses.ClaudeCode` registers a UHP runtime with `AddUhpClaudeCode`. It runs one Claude Code process per turn. `ClaudeCodeRunner` is also available for direct access to the native event stream. Build the preview with `dotnet pack StaticNorth.Uhp.slnx -c Release` and install it from `artifacts/packages`. [Server registration](server.md#register-harness-providers) · [Claude Code headless streaming](https://code.claude.com/docs/en/headless#stream-responses)
+The reference sample registers the Claude Code runtime with `AddUhpClaudeCode`. It runs one Claude Code process per turn. The sample includes `ClaudeCodeRunner` for direct access to the native event stream. [Server registration](server.md#register-harness-providers) · [Claude Code headless streaming](https://code.claude.com/docs/en/headless#stream-responses)
 
 ```csharp
 using StaticNorth.Uhp.Harnesses.ClaudeCode;
@@ -19,7 +19,7 @@ The runner passes prompts through stdin and starts with an empty tool list and M
 
 Consume the stream to completion before marking a turn successful. The runner validates the result and exit code at EOF, and rejects mismatched session IDs before yielding events. Cancellation and early disposal terminate the local process tree. The host should treat a stopped turn as unfinished when deciding whether to resume it.
 
-Verification used a POSIX CLI fixture and a macOS arm64 Native AOT consumer installed from the local NuGet package. The managed allocation test averaged 8,527 bytes per owned 8 KiB frame over 64 frames after warmup, against a 12,288-byte ceiling. CLI options were checked against Claude Code `2.1.316`.
+Verification used a POSIX CLI fixture and a macOS arm64 Native AOT consumer of the earlier standalone package. The managed allocation test averaged 8,527 bytes per owned 8 KiB frame over 64 frames after warmup, against a 12,288-byte ceiling. CLI options were checked against Claude Code `2.1.316`.
 
 ## Use Claude Code alongside Codex
 
