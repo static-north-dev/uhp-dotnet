@@ -19,7 +19,7 @@ For a mixed runtime preview, the same host can also serve a built-in Claude Code
 
 ## Reproduce
 
-Use a Unix machine with .NET 10, its native compiler, Codex 0.166.0 authenticated locally, Python, npm if building Node environments, and `uv`. Set `CODEX_HOME` if the login lives outside the default local Codex home. The runner configures the origin from its loopback URL; a manually run host may use `--public-origin` for absolute artifact links. Keep provider credentials local.
+Use a Unix machine with .NET 11, its native compiler, Codex 0.166.0 authenticated locally, Python, npm if building Node environments, and `uv`. Set `CODEX_HOME` if the login lives outside the default local Codex home. The runner configures the origin from its loopback URL. A manually run host may use `--public-origin` for absolute artifact links. Keep provider credentials local.
 
 From the repository root, restore/build, pack the three SDK projects, and prepare the suite from the [locked runner instructions](../tools/conformance/README.md). Then run:
 
