@@ -29,6 +29,7 @@ jobs:
       - run: dotnet run --project tests/StaticNorth.Uhp.Client.Tests --configuration Release --no-build --no-restore -- --minimum-expected-tests 179 --report-trx --results-directory artifacts/test-results
       - run: dotnet format StaticNorth.Uhp.slnx --no-restore --verify-no-changes
       - run: dotnet pack StaticNorth.Uhp.slnx --configuration Release --no-build --no-restore --disable-build-servers
+      - run: python3 tools/package-smoke.py --rid linux-x64 --framework net10.0
       - run: python3 tools/package-smoke.py --rid linux-x64 --reference-host
       - name: Publish Native AOT TUnit runner
         run: >-
@@ -47,3 +48,5 @@ jobs:
             artifacts/aot-test-results
             artifacts/aot/result.json
             artifacts/aot/fixture.log
+            artifacts/aot/net10.0/result.json
+            artifacts/aot/net10.0/fixture.log

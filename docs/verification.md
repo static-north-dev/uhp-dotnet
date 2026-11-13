@@ -1,8 +1,12 @@
 # Verification
 
+## .NET 10 and .NET 11 package compatibility
+
+SDK `11.0.100` builds Core, Client, and Server as `net10.0`. On macOS arm64, the same three packages restored from a local feed and passed the HTTP/SSE lifecycle in standalone managed consumers on .NET 10 and .NET 11. Fresh-cache Native AOT consumers passed the same scenario with runtime/compiler `10.0.15` and `11.0.0`. CI runs the packed Native AOT scenario for both targets.
+
 ## .NET 11 upgrade
 
-With SDK `11.0.100` and runtime/compiler `11.0.0`, locked restore, the Release build, formatting, schema generation, and pinned suite checks passed. All 199 local TUnit tests passed on managed macOS arm64 and as Native AOT executables on macOS arm64 and in an emulated Linux x64 SDK container, including the [allocation checks](performance.md). The three NuGet packages contain `net11.0` assemblies. A fresh package cache restored the client, fixture server, and conformance host for Native AOT on macOS arm64, and the packed client and fixture server passed the HTTP/SSE lifecycle.
+With SDK `11.0.100` and runtime/compiler `11.0.0`, locked restore, the Release build, formatting, schema generation, and pinned suite checks passed. All 199 local TUnit tests passed on managed macOS arm64 and as Native AOT executables on macOS arm64 and in an emulated Linux x64 SDK container, including the [allocation checks](performance.md). The packages in that run contained `net11.0` assemblies. A fresh package cache restored the client, fixture server, and conformance host for Native AOT on macOS arm64, and the packed client and fixture server passed the HTTP/SSE lifecycle.
 
 The macOS native toolchain emitted debug-symbol warnings during publish. The two external interoperability cases skipped because their pinned server configurations were absent. The Full conformance evidence below is from the .NET 10 reference deployment.
 
