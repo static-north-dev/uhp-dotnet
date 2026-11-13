@@ -4,7 +4,7 @@ The non-packable reference memory provider also has warmed allocation checks: ow
 
 The requirement is zero avoidable allocations in repeated hot paths. HTTP messages/content, owned JSON snapshots, parsed result graphs, and UTF-8 SSE frames have explicit allocation budgets. Neither an entire request nor the SDK as a whole is claimed to allocate zero bytes.
 
-Measurements below use the pinned .NET SDK 10.0.401 on macOS arm64. `AllocationTests` warms the serializers, reuses a caller-owned 16 KiB buffer and `Utf8JsonWriter`, and measures 256 synchronous writes with `GC.GetAllocatedBytesForCurrentThread`. Buffer creation/growth, model creation, assertions, logging, and awaits are outside the measured interval. Tests run without competing test workloads.
+Measurements below use the pinned .NET SDK 11.0.100 on macOS arm64. `AllocationTests` warms the serializers, reuses a caller-owned 16 KiB buffer and `Utf8JsonWriter`, and measures 256 synchronous writes with `GC.GetAllocatedBytesForCurrentThread`. Buffer creation/growth, model creation, assertions, logging, and awaits are outside the measured interval. Tests run without competing test workloads.
 
 | Writer/input | Before | Current warmed allocation |
 |---|---:|---:|

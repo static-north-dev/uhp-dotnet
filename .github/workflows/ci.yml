@@ -33,7 +33,7 @@ jobs:
       - name: Publish Native AOT TUnit runner
         run: >-
           dotnet publish tests/StaticNorth.Uhp.Client.Tests --configuration Release --runtime linux-x64
-          -p:PublishAot=true -p:RuntimeFrameworkVersion=10.0.14 -p:EnableRequestDelegateGenerator=true
+          -p:PublishAot=true -p:RuntimeFrameworkVersion=11.0.0 -p:EnableRequestDelegateGenerator=true
           -p:NuGetLockFilePath=obj/native-tests.lock.json -p:TrimmerSingleWarn=false
           --output artifacts/aot/StaticNorth.Uhp.Client.Tests
       - run: artifacts/aot/StaticNorth.Uhp.Client.Tests/StaticNorth.Uhp.Client.Tests --minimum-expected-tests 179 --report-trx --results-directory artifacts/aot-test-results

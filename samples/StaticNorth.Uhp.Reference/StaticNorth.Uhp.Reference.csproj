@@ -11,7 +11,7 @@
     <PackageReference Include="StaticNorth.Uhp.Server" Version="$(Version)" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.ILLink.Tasks" Version="10.0.14" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.NET.ILLink.Tasks" Version="11.0.0" PrivateAssets="all" />
     <ProjectReference Include="../../tests/StaticNorth.Uhp.TestSupport/StaticNorth.Uhp.TestSupport.csproj" />
   </ItemGroup>
 </Project>

@@ -6,6 +6,6 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../../samples/StaticNorth.Uhp.Reference/StaticNorth.Uhp.Reference.csproj" />
-    <PackageReference Include="Microsoft.NET.ILLink.Tasks" Version="10.0.14" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.NET.ILLink.Tasks" Version="11.0.0" PrivateAssets="all" />
   </ItemGroup>
 </Project>

@@ -11,7 +11,7 @@
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <ProjectReference Include="../StaticNorth.Uhp.Core/StaticNorth.Uhp.Core.csproj" />
-    <PackageReference Include="Microsoft.NET.ILLink.Tasks" Version="10.0.14" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.NET.ILLink.Tasks" Version="11.0.0" PrivateAssets="all" />
     <PackageReference Include="StaticNorth.Valiant.Endpoints.AspNetCore" Version="1.2.1" />
     <PackageReference Include="StaticNorth.Valiant.Validation" Version="1.2.1" />
   </ItemGroup>

@@ -51,7 +51,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--rid", default=("osx" if platform.system() == "Darwin" else "linux") + ("-arm64" if platform.machine() in ("arm64", "aarch64") else "-x64"))
     parser.add_argument("--offline-cache", type=Path)
-    parser.add_argument("--runtime-version", default="10.0.14")
+    parser.add_argument("--runtime-version", default="11.0.0")
     parser.add_argument("--version", default=ET.parse(ROOT / "Directory.Build.props").findtext("./PropertyGroup/Version"))
     parser.add_argument("--reference-host", action="store_true")
     args = parser.parse_args()

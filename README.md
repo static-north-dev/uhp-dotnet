@@ -2,7 +2,7 @@
 
 [![CI on develop](https://github.com/static-north-dev/uhp-dotnet/actions/workflows/ci.yml/badge.svg?branch=develop&event=push)](https://github.com/static-north-dev/uhp-dotnet/actions/workflows/ci.yml?query=branch%3Adevelop+event%3Apush)
 
-Community .NET SDK for connecting to UHP servers, with shared contracts and an ASP.NET Core server integration. Targets .NET 10 and supports Native AOT. Package versions come from release tags and are independent of negotiated protocol dates.
+Community .NET SDK for connecting to UHP servers, with shared contracts and an ASP.NET Core server integration. Targets .NET 11 and supports Native AOT. Package versions come from release tags and are independent of negotiated protocol dates.
 
 The [official Unified Harness Protocol documentation](https://unifiedharnessprotocol.org/) is the source of truth for protocol behavior, schemas, and conformance requirements. Target date: **2026-10-19**. Tested fixture compatibility dates: **2026-09-28** and **2026-09-12**. Inputs are pinned to upstream commit `80d5d369a1ddf14cad8bd9cf3a1a5891d15616b6` in [spec/upstream](spec/upstream).
 
@@ -110,7 +110,7 @@ dotnet pack StaticNorth.Uhp.slnx --configuration Release --no-build --no-restore
 python3 tools/package-smoke.py --reference-host
 ```
 
-The smoke gate checks metadata, notices, and symbols for all three SDK packages. It installs them from a local feed with a fresh package cache, publishes the samples with Native AOT and reflection-based JSON disabled, and runs the shared client/server lifecycle scenario. `--reference-host` also publishes the conformance host against the packed SDK. Pass `--version` when testing packages built with a release version. On an offline workstation, pass `--offline-cache /path/to/nuget/packages`. The gate selects runtime and compiler `10.0.14`, which you can override with `--runtime-version`.
+The smoke gate checks metadata, notices, and symbols for all three SDK packages. It installs them from a local feed with a fresh package cache, publishes the samples with Native AOT and reflection-based JSON disabled, and runs the shared client/server lifecycle scenario. `--reference-host` also publishes the conformance host against the packed SDK. Pass `--version` when testing packages built with a release version. On an offline workstation, pass `--offline-cache /path/to/nuget/packages`. The gate selects runtime and compiler `11.0.0`, which you can override with `--runtime-version`.
 
 After packing, run the console sample against a configured server with `UHP_BASE_URL`, `UHP_TOKEN`, and `UHP_HARNESS_ID` in the environment:
 
